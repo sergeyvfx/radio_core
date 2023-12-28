@@ -1,0 +1,4 @@
+SSTV transmission of SMPTE_Color_Bars_800x616.png in PD290 mode, 11025 samples
+per second sample rate.
+
+sstv_encoder --vox --mode PD290 --rate 11025 SMPTE_Color_Bars_800x616.png SMPTE_Color_Bars_vox_11025.wav

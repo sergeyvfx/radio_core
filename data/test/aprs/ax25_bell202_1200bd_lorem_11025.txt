@@ -1,0 +1,7 @@
+packet_encoder \
+    --source SRC \
+    --destination DST \
+    --repeater 'RPTR-12*' \
+    --message "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua." \
+    --rate 11025 \
+    ax25_bell202_1200bd_lorem_11025.wav

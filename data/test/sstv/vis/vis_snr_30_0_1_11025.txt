@@ -1,0 +1,9 @@
+VIS transmissions.
+
+The first one is the clean transmission with code of 0x75.
+The following ones are stared with SNR of 30db, 1db decrement, with the last
+VIS with 0db SNR.
+
+11025 samples per second sample rate.
+
+sstv_vis_generator --number 32 --start-snr 30 --snr-delta -1 --rate 11025 vis_snr_30_0_1_11025.wav

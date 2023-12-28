@@ -1,0 +1,7 @@
+VIS transmissions.
+
+4 VIS transmissions with ideal SNR (no noise), and VIS code 0x5f (PD120).
+
+44100 samples per second sample rate.
+
+sstv_vis_generator --number 4 --no-noise --ideal-code 0x5f --rate 44100 vis_ideal_44100.wav

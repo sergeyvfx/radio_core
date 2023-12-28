@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <style>
+    body {
+      color: #111;
+      background-color: #999;
+    }
+
+    .content {
+      max-width: 80em;
+      margin: auto;
+      padding: 1.2em;
+    }
+
+    span.passed {
+      color: #336633;
+    }
+
+    span.failed {
+      color: #663333;
+    }
+
+    table {
+      border-spacing: 0px;
+      border: 1px #333 solid;
+      width: 100%;
+    }
+
+    th,
+    td {
+      border: 1px black solid;
+      border-top-color: #eee;
+      border-left-color: #eee;
+      border-right-color: #888;
+      border-bottom-color: #888;
+      padding: 0.2em 1.2em;
+    }
+
+    th {
+      background-color: #aaa;
+    }
+
+    tr.passed td {
+      background-color: #aaeeaa;
+    }
+
+    tr.failed td {
+      background-color: #eeaaaa;
+    }
+
+    td.result {
+      text-align: center;
+      font-weight: bold;
+    }
+
+    a {
+      color: #333;
+    }
+
+    table img {
+      max-width: 16em;
+    }
+
+    div.note {
+      margin: 1em;
+      padding: 1em;
+      background: #aaa;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="content">
+    <h2>{TITLE}</h2>
+    <h4>Overall result: {OVERALL-RESULT}</h4>
+    <div class="note">
+      <b>NOTE:</b> Run tests with UPDATE_REFERENCE_ON_FAILURE=1 environment
+      variable to update reference images to the actual ones when the change
+      in result is expected.
+    </div>
+    <table>
+      {SUIT-RESULT-HEADER}
+      {SUIT-RESULT-ROWS}
+    </table>
+  </div>
+</body>
+
+</html>

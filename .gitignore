@@ -1,0 +1,39 @@
+# Generic files to ignore.
+.*
+.*.swp
+
+# Editors.
+*~
+*.swp
+*.swo
+*#
+.vscode
+
+# QtCreator.
+CMakeLists.txt.user
+
+# ms-windows.
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# macOS.
+.DS_Store
+
+# Local patches.
+/*.patch
+/*.diff
+
+# Build folders.
+/build*/
+
+# Python temp paths.
+__pycache__/
+*.py[cod]
+
+# Python virtual environment.
+/.venv
+/poetry.lock
+
+# Data which is to be downloaded separately.
+/data/test/aprs/tnc_test_cd/*.wav

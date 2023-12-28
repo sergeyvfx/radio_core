@@ -1,0 +1,5 @@
+Project: stb - single-file public domain (or MIT licensed) libraries for C/C++
+URL: https://github.com/nothings/stb
+License: Public Domain / MIT
+Upstream version: 8b5f1f37b5b
+Local modifications: None

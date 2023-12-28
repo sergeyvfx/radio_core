@@ -1,0 +1,4 @@
+Recording of a NOAA satellite on January 9, 2022 by Sergey Sharybin.
+
+The audio seems to have some issues with recording: as if some samples are lost,
+which makes it good test for the line re-synchronization.

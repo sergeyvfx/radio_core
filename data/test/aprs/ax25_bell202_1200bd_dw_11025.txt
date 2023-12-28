@@ -1,0 +1,1 @@
+gen_packets -n 100 -r 11025 -o ax25_bell202_1200bd_dw_11025.wav
