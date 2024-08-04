@@ -34,12 +34,6 @@ if(WITH_DEVELOPER_SANITIZER)
   add_compiler_flag(DEFAULT_C_FLAGS "${_sanitizer_flags}")
   add_compiler_flag(DEFAULT_CXX_FLAGS "${_sanitizer_flags}")
 
-  if(APPLE)
-    # Pass -fsanitize=address to the linker so that it links agains ASAN
-    # libraries avoiding linker error when using Xcode generator.
-    add_compiler_flag(DEFAULT_LINKER_FLAGS "${_sanitizer_flags}")
-  endif()
-
   unset(_sanitizer_flags)
 endif()
 
@@ -66,15 +60,15 @@ add_c_flag_if_supported(DEFAULT_CC_FLAGS -fno-strict-aliasing)
 #     intrinsics with CLang. For example, peak detection kernel becomes 2-3
 #     times slower with the fast math.
 
-# Using -march=native on Apple M2 Max CPU does not inmply the vector arihmetic
+# Using -march=native on Apple M2 Max CPU does not imply the vector arithmetic
 # for the half-float (__ARM_FEATURE_FP16_VECTOR_ARITHMETIC), Tested with the
 # clang-1403.0.22.14.1.
 #
-# This also makes it soe code detects Neon instruction set on BeagleBone Black
+# This also makes it so code detects Neon instruction set on BeagleBone Black
 # board which uses AM335x CPU.
 #
-# This is solved with -mcpu=native, which is also adviced to be used instead of
-# the -march=natvive:
+# This is solved with -mcpu=native, which is also advised to be used instead of
+# the -march=native:
 #   https://community.arm.com/arm-community-blogs/b/tools-software-ides-blog/posts/compiler-flags-across-architectures-march-mtune-and-mcpu
 if(APPLE AND CMAKE_OSX_ARCHITECTURES)
   # Do not use native architecture when cross-compiling.

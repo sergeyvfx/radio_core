@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: MIT-0
 
-# Utility functions for defnining regression and benchmark targets.
+# Utility functions for defining regression and benchmark targets.
 
 # Define a benchmark target.
 #
@@ -11,12 +11,12 @@
 #
 # If the benchmarks are disabled as per CMake configuration this function has no
 # affect.
-# Otherwise a new traget named BENCHMARK_NAME is created, and it compiles the
+# Otherwise a new target named BENCHMARK_NAME is created, and it compiles the
 # given file FILENAME. It is possible to provide extra compiler definitions and
-# librraies to be linked against by using DEFINITIONS and LIBRARIES "keywords".
+# libraries to be linked against by using DEFINITIONS and LIBRARIES "keywords".
 #
 # Example:
-#   radio_core_benchmark(my_benchmark inernal/my_benchmark.cc
+#   radio_core_benchmark(my_benchmark internal/my_benchmark.cc
 #                        LIBRARIES my_library)
 function(radio_core_benchmark BENCHMARK_NAME FILENAME)
   if(NOT WITH_BENCHMARKS)
