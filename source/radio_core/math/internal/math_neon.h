@@ -134,8 +134,8 @@ inline auto vreveseq_u32(const uint32x4_t v) -> uint32x4_t {
   const uint32x4_t vec = vrev64q_u32(v);
   return vextq_u32(vec, vec, 2);
 #  else
-  const uint32x4_t lo = vrev64_u32(vget_high_u32(v));
-  const uint32x4_t hi = vrev64_u32(vget_low_u32(v));
+  const uint32x2_t lo = vrev64_u32(vget_high_u32(v));
+  const uint32x2_t hi = vrev64_u32(vget_low_u32(v));
   return vcombine_u32(lo, hi);
 #  endif
 }
