@@ -33,6 +33,8 @@ set(PUBLIC_HEADERS
   math.h
   num_digits.h
   quantize.h
+  resample.h
+  time.h
   uint2.h
   uint3.h
   uint4.h
@@ -167,6 +169,7 @@ radio_core_math_test(half4)
 radio_core_math_test(half8)
 radio_core_math_test(num_digits)
 radio_core_math_test(quantize)
+radio_core_math_test(resample)
 radio_core_math_test(uint2)
 radio_core_math_test(uint3)
 radio_core_math_test(uint4)
