@@ -32,8 +32,8 @@ class StagesDecimation {
       return !(*this == other);
     }
 
-    friend auto operator<<(std::ostream& os, const Ratio& ratio)
-        -> std::ostream& {
+    friend auto operator<<(std::ostream& os,
+                           const Ratio& ratio) -> std::ostream& {
       os << "IQ to IF: " << ratio.iq_to_if << ", IF to AF: " << ratio.if_to_af;
       return os;
     }
@@ -76,10 +76,10 @@ class StagesDecimation {
     // can optimize out division by 2 on both sides.
     if (receive_filter_bandwidth < af_sample_rate) {
       // The audio sample rate is enough to give good results for the filter.
-      // Don't go below this sample rate: if neededthe receive filter will use
-      // down and up comversion if the bandwidth is very narrow.
+      // Don't go below this sample rate: if needed the receive filter will use
+      // down and up conversion if the bandwidth is very narrow.
       //
-      // Not going below the audio sampel rate allows demodulators like CW to
+      // Not going below the audio sample rate allows demodulators like CW to
       // have enough space for the frequency shift.
       return {iq_to_af_ratio, 1};
     }
@@ -91,7 +91,7 @@ class StagesDecimation {
       const int if_sample_rate = af_sample_rate * if_to_af_ratio;
 
       if (if_sample_rate < receive_filter_bandwidth) {
-        // Sample rate is too small for the abndwidth of the filter.
+        // Sample rate is too small for the bandwidth of the filter.
         continue;
       }
 
@@ -104,7 +104,7 @@ class StagesDecimation {
     }
 
     // The algorithm was unable to find mid-point for the IF, so ise the input
-    // sampel rate as the intermediate frequency, and downsample it to audio
+    // sample rate as the intermediate frequency, and downsample it to audio
     // after demodulation.
     return {1, iq_to_af_ratio};
   }
