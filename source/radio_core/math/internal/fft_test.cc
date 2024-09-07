@@ -16,6 +16,9 @@ using testing::FloatNear;
 using testing::Pointwise;
 
 TEST(math, FFTShift) {
+  // >>> import numpy as np
+  // >>> np.fft.fftshift([1])
+  // array([1])
   {
     std::vector<float> fft{1};
     FFTShift(std::span<float>(fft));
@@ -23,6 +26,9 @@ TEST(math, FFTShift) {
     EXPECT_THAT(fft, Pointwise(FloatNear(1e-6f), std::to_array<float>({1})));
   }
 
+  // >>> import numpy as np
+  // >>> np.fft.fftshift([1, 2])
+  // array([2, 1])
   {
     std::vector<float> fft{1, 2};
     FFTShift(std::span<float>(fft));
@@ -30,6 +36,9 @@ TEST(math, FFTShift) {
     EXPECT_THAT(fft, Pointwise(FloatNear(1e-6f), std::to_array<float>({2, 1})));
   }
 
+  // >>> import numpy as np
+  // >>> np.fft.fftshift([1, 2, 3])
+  // array([3, 1, 2])
   {
     std::vector<float> fft{1, 2, 3};
     FFTShift(std::span<float>(fft));
@@ -38,6 +47,9 @@ TEST(math, FFTShift) {
                 Pointwise(FloatNear(1e-6f), std::to_array<float>({3, 1, 2})));
   }
 
+  // >>> import numpy as np
+  // >>> np.fft.fftshift([1, 2, 3, 4])
+  // array([3, 4, 1, 2])
   {
     std::vector<float> fft{1, 2, 3, 4};
     FFTShift(std::span<float>(fft));
@@ -46,6 +58,9 @@ TEST(math, FFTShift) {
         fft, Pointwise(FloatNear(1e-6f), std::to_array<float>({3, 4, 1, 2})));
   }
 
+  // >>> import numpy as np
+  // >>> np.fft.fftshift([1, 2, 3, 4, 5])
+  // array([4, 5, 1, 2, 3])
   {
     std::vector<float> fft{1, 2, 3, 4, 5};
     FFTShift(std::span<float>(fft));
@@ -55,6 +70,9 @@ TEST(math, FFTShift) {
         Pointwise(FloatNear(1e-6f), std::to_array<float>({4, 5, 1, 2, 3})));
   }
 
+  // >>> import numpy as np
+  // >>> np.fft.fftshift([1, 2, 3, 4, 5, 6])
+  // array([4, 5, 6, 1, 2, 3])
   {
     std::vector<float> fft{1, 2, 3, 4, 5, 6};
     FFTShift(std::span<float>(fft));
