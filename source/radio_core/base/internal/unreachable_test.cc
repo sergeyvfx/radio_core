@@ -11,7 +11,7 @@ namespace radio_core {
 
 namespace {
 
-void UnreachableCodeTrigger() { UNREACHABLE(); }
+void UnreachableCodeTrigger() { Unreachable(); }
 
 }  // namespace
 

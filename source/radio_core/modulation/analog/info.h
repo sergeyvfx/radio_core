@@ -36,7 +36,7 @@ inline auto GetName(const Type modulation) -> const char* {
     case Type::kCW: return Info<Type::kCW>::kName;
   }
 
-  UNREACHABLE();
+  Unreachable();
 }
 
 namespace analog_internal {
@@ -85,7 +85,7 @@ inline auto GetDefaultBandwidth(const Type modulation) -> int {
 
     case Type::kCW: return Info<Type::kCW>::kDefaultBandwidth;
   }
-  UNREACHABLE();
+  Unreachable();
 }
 
 // For the given modulation type get typical filter bandwidths.
@@ -104,7 +104,7 @@ inline auto GetTypicalBandwidths(const Type modulation)
     case Type::kCW: return Info<Type::kCW>::kTypicalBandwidths;
   }
 
-  UNREACHABLE();
+  Unreachable();
 }
 
 // Get the reference point for the radio bandwidth filter.
@@ -122,7 +122,7 @@ inline auto GetBandwidthReference(const Type modulation) -> BandwidthReference {
     case Type::kCW: return Info<Type::kCW>::kBandwidthReference;
   }
 
-  UNREACHABLE();
+  Unreachable();
 }
 
 }  // namespace radio_core::modulation::analog

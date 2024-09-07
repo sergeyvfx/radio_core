@@ -74,7 +74,7 @@ class Demodulator {
         return;
     }
 
-    UNREACHABLE();
+    Unreachable();
   }
 
   // Get currently configured modulation type.

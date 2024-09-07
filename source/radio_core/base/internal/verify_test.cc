@@ -11,16 +11,16 @@ namespace radio_core {
 
 namespace {
 
-void FunctionWithVerifyFail() { VERIFY(0 == 1); }
+void FunctionWithVerifyFail() { Verify(0 == 1, "0 == 1"); }
 
 }  // namespace
 
 TEST(base, verify) {
-  VERIFY(1 == 1);
+  Verify(1 == 1, "1 == 1");
 
   EXPECT_DEATH_IF_SUPPORTED(
       FunctionWithVerifyFail(),
-      "function FunctionWithVerifyFail, file verify_test.cc, line 14");
+      "function .*FunctionWithVerifyFail.*, file verify_test.cc");
 }
 
 }  // namespace radio_core

@@ -41,8 +41,7 @@ inline void GenerateWindowedHilbertTransformer(
     std::span<RealType> h, const WindowPredicateType& window_equation) {
   const int num_taps = int(h.size());
 
-  // Hilbert requires odd number of taps.
-  VERIFY((num_taps & 1) == 1);
+  Verify((num_taps & 1) == 1, "Hilbert requires odd number of taps");
 
   const int order = num_taps - 1;
   const RealType half_order = RealType(order) / 2.0f;

@@ -13,16 +13,15 @@ namespace radio_core::modulation::analog {
 // Get interval of frequencies relative to the center frequency which define the
 // receive filter of the given bandwidth for the given modulation type.
 template <class RealType>
-auto GetBandwidthIntervalAroundCenterFrequency(const Type modulation,
-                                               const RealType bandwidth)
-    -> Interval<RealType> {
+auto GetBandwidthIntervalAroundCenterFrequency(
+    const Type modulation, const RealType bandwidth) -> Interval<RealType> {
   switch (GetBandwidthReference(modulation)) {
     case BandwidthReference::kCenter: return {-bandwidth / 2, bandwidth / 2};
     case BandwidthReference::kLower: return {0, bandwidth};
     case BandwidthReference::kUpper: return {-bandwidth, 0};
   }
 
-  UNREACHABLE();
+  Unreachable();
 }
 
 }  // namespace radio_core::modulation::analog

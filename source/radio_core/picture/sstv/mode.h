@@ -38,7 +38,7 @@ constexpr inline auto GetName(const Mode mode) -> const char* {
     case Mode::kPD240: return "PD240";
     case Mode::kPD290: return "PD290";
   }
-  UNREACHABLE();
+  Unreachable();
 }
 
 inline auto operator<<(std::ostream& os, const Mode mode) -> std::ostream& {

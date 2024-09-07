@@ -40,8 +40,8 @@ inline void DesignLowPassFilter(std::span<T> h,
                                 const WindowPredicateType& window_equation,
                                 const T cutoff_frequency,
                                 const T sampling_frequency = 2) {
-  // Validate frequency.
-  VERIFY(cutoff_frequency <= sampling_frequency / 2);
+  Verify(cutoff_frequency <= sampling_frequency / 2,
+         "Nyquest requirement for cutoff_frequency");
 
   // Calculate filter coefficients.
   const T ft = cutoff_frequency / sampling_frequency;
@@ -94,8 +94,10 @@ inline void DesignBandPassFilter(std::span<T> h,
                                  const T cutoff_frequency_end,
                                  const T sampling_frequency = 2) {
   // Validate frequencies.
-  VERIFY(cutoff_frequency_start <= sampling_frequency / 2);
-  VERIFY(cutoff_frequency_end <= sampling_frequency / 2);
+  Verify(cutoff_frequency_start <= sampling_frequency / 2,
+         "Nyquest requirement for cutoff_frequency_start");
+  Verify(cutoff_frequency_end <= sampling_frequency / 2,
+         "Nyquest requirement for cutoff_frequency_end");
 
   const T ft1 = cutoff_frequency_start / sampling_frequency;
   const T ft2 = cutoff_frequency_end / sampling_frequency;
@@ -104,7 +106,7 @@ inline void DesignBandPassFilter(std::span<T> h,
   const int order = num_taps - 1;
 
   // Bandpass requires even order of filter (an odd filter length).
-  VERIFY((order & 1) == 0);
+  Verify((order & 1) == 0, "Filter order is expected to be odd");
 
   // Calculate filter coefficients.
   const T half_order = T(order) / 2;

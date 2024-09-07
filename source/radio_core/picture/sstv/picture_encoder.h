@@ -65,7 +65,7 @@ class PictureEncoder {
                                       std::forward<Args>(args)...);
     }
 
-    UNREACHABLE();
+    Unreachable();
   }
 
  protected:

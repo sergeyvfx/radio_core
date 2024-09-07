@@ -67,7 +67,8 @@ class StagesDecimation {
                                const int af_sample_rate,
                                const T receive_filter_bandwidth) -> Ratio {
     // TODO(sergey): Support rational factor downsampling.
-    VERIFY(iq_sample_rate % af_sample_rate == 0);
+    Verify(iq_sample_rate % af_sample_rate == 0,
+           "Only integer downsampling ratio is supported");
 
     const int iq_to_af_ratio = iq_sample_rate / af_sample_rate;
 

@@ -105,7 +105,7 @@ class Decoder {
       }
     }
 
-    UNREACHABLE();
+    Unreachable();
   }
 
   // Process single byte of an AX.25 frame.
@@ -142,7 +142,7 @@ class Decoder {
       case FieldState::kFrameSkip: return Result(Error::kUnavailable);
     }
 
-    UNREACHABLE();
+    Unreachable();
   }
 
   // Process the entire frame.
@@ -183,7 +183,7 @@ class Decoder {
       return (*this)(frame_byte.GetMarker());
     }
 
-    UNREACHABLE();
+    Unreachable();
   }
 
  private:

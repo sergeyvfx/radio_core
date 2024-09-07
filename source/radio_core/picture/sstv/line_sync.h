@@ -76,7 +76,7 @@ class LineSync {
             frequency, std::forward<F>(callback), std::forward<Args>(args)...);
     }
 
-    UNREACHABLE();
+    Unreachable();
   }
 
  private:

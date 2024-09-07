@@ -22,8 +22,9 @@ namespace radio_core::signal {
 
 // Calculate impulse response h(t) of the RRC filter.
 template <class T>
-inline auto RRCWeight(const T t, const T samples_per_symbol, const T beta)
-    -> T {
+inline auto RRCWeight(const T t,
+                      const T samples_per_symbol,
+                      const T beta) -> T {
   const T pi = T(constants::pi);
 
   const T sps = samples_per_symbol;
@@ -63,8 +64,7 @@ inline void DesignLowpassRRCFilter(std::span<T> h,
                                    const T beta) {
   const int num_taps = int(h.size());
 
-  // Odd number of taps is required.
-  VERIFY((num_taps & 1) == 1);
+  Verify((num_taps & 1) == 1, "Required odd number of taps");
 
   const size_t order = num_taps - 1;
   const T half_order = T(order) / 2;

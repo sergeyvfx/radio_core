@@ -23,14 +23,14 @@ enum class FrameMarker {
   kEnd,
 };
 
-inline auto operator<<(std::ostream& os, const FrameMarker marker)
-    -> std::ostream& {
+inline auto operator<<(std::ostream& os,
+                       const FrameMarker marker) -> std::ostream& {
   switch (marker) {
     case FrameMarker::kBegin: os << "FrameMarker::kBegin"; return os;
     case FrameMarker::kEnd: os << "FrameMarker::kEnd"; return os;
   }
 
-  UNREACHABLE();
+  Unreachable();
 }
 
 // Representation of a decoded byte from frame transmission.
@@ -75,15 +75,15 @@ class FrameByte {
   std::optional<FrameMarker> marker_;
 };
 
-inline auto operator<<(std::ostream& os, const FrameByte& frame_byte)
-    -> std::ostream& {
+inline auto operator<<(std::ostream& os,
+                       const FrameByte& frame_byte) -> std::ostream& {
   if (frame_byte.IsMarker()) {
     os << "FrameByte(" << frame_byte.GetMarker() << ")";
   } else if (frame_byte.IsData()) {
     os << "FrameByte(std::byte{0b"
        << std::bitset<8>(std::to_integer<int>(frame_byte.GetData())) << "})";
   } else {
-    UNREACHABLE();
+    Unreachable();
   }
 
   return os;
@@ -113,7 +113,7 @@ inline auto operator<<(std::ostream& os,
       os << "std::byte{0b"
          << std::bitset<8>(std::to_integer<int>(frame_byte.GetData())) << "}";
     } else {
-      UNREACHABLE();
+      Unreachable();
     }
 
     is_first = false;

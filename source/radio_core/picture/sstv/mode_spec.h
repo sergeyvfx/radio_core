@@ -49,7 +49,7 @@ class ModeSpec {
         return ModeSpec::Make<ModeSpecInfo<RealType, Mode::kPD290>>();
     }
 
-    UNREACHABLE();
+    Unreachable();
   }
 
   ModeSpec() = default;

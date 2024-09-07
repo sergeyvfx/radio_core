@@ -63,8 +63,9 @@ class LineDecoder {
   inline void SetMode(const Mode mode) {
     mode_spec_ = ModeSpec<RealType>::Get(mode);
 
-    VERIFY(mode_spec_.mode != Mode::kUnknown);
-    VERIFY(mode_spec_.num_pixels_per_line <= line_pixels_luma_.size());
+    Verify(mode_spec_.mode != Mode::kUnknown, "SSTV mode");
+    Verify(mode_spec_.num_pixels_per_line <= line_pixels_luma_.size(),
+           "SSTV number of pixels per line");
 
     total_synchronization_time_ =
         mode_spec_.line_sync.duration_ms + mode_spec_.line_porch.duration_ms;
@@ -80,7 +81,7 @@ class LineDecoder {
       case State::kWaitForSyncEvent: return HandleWaitForSyncEvent(frequency);
       case State::kDecodeLine: return HandleDecodeLine(frequency);
     }
-    UNREACHABLE();
+    Unreachable();
   }
 
   // Inform the machine that a vertical synchronization (VIS) has been decoded.
@@ -269,11 +270,11 @@ class LineDecoder {
         // This situation is not supposed to happen, and there are checks and
         // validation during the configuration stage. Unless the bug is in some
         // other area of the code this case is unreachable.
-        UNREACHABLE();
+        Unreachable();
 
       case LineEncoding::kYccAverageCrCb: return DecodeYCbCrAverageCrRb();
     }
-    UNREACHABLE();
+    Unreachable();
   }
 
   auto DecodeYCbCrAverageCrRb() -> Result {

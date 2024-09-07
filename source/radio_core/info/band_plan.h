@@ -96,7 +96,7 @@ class BandPlan {
     switch (region) {
       case Region::kITU1: return band_plan_internal::GetITU1Bands();
     }
-    UNREACHABLE();
+    Unreachable();
   }
 
   Bands bands_;

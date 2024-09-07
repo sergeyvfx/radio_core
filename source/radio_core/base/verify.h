@@ -2,19 +2,32 @@
 //
 // SPDX-License-Identifier: MIT
 
+// Function Verify() checks the input condition and it it is false it aborts
+// program execution. This is done regardless of the build type (debug or
+// release).
+//
+// The implementation avoid using macro to provide a short name without risking
+// running into symbol conflicts. This requires passing message explicitly, as
+// it is not possible to convert expression used as a function argument to
+// string.
+//
+// Conceptually this is similar to Google Log's CHECK() and Python's assert.
+//
+// Example:
+//   Verify(foo == bar, "Expected foo == bar")
+
 #pragma once
 
 #include <cstdio>
 #include <cstdlib>
 
-// Similar to `assert()` but performs checks in release builds as well.
-#define VERIFY(expression)                                                     \
-  ::radio_core::verify_internal::VerifyImpl(                                   \
-      (expression), #expression, __func__, __FILE__, __LINE__)
+#include "radio_core/base/source_location.h"
 
-namespace radio_core::verify_internal {
+namespace radio_core {
 
-inline void VerifyImpl(bool expression_eval,
+namespace verify_internal {
+
+inline void VerifyImpl(const bool expression_eval,
                        const char* expression_str,
                        const char* function,
                        const char* file,
@@ -45,4 +58,17 @@ inline void VerifyImpl(bool expression_eval,
   ::abort();
 }
 
-}  // namespace radio_core::verify_internal
+}  // namespace verify_internal
+
+inline void Verify(
+    const bool condition,
+    const char* message,
+    const source_location location = source_location::current()) {
+  verify_internal::VerifyImpl(condition,
+                              message,
+                              location.function_name(),
+                              location.file_name(),
+                              location.line());
+}
+
+}  // namespace radio_core

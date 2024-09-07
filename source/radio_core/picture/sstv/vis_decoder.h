@@ -256,7 +256,7 @@ class VISDecoder {
       case State::kSampleCode: return HandleSampleCode(frequency);
     }
 
-    UNREACHABLE();
+    Unreachable();
   }
 
   // Wait for frequency to fall into the range of leader tone.
