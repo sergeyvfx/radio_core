@@ -31,11 +31,11 @@ struct Kernel {
     const T* samples_begin = samples_ptr;
     const T* samples_end = samples_ptr + num_samples;
 
-    T output(0);
+    T output(samples[0]);
 
     // Handle 8 elements at a time.
     if constexpr (Type8::kIsVectorized) {
-      Type8 output8(0);
+      Type8 output8(output);
 
       const size_t num_samples_aligned = num_samples & ~size_t(7);
       const T* aligned_samples_end = samples_begin + num_samples_aligned;
@@ -53,7 +53,7 @@ struct Kernel {
 
     // Handle 4 elements at a time.
     if constexpr (Type4::kIsVectorized) {
-      Type4 output4(0);
+      Type4 output4(output);
 
       const size_t num_samples_aligned = num_samples & ~size_t(3);
       const T* aligned_samples_end = samples_begin + num_samples_aligned;
