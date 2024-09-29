@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "radio_core/signal_path/signal_path.h"
+#include "radio_core/signal_path/simple_signal_path.h"
 
 #include "radio_core/math/complex.h"
 #include "radio_core/unittest/test.h"
@@ -26,7 +26,7 @@ class DummyAFSink : public Sink<float> {
 }  // namespace
 
 TEST(SignalPath, Configure) {
-  using SignalPath = SignalPath<float>;
+  using SignalPath = SimpleSignalPath<float>;
 
   // Configure fake options so that there is no numerical issues like division
   // by zero.
@@ -39,7 +39,7 @@ TEST(SignalPath, Configure) {
 }
 
 TEST(SignalPath, IFSink) {
-  using SignalPath = SignalPath<float>;
+  using SignalPath = SimpleSignalPath<float>;
 
   // Ensure explicit function attachment compiles.
   {
@@ -59,7 +59,7 @@ TEST(SignalPath, IFSink) {
 }
 
 TEST(SignalPath, AFSink) {
-  using SignalPath = SignalPath<float>;
+  using SignalPath = SimpleSignalPath<float>;
 
   // Ensure explicit function attachment compiles.
   {

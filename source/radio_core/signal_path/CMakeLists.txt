@@ -8,7 +8,8 @@ set(PUBLIC_HEADERS
   internal/receive_filter.h
 
   async_sink.h
-  signal_path.h
+  base_signal_path.h
+  simple_signal_path.h
   sink.h
   sink_collection.h
   sink_method_wrapper.h
@@ -44,7 +45,7 @@ endfunction()
 radio_core_signal_path_test(async_sink)
 radio_core_signal_path_test(decimation_ratio)
 radio_core_signal_path_test(demodulator)
-radio_core_signal_path_test(signal_path)
+radio_core_signal_path_test(simple_signal_path)
 radio_core_signal_path_test(sink_collection)
 radio_core_signal_path_test(sink_method_wrapper)
 radio_core_signal_path_test(receive_filter)

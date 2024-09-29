@@ -22,7 +22,7 @@
 #include "radio_core/math/complex.h"
 #include "radio_core/math/half_complex.h"
 #include "radio_core/modulation/analog/info.h"
-#include "radio_core/signal_path/signal_path.h"
+#include "radio_core/signal_path/simple_signal_path.h"
 #include "tl_audio_wav/tl_audio_wav_reader.h"
 #include "tl_audio_wav/tl_audio_wav_writer.h"
 #include "tl_io/tl_io_file.h"
@@ -176,7 +176,7 @@ auto CheckCLIOptionsValidOrReport(const CLIOptions& cli_options) -> bool {
 // The details about it will be logged to the stderr.
 auto ConfigureSignalPath(const CLIOptions cli_options,
                          const audio_wav_reader::FormatSpec iq_format_spec,
-                         SignalPath<DSPReal>& signal_path) -> bool {
+                         SimpleSignalPath<DSPReal>& signal_path) -> bool {
   if (iq_format_spec.sample_rate % cli_options.audio_sample_rate) {
     cerr << "Non-integer ratio of sample rates at the input and audio stages"
          << endl;
@@ -191,7 +191,7 @@ auto ConfigureSignalPath(const CLIOptions cli_options,
     return false;
   }
 
-  SignalPath<DSPReal>::Options options;
+  SimpleSignalPath<DSPReal>::Options options;
 
   options.input.sample_rate = iq_format_spec.sample_rate;
   options.input.frequency_shift = 0;
@@ -286,7 +286,7 @@ class WAVToBufferredIQProvider {
 
 // Sink of samples to a single-channel WAV file.
 template <class WAVWriter, class T>
-class WAVFileSink : public SignalPath<T>::AFSink {
+class WAVFileSink : public SimpleSignalPath<T>::AFSink {
  public:
   WAVFileSink(WAVWriter& wav_writer, const T volume)
       : wav_writer_(&wav_writer), volume_{volume} {}
@@ -384,7 +384,7 @@ auto Main(int argc, char** argv) -> int {
   }
 
   // Configure the signal processing path.
-  SignalPath<DSPReal> signal_path;
+  SimpleSignalPath<DSPReal> signal_path;
   if (!ConfigureSignalPath(cli_options, iq_format_spec, signal_path)) {
     return false;
   }

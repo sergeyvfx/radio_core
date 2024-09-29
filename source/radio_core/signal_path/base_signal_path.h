@@ -9,14 +9,14 @@
 //
 // It is also possible to attach sinks at different stages of the path.
 //
-// This signal path allows processing of samples in one thread and
-// re-configuration from another thread. A mutex lock from std library is used
-// to ensure thread-safety.
+// This class implements the most portable part of the signal processing. It
+// does not perform any thread synchronization which makes it portable on
+// various devices, but requires manual thread synchronization: the signal path
+// is not to be modified or re-configured while it processes samples.
 
 #pragma once
 
 #include <memory>
-#include <mutex>
 #include <span>
 #include <vector>
 
@@ -128,7 +128,7 @@ struct SinkAccessor<RealType, Allocator, Stage::kAF> {
 }  // namespace signal_path_internal
 
 template <class T, template <class> class Allocator = std::allocator>
-class SignalPath : public Sink<BaseComplex<T>> {
+class BaseSignalPath : public Sink<BaseComplex<T>> {
   using Demodulator = internal::Demodulator<T, Allocator>;
   using ReceiveFilter = internal::ReceiveFilter<T, Allocator>;
 
@@ -216,7 +216,7 @@ class SignalPath : public Sink<BaseComplex<T>> {
   using AFSink = Sink<typename StageTraits<Stage::kAF>::SampleType>;
 
   void Configure(const Options& options) {
-    std::unique_lock lock(mutex_);
+    Lock();
 
     if (NeedResetSoftAudioStart(options)) {
       ResetSoftAudioStartUnsafe();
@@ -230,14 +230,17 @@ class SignalPath : public Sink<BaseComplex<T>> {
     ConfigureDemodulator(options);
 
     ConfigureAudioOutput(options);
+
+    Unlock();
   }
 
   // Perform soft audio startup.
   // Resets the state of the AGC and forces output audio volume to start from 0
   // and gradually rise up.
   void ResetSoftAudioStart() {
-    std::unique_lock lock(mutex_);
+    Lock();
     ResetSoftAudioStartUnsafe();
+    Unlock();
   }
 
   // Compile-time flexible sink connection to a specific stage of the signal
@@ -255,14 +258,16 @@ class SignalPath : public Sink<BaseComplex<T>> {
 
   template <Stage kStage>
   void AddSink(typename StageTraits<kStage>::SinkType& sink) {
-    std::unique_lock lock(mutex_);
+    Lock();
     GetSinkForStage<kStage>().AddSink(sink);
+    Unlock();
   }
 
   template <Stage kStage>
   void RemoveSink(const typename StageTraits<kStage>::SinkType& sink) {
-    std::unique_lock lock(mutex_);
+    Lock();
     GetSinkForStage<kStage>().RemoveSink(sink);
+    Unlock();
   }
 
   // Sink of signal sampled at the intermediate frequency sample rate.
@@ -288,7 +293,7 @@ class SignalPath : public Sink<BaseComplex<T>> {
 
   // Actual signal processing.
   void PushSamples(std::span<const BaseComplex<T>> input_iq_samples) override {
-    std::unique_lock lock(mutex_);
+    Lock();
 
     // Make sure the work buffers are big enough for the samples.
 
@@ -353,6 +358,8 @@ class SignalPath : public Sink<BaseComplex<T>> {
     // which has much lower bandwidth than the audio sink.
 
     sinks_.af_sink.PushSamples(af_samples);
+
+    Unlock();
   }
 
   // Get configured sample rate at the different stages.
@@ -373,6 +380,11 @@ class SignalPath : public Sink<BaseComplex<T>> {
   auto GetReceiveFilterKernelSize() -> size_t {
     return receive_filter_.GetKernelSize();
   }
+
+ protected:
+  // Thread synchronization: an explicit lock/unlock functionality.
+  virtual void Lock() {}
+  virtual void Unlock() {}
 
  private:
   using StagesDecimation = internal::StagesDecimation<T>;
@@ -499,9 +511,6 @@ class SignalPath : public Sink<BaseComplex<T>> {
 
   //////////////////////////////////////////////////////////////////////////////
   // Properties.
-
-  // Lock which ensures thread safety of configuration of processing threads.
-  std::mutex mutex_;
 
   // Shifter of the IQ signal.
   //
