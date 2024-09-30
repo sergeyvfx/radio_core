@@ -142,7 +142,7 @@ class BaseSignalPath : public Sink<BaseComplex<T>> {
       // Hz.
       //
       // If the IQ signal centered around 145.4 MHz and the radio station of
-      // interest is at 145.3 MHz the shift is to be set to -100000.
+      // interest is at 145.3 MHz the shift is to be set to 100000.
       T frequency_shift{0};
     } input;
 
