@@ -26,7 +26,7 @@
 
 #include "radio_core/math/kernel/internal/dot_neon.h"
 
-namespace radio_core {
+namespace radio_core::kernel {
 
 template <class FType,
           class GType,
@@ -50,14 +50,14 @@ inline auto Dot(const std::span<const FType>& f,
 template <>
 inline auto Dot(const std::span<const float>& f,
                 const std::span<const float>& g) -> float {
-  return dot_kernel_internal::Kernel<float, float, true>::Execute(f, g);
+  return dot_internal::Kernel<float, float, true>::Execute(f, g);
 }
 
 // Specialization for dot product between Complex and float arguments.
 template <>
 inline auto Dot(const std::span<const Complex>& f,
                 const std::span<const float>& g) -> Complex {
-  return dot_kernel_internal::Kernel<Complex, float, true>::Execute(f, g);
+  return dot_internal::Kernel<Complex, float, true>::Execute(f, g);
 }
 
 #if RADIO_CORE_HAVE_HALF
@@ -66,16 +66,16 @@ inline auto Dot(const std::span<const Complex>& f,
 template <>
 inline auto Dot(const std::span<const Half>& f, const std::span<const Half>& g)
     -> Half {
-  return dot_kernel_internal::Kernel<Half, Half, true>::Execute(f, g);
+  return dot_internal::Kernel<Half, Half, true>::Execute(f, g);
 }
 
 // Specialization for dot product between HalfComplex and Half arguments.
 template <>
 inline auto Dot(const std::span<const HalfComplex>& f,
                 const std::span<const Half>& g) -> HalfComplex {
-  return dot_kernel_internal::Kernel<HalfComplex, Half, true>::Execute(f, g);
+  return dot_internal::Kernel<HalfComplex, Half, true>::Execute(f, g);
 }
 
 #endif  // RADIO_CORE_HAVE_HALF
 
-}  // namespace radio_core
+}  // namespace radio_core::kernel

@@ -25,7 +25,7 @@
 #  include "radio_core/math/half_complex.h"
 #endif
 
-namespace radio_core {
+namespace radio_core::kernel {
 
 // The output buffer must have at least same number of elements as the input
 // samples buffer. It is possible to have the output buffer bigger than input
@@ -38,8 +38,8 @@ namespace radio_core {
 inline auto PowerSpectralDensity(const std::span<const Complex> samples,
                                  const std::span<float> power)
     -> std::span<float> {
-  return power_spectral_density_kernel_internal::Kernel<float, true>::Execute(
-      samples, power);
+  return power_spectral_density_internal::Kernel<float, true>::Execute(samples,
+                                                                       power);
 }
 
 #if RADIO_CORE_HAVE_HALF
@@ -47,10 +47,10 @@ inline auto PowerSpectralDensity(const std::span<const Complex> samples,
 inline auto PowerSpectralDensity(const std::span<const HalfComplex> samples,
                                  const std::span<Half> power)
     -> std::span<Half> {
-  return power_spectral_density_kernel_internal::Kernel<Half, true>::Execute(
-      samples, power);
+  return power_spectral_density_internal::Kernel<Half, true>::Execute(samples,
+                                                                      power);
 }
 
 #endif  // RADIO_CORE_HAVE_HALF
 
-}  // namespace radio_core
+}  // namespace radio_core::kernel

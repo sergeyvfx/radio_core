@@ -67,13 +67,13 @@ class FIRFilter {
         stored_samples_.GetContinuousNewElements();
     const size_t num_new_samples = new_samples.size();
     if (num_new_samples) {
-      output += Dot(new_samples, kernel_.subspan(0, num_new_samples));
+      output += kernel::Dot(new_samples, kernel_.subspan(0, num_new_samples));
     }
 
     const std::span<const SampleType> old_samples =
         stored_samples_.GetContinuousOldElements();
     if (!old_samples.empty()) {
-      output += Dot(old_samples, kernel_.subspan(num_new_samples));
+      output += kernel::Dot(old_samples, kernel_.subspan(num_new_samples));
     }
 
     return output;
@@ -137,7 +137,7 @@ class FIRFilter {
       while (k >= i) {
         assert(k >= kernel_size);
 
-        output_samples[k] = experimental::DotFlipG(
+        output_samples[k] = kernel::experimental::DotFlipG(
             input_samples.subspan(k - kernel_size + 1, kernel_size), kernel_);
 
         --k;

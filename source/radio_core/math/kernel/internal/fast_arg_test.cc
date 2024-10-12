@@ -31,7 +31,7 @@ TEST(FastArg, Complex) {
   }};
 
   std::array<float, 6> arg_values;
-  FastArg<float>(samples, arg_values);
+  kernel::FastArg<float>(samples, arg_values);
   EXPECT_THAT(arg_values,
               Pointwise(FloatNear(2e-2f),
                         std::array<float, 6>({{
@@ -57,7 +57,7 @@ TEST(FastArg, HalfComplex) {
   }};
 
   std::array<Half, 6> arg_values;
-  FastArg<Half>(samples, arg_values);
+  kernel::FastArg<Half>(samples, arg_values);
 
   std::array<float, 6> arg_values_values;
   for (int i = 0; i < arg_values.size(); ++i) {

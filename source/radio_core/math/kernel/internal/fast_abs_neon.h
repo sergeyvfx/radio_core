@@ -18,7 +18,7 @@
 #  include "radio_core/math/kernel/internal/kernel_common.h"
 #  include "radio_core/math/math.h"
 
-namespace radio_core::fast_abs_kernel_internal {
+namespace radio_core::kernel::fast_abs_internal {
 
 template <class T, bool SpecializationMarker>
 struct Kernel;
@@ -125,6 +125,6 @@ struct Kernel<HalfComplex, HalfComplex8::kIsVectorized> {
 
 #  endif  // RADIO_CORE_HAVE_HALF
 
-}  // namespace radio_core::fast_abs_kernel_internal
+}  // namespace radio_core::kernel::fast_abs_internal
 
 #endif  // ISA_CPU_ARM_NEON

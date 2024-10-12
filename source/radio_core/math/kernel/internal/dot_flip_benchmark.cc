@@ -96,7 +96,7 @@ class DotBenchmark : public Benchmark {
 
     switch (arguments_type_) {
       case ArgumentsType::kFloatFloat: {
-        const float d = experimental::DotFlipG<float, float>(
+        const float d = kernel::experimental::DotFlipG<float, float>(
             float_float_data_.f, float_float_data_.g);
 
         is_finite = IsFinite(d);
@@ -104,7 +104,7 @@ class DotBenchmark : public Benchmark {
       }
 
       case ArgumentsType::kComplexFloat: {
-        const Complex d = experimental::DotFlipG<Complex, float>(
+        const Complex d = kernel::experimental::DotFlipG<Complex, float>(
             complex_float_data_.f, complex_float_data_.g);
 
         is_finite = IsFinite(d);
@@ -113,14 +113,14 @@ class DotBenchmark : public Benchmark {
 
 #if RADIO_CORE_HAVE_HALF
       case ArgumentsType::kHalfHalf: {
-        const Half d = experimental::DotFlipG<Half, Half>(half_half_data_.f,
-                                                          half_half_data_.g);
+        const Half d = kernel::experimental::DotFlipG<Half, Half>(
+            half_half_data_.f, half_half_data_.g);
         is_finite = IsFinite(d);
         break;
       }
 
       case ArgumentsType::kHalfComplexHalf: {
-        const HalfComplex d = experimental::DotFlipG<HalfComplex, Half>(
+        const HalfComplex d = kernel::experimental::DotFlipG<HalfComplex, Half>(
             half_complex_half_data_.f, half_complex_half_data_.g);
         is_finite = IsFinite(d);
         break;

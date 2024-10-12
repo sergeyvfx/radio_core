@@ -133,7 +133,8 @@ class DotBenchmark : public Benchmark {
         } else
 #endif
         {
-          d = Dot<float, float>(float_float_data_.f, float_float_data_.g);
+          d = kernel::Dot<float, float>(float_float_data_.f,
+                                        float_float_data_.g);
         }
 
         is_finite = IsFinite(d);
@@ -160,7 +161,8 @@ class DotBenchmark : public Benchmark {
         } else
 #endif
         {
-          d = Dot<Complex, float>(complex_float_data_.f, complex_float_data_.g);
+          d = kernel::Dot<Complex, float>(complex_float_data_.f,
+                                          complex_float_data_.g);
         }
 
         is_finite = IsFinite(d);
@@ -169,14 +171,15 @@ class DotBenchmark : public Benchmark {
 
 #if RADIO_CORE_HAVE_HALF
       case ArgumentsType::kHalfHalf: {
-        const Half d = Dot<Half, Half>(half_half_data_.f, half_half_data_.g);
+        const Half d =
+            kernel::Dot<Half, Half>(half_half_data_.f, half_half_data_.g);
         is_finite = IsFinite(d);
         break;
       }
 
       case ArgumentsType::kHalfComplexHalf: {
-        const HalfComplex d = Dot<HalfComplex, Half>(half_complex_half_data_.f,
-                                                     half_complex_half_data_.g);
+        const HalfComplex d = kernel::Dot<HalfComplex, Half>(
+            half_complex_half_data_.f, half_complex_half_data_.g);
         is_finite = IsFinite(d);
         break;
       }

@@ -79,14 +79,14 @@ class HorizontalMaxBenchmark : public Benchmark {
 
     switch (input_sample_type_) {
       case InputSampleType::kFloat: {
-        const float max = HorizontalMax<float>(float_data_.samples);
+        const float max = kernel::HorizontalMax<float>(float_data_.samples);
         is_finite = IsFinite(max);
         break;
       }
 
 #if RADIO_CORE_HAVE_HALF
       case InputSampleType::kHalf: {
-        const Half max = HorizontalMax<Half>(half_data_.samples);
+        const Half max = kernel::HorizontalMax<Half>(half_data_.samples);
         is_finite = IsFinite(max);
         break;
       }

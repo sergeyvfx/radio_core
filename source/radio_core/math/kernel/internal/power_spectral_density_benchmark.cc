@@ -82,13 +82,14 @@ class PowerSpectralDensityBenchmark : public Benchmark {
   void Iteration() override {
     switch (input_sample_type_) {
       case InputSampleType::kComplex:
-        PowerSpectralDensity(complex_data_.samples, complex_data_.power);
+        kernel::PowerSpectralDensity(complex_data_.samples,
+                                     complex_data_.power);
         break;
 
 #if RADIO_CORE_HAVE_HALF
       case InputSampleType::kHalfComplex:
-        PowerSpectralDensity(half_complex_data_.samples,
-                             half_complex_data_.power);
+        kernel::PowerSpectralDensity(half_complex_data_.samples,
+                                     half_complex_data_.power);
         break;
 #endif
     }

@@ -17,7 +17,7 @@
 
 #include "radio_core/math/kernel/internal/horizontal_max_neon.h"
 
-namespace radio_core {
+namespace radio_core::kernel {
 
 template <class T>
 inline auto HorizontalMax(const std::span<const T> samples) -> T {
@@ -39,7 +39,7 @@ inline auto HorizontalMax(const std::span<const T> samples) -> T {
 // Specialization for the single precision floating point samples.
 template <>
 inline auto HorizontalMax(const std::span<const float> samples) -> float {
-  return horizontal_max_kernel_internal::Kernel<float, true>::Execute(samples);
+  return horizontal_max_internal::Kernel<float, true>::Execute(samples);
 }
 
 #if RADIO_CORE_HAVE_HALF
@@ -47,9 +47,9 @@ inline auto HorizontalMax(const std::span<const float> samples) -> float {
 // Specialization for the half precision floating point samples.
 template <>
 inline auto HorizontalMax(const std::span<const Half> samples) -> Half {
-  return horizontal_max_kernel_internal::Kernel<Half, true>::Execute(samples);
+  return horizontal_max_internal::Kernel<Half, true>::Execute(samples);
 }
 
 #endif  // RADIO_CORE_HAVE_HALF
 
-}  // namespace radio_core
+}  // namespace radio_core::kernel

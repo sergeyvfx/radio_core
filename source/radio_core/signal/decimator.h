@@ -304,7 +304,7 @@ class Decimator {
       assert(samples.end() <= input_samples.end());
 
       output_samples[output_sample_index++] =
-          Dot<SampleType, KernelElementType>(samples, kernel_);
+          kernel::Dot<SampleType, KernelElementType>(samples, kernel_);
 
       input_sample_index += ratio_;
     }
@@ -325,11 +325,12 @@ class Decimator {
         stored_samples_.GetContinuousOldElements();
     const size_t num_old_samples = old_samples.size();
     filtered_sample +=
-        Dot(old_samples, kernel_span.subspan(0, num_old_samples));
+        kernel::Dot(old_samples, kernel_span.subspan(0, num_old_samples));
 
     const std::span<const SampleType> new_samples =
         stored_samples_.GetContinuousNewElements();
-    filtered_sample += Dot(new_samples, kernel_span.subspan(num_old_samples));
+    filtered_sample +=
+        kernel::Dot(new_samples, kernel_span.subspan(num_old_samples));
 
     return filtered_sample;
   }

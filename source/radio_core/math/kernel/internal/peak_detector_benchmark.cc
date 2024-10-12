@@ -77,13 +77,13 @@ class PeakDetectorBenchmark : public Benchmark {
   void Iteration() override {
     switch (input_sample_type_) {
       case InputSampleType::kFloat:
-        PerPointLerpPeakDetector<float>(
+        kernel::PerPointLerpPeakDetector<float>(
             float_data_.samples, float_data_.peak, 0.001f, 0.002f);
         break;
 
 #if RADIO_CORE_HAVE_HALF
       case InputSampleType::kHalf:
-        PerPointLerpPeakDetector<Half>(
+        kernel::PerPointLerpPeakDetector<Half>(
             half_data_.samples, half_data_.peak, Half(0.01f), Half(0.02f));
         break;
 #endif

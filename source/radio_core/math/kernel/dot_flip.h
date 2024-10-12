@@ -26,7 +26,7 @@
 
 #include "radio_core/math/kernel/internal/dot_flip_neon.h"
 
-namespace radio_core::experimental {
+namespace radio_core::kernel::experimental {
 
 // Equivalent of `numpy.dot(f, numpy.flip(g))`.
 template <class FType,
@@ -80,4 +80,4 @@ inline auto DotFlipG(const std::span<const HalfComplex>& f,
 
 #endif  // RADIO_CORE_HAVE_HALF
 
-}  // namespace radio_core::experimental
+}  // namespace radio_core::kernel::experimental

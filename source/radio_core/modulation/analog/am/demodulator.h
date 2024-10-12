@@ -39,7 +39,8 @@ class Demodulator : public IQDemodulator<T> {
     assert(input_samples.size() <= output_samples.size());
 
     // Calculate magnitude of all input samples.
-    const std::span<T> written_samples = FastAbs(input_samples, output_samples);
+    const std::span<T> written_samples =
+        kernel::FastAbs(input_samples, output_samples);
 
     // Remove DC offset of the magnitude.
     for (T& output_sample : written_samples) {

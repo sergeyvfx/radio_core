@@ -25,7 +25,7 @@ TEST(PerPointLerpPeakDetector, Float) {
                                      Complex(10, 11)}};
   std::array<float, 5> power;
 
-  PowerSpectralDensity(samples, power);
+  kernel::PowerSpectralDensity(samples, power);
 
   // Vectorized log10 implementation might not allow better precision than this.
   EXPECT_NEAR(power[0], 11.1394335f, 1e-5f);
@@ -50,7 +50,7 @@ TEST(PerPointLerpPeakDetector, Half) {
                                           HalfComplex(10, 11)}};
   std::array<Half, 10> power;
 
-  PowerSpectralDensity(samples, power);
+  kernel::PowerSpectralDensity(samples, power);
 
   // Vectorized log10 implementation might not allow better precision than this.
   EXPECT_NEAR(float(power[0]), 11.1394335f, 2e-2f);

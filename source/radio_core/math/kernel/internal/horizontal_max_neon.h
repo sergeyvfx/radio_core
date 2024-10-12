@@ -20,7 +20,7 @@
 #    include "radio_core/math/half8.h"
 #  endif
 
-namespace radio_core::horizontal_max_kernel_internal {
+namespace radio_core::kernel::horizontal_max_internal {
 
 // Specialization for HorizontalMax<float>
 template <>
@@ -180,6 +180,6 @@ struct Kernel<Half, Half8::kIsVectorized> {
 
 #  endif  // RADIO_CORE_HAVE_HALF
 
-}  // namespace radio_core::horizontal_max_kernel_internal
+}  // namespace radio_core::kernel::horizontal_max_internal
 
 #endif  // ISA_CPU_ARM_NEON

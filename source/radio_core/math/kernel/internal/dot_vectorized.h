@@ -13,7 +13,7 @@
 
 #include "radio_core/math/kernel/internal/kernel_common.h"
 
-namespace radio_core::dot_kernel_internal {
+namespace radio_core::kernel::dot_internal {
 
 template <class FType, class GType, bool SpecializationMarker>
 struct Kernel {
@@ -97,4 +97,4 @@ struct Kernel {
   }
 };
 
-}  // namespace radio_core::dot_kernel_internal
+}  // namespace radio_core::kernel::dot_internal

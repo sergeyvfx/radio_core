@@ -118,10 +118,10 @@ class FastAbsBenchmark : public Benchmark {
 #endif
         else {
           Complex phase(1.0f, 0.0f);
-          Rotator<float>(complex_data_.samples,
-                         phase,
-                         Complex(Cos(-0.1f), Sin(-0.1f)),
-                         complex_data_.samples);
+          kernel::Rotator<float>(complex_data_.samples,
+                                 phase,
+                                 Complex(Cos(-0.1f), Sin(-0.1f)),
+                                 complex_data_.samples);
         }
         break;
       }
@@ -129,10 +129,10 @@ class FastAbsBenchmark : public Benchmark {
 #if RADIO_CORE_HAVE_HALF
       case InputSampleType::kHalfComplex:
         HalfComplex phase(1.0f, 0.0f);
-        Rotator<Half>(half_complex_data_.samples,
-                      phase,
-                      HalfComplex(Cos(-0.1f), Sin(-0.1f)),
-                      half_complex_data_.samples);
+        kernel::Rotator<Half>(half_complex_data_.samples,
+                              phase,
+                              HalfComplex(Cos(-0.1f), Sin(-0.1f)),
+                              half_complex_data_.samples);
         break;
 #endif
     }

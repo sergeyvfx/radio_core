@@ -97,15 +97,15 @@ struct ComplexFloatData {
 };
 
 TEST(Dot, float_float) {
-  const float dot =
-      Dot<float, float>(FloatFloatData<float>::a, FloatFloatData<float>::b);
+  const float dot = kernel::Dot<float, float>(FloatFloatData<float>::a,
+                                              FloatFloatData<float>::b);
 
   EXPECT_NEAR(dot, FloatFloatData<float>::dot, 1e-6f);
 }
 
 TEST(Dot, complex_float) {
-  const Complex dot = Dot<Complex, float>(ComplexFloatData<float>::a,
-                                          ComplexFloatData<float>::b);
+  const Complex dot = kernel::Dot<Complex, float>(ComplexFloatData<float>::a,
+                                                  ComplexFloatData<float>::b);
 
   EXPECT_THAT(dot, ComplexNear(ComplexFloatData<float>::dot, 1e-6f));
 }
@@ -114,14 +114,14 @@ TEST(Dot, complex_float) {
 
 TEST(Dot, half_half) {
   const Half dot =
-      Dot<Half, Half>(FloatFloatData<Half>::a, FloatFloatData<Half>::b);
+      kernel::Dot<Half, Half>(FloatFloatData<Half>::a, FloatFloatData<Half>::b);
 
   EXPECT_NEAR(float(dot), float(FloatFloatData<Half>::dot), 1e-6f);
 }
 
 TEST(Dot, half_complex_half) {
-  const HalfComplex dot = Dot<HalfComplex, Half>(ComplexFloatData<Half>::a,
-                                                 ComplexFloatData<Half>::b);
+  const HalfComplex dot = kernel::Dot<HalfComplex, Half>(
+      ComplexFloatData<Half>::a, ComplexFloatData<Half>::b);
 
   EXPECT_THAT(Complex(float(dot.real), float(dot.imag)),
               ComplexNear(ComplexFloatData<float>::dot, 1e-6f));

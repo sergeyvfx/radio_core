@@ -20,7 +20,7 @@
 #    include "radio_core/math/half8.h"
 #  endif
 
-namespace radio_core::experimental::dot_flip_kernel_internal {
+namespace radio_core::experimental::kernel::dot_flip_internal {
 
 template <class FType, class GType, bool SpecializationMarker>
 struct Kernel;
@@ -334,6 +334,6 @@ struct Kernel<HalfComplex, Half, Half8::kIsVectorized> {
 
 #  endif  // RADIO_CORE_HAVE_HALF
 
-}  // namespace radio_core::experimental::dot_flip_kernel_internal
+}  // namespace radio_core::experimental::kernel::dot_flip_internal
 
 #endif  // ISA_CPU_ARM_NEON

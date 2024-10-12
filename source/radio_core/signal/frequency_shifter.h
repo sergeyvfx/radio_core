@@ -61,7 +61,8 @@ class FrequencyShifter {
   auto operator()(const std::span<const BaseComplex<T>> samples,
                   const std::span<BaseComplex<T>> output)
       -> std::span<BaseComplex<T>> {
-    return Rotator(samples, phase_, phase_increment_per_sample_, output);
+    return kernel::Rotator(
+        samples, phase_, phase_increment_per_sample_, output);
   }
 
   // Shift samples frequency in-place.

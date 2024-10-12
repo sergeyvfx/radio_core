@@ -19,7 +19,7 @@ using testing::Pointwise;
 TEST(Abs, Generic) {
   const std::array<int, 10> samples = {{1, -2, 3, -4, 5, -6, 7, -8, 9, -10}};
   std::array<int, 10> abs_values;
-  Abs<int, int>(samples, abs_values);
+  kernel::Abs<int, int>(samples, abs_values);
   EXPECT_THAT(
       abs_values,
       Pointwise(Eq(), std::to_array<int>({1, 2, 3, 4, 5, 6, 7, 8, 9, 10})));
@@ -28,7 +28,7 @@ TEST(Abs, Generic) {
 TEST(Abs, Float) {
   const std::array<float, 10> samples = {{1, -2, 3, -4, 5, -6, 7, -8, 9, -10}};
   std::array<float, 10> abs_values;
-  Abs<float, float>(samples, abs_values);
+  kernel::Abs<float, float>(samples, abs_values);
   EXPECT_THAT(abs_values,
               Pointwise(FloatNear(1e-6f),
                         std::to_array<float>({1, 2, 3, 4, 5, 6, 7, 8, 9, 10})));
@@ -49,7 +49,7 @@ TEST(Abs, Complex) {
   });
 
   std::array<float, 10> abs_values;
-  Abs<Complex, float>(samples, abs_values);
+  kernel::Abs<Complex, float>(samples, abs_values);
   EXPECT_THAT(abs_values,
               Pointwise(FloatNear(1e-6f),
                         std::to_array<float>({
@@ -72,7 +72,7 @@ TEST(Abs, Half) {
   const std::array<Half, 10> samples = {{1, -2, 3, -4, 5, -6, 7, -8, 9, -10}};
   std::array<Half, 10> abs_values;
 
-  Abs<Half, Half>(samples, abs_values);
+  kernel::Abs<Half, Half>(samples, abs_values);
 
   std::array<float, 10> abs_float_values;
   for (int i = 0; i < abs_values.size(); ++i) {
@@ -99,7 +99,7 @@ TEST(Abs, HalfComplex) {
   });
 
   std::array<Half, 10> abs_values;
-  Abs<HalfComplex, Half>(samples, abs_values);
+  kernel::Abs<HalfComplex, Half>(samples, abs_values);
 
   std::array<float, 10> abs_float_values;
   for (int i = 0; i < abs_values.size(); ++i) {

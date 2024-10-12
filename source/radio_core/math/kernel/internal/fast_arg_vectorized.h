@@ -14,7 +14,7 @@
 #include "radio_core/math/kernel/internal/kernel_common.h"
 #include "radio_core/math/math.h"
 
-namespace radio_core::fast_arg_kernel_internal {
+namespace radio_core::kernel::fast_arg_internal {
 
 template <class Real, bool SpecializationMarker>
 struct Kernel {
@@ -91,4 +91,4 @@ struct Kernel {
   }
 };
 
-}  // namespace radio_core::fast_arg_kernel_internal
+}  // namespace radio_core::kernel::fast_arg_internal

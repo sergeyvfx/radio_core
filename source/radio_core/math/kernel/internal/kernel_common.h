@@ -21,7 +21,7 @@
 #  include "radio_core/math/half_complex8.h"
 #endif
 
-namespace radio_core::kernel_internal {
+namespace radio_core::kernel::kernel_internal {
 
 // Accessor to a vectorized type for the type T.
 //
@@ -62,4 +62,4 @@ struct VectorizedBase<BaseComplex<Half>> {
 };
 #endif
 
-}  // namespace radio_core::kernel_internal
+}  // namespace radio_core::kernel::kernel_internal

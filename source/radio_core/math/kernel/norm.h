@@ -18,7 +18,7 @@
 
 #include "radio_core/math/kernel/internal/norm_neon.h"
 
-namespace radio_core {
+namespace radio_core::kernel {
 
 // The output buffer must have at least same number of elements as the input
 // samples buffer. It is possible to have the output buffer bigger than input
@@ -53,7 +53,7 @@ inline auto Norm(const std::span<const BaseComplex<T>>& samples,
 template <>
 inline auto Norm(const std::span<const Complex>& samples,
                  const std::span<float>& arg) -> std::span<float> {
-  return norm_kernel_internal::Kernel<float, true>::Execute(samples, arg);
+  return norm_internal::Kernel<float, true>::Execute(samples, arg);
 }
 
 #if RADIO_CORE_HAVE_HALF
@@ -61,8 +61,8 @@ inline auto Norm(const std::span<const Complex>& samples,
 template <>
 inline auto Norm(const std::span<const HalfComplex>& samples,
                  const std::span<Half>& arg) -> std::span<Half> {
-  return norm_kernel_internal::Kernel<Half, true>::Execute(samples, arg);
+  return norm_internal::Kernel<Half, true>::Execute(samples, arg);
 }
 #endif
 
-}  // namespace radio_core
+}  // namespace radio_core::kernel

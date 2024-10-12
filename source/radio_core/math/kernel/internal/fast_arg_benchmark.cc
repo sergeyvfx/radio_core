@@ -80,12 +80,13 @@ class FastArgBenchmark : public Benchmark {
   void Iteration() override {
     switch (input_sample_type_) {
       case InputSampleType::kComplex:
-        FastArg<float>(complex_data_.samples, complex_data_.magnitude);
+        kernel::FastArg<float>(complex_data_.samples, complex_data_.magnitude);
         break;
 
 #if RADIO_CORE_HAVE_HALF
       case InputSampleType::kHalfComplex:
-        FastArg<Half>(half_complex_data_.samples, half_complex_data_.magnitude);
+        kernel::FastArg<Half>(half_complex_data_.samples,
+                              half_complex_data_.magnitude);
         break;
 #endif
     }

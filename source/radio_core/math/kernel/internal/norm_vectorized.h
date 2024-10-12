@@ -15,7 +15,7 @@
 #include "radio_core/math/kernel/internal/kernel_common.h"
 #include "radio_core/math/math.h"
 
-namespace radio_core::norm_kernel_internal {
+namespace radio_core::kernel::norm_internal {
 
 template <class RealType, bool SpecializationMarker>
 struct Kernel {
@@ -92,4 +92,4 @@ struct Kernel {
   }
 };
 
-}  // namespace radio_core::norm_kernel_internal
+}  // namespace radio_core::kernel::norm_internal

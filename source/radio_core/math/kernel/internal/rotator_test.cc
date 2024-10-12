@@ -29,7 +29,8 @@ TEST(Rotator, Complex) {
   }
 
   Complex phase(1.0f, 0.0f);
-  Rotator<float>(samples, phase, Complex(Cos(-0.1f), Sin(-0.1f)), samples);
+  kernel::Rotator<float>(
+      samples, phase, Complex(Cos(-0.1f), Sin(-0.1f)), samples);
 
   for (Complex& sample : samples) {
     EXPECT_THAT(sample, ComplexNear(Complex(1, 0.0f), 1e-6f));
@@ -46,7 +47,8 @@ TEST(Rotator, HalfComplex) {
   }
 
   HalfComplex phase(1.0f, 0.0f);
-  Rotator<Half>(samples, phase, HalfComplex(Cos(-0.1f), Sin(-0.1f)), samples);
+  kernel::Rotator<Half>(
+      samples, phase, HalfComplex(Cos(-0.1f), Sin(-0.1f)), samples);
 
   for (HalfComplex& sample : samples) {
     const Complex complex_sample(float(sample.real), float(sample.imag));

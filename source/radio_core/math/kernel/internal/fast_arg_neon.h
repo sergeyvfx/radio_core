@@ -25,7 +25,7 @@
 #    include "radio_core/math/half_complex8.h"
 #  endif
 
-namespace radio_core::fast_arg_kernel_internal {
+namespace radio_core::kernel::fast_arg_internal {
 
 template <class Real, bool SpecializationMarker>
 struct Kernel;
@@ -133,6 +133,6 @@ struct Kernel<Half, true> {
 
 #  endif  // RADIO_CORE_HAVE_HALF
 
-}  // namespace radio_core::fast_arg_kernel_internal
+}  // namespace radio_core::kernel::fast_arg_internal
 
 #endif  // ISA_CPU_ARM_NEON

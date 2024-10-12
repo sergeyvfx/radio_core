@@ -114,14 +114,15 @@ class AbsBenchmark : public Benchmark {
         } else
 #endif
         {
-          Abs<Complex, float>(complex_data_.samples, complex_data_.magnitude);
+          kernel::Abs<Complex, float>(complex_data_.samples,
+                                      complex_data_.magnitude);
         }
         break;
 
 #if RADIO_CORE_HAVE_HALF
       case InputSampleType::kHalfComplex:
-        Abs<HalfComplex, Half>(half_complex_data_.samples,
-                               half_complex_data_.magnitude);
+        kernel::Abs<HalfComplex, Half>(half_complex_data_.samples,
+                                       half_complex_data_.magnitude);
         break;
 #endif
     }

@@ -14,12 +14,12 @@ namespace radio_core {
 TEST(HorizontalMax, Basic) {
   {
     const std::array<int, 6> samples = {0, -1, 2, -3, 4, -5};
-    EXPECT_EQ(HorizontalMax<int>(samples), 4);
+    EXPECT_EQ(kernel::HorizontalMax<int>(samples), 4);
   }
 
   {
     const std::array<int, 6> samples = {-1, -2, -3, -4, -5, -6};
-    EXPECT_EQ(HorizontalMax<int>(samples), -1);
+    EXPECT_EQ(kernel::HorizontalMax<int>(samples), -1);
   }
 }
 
@@ -27,13 +27,13 @@ TEST(HorizontalMax, Float) {
   {
     const auto samples =
         std::to_array<float>({0, -1, 2, -3, 4, -5, 9, 7, -8, -6});
-    EXPECT_EQ(HorizontalMax<float>(samples), 9);
+    EXPECT_EQ(kernel::HorizontalMax<float>(samples), 9);
   }
 
   {
     const auto samples =
         std::to_array<float>({-9, -2, -3, -4, -5, -1, -7, -8, -6, -7});
-    EXPECT_EQ(HorizontalMax<float>(samples), -1);
+    EXPECT_EQ(kernel::HorizontalMax<float>(samples), -1);
   }
 }
 
@@ -43,13 +43,13 @@ TEST(HorizontalMax, Half) {
   {
     const auto samples =
         std::to_array<Half>({0, -1, 2, -3, 4, -5, 9, 7, -8, -6});
-    EXPECT_EQ(HorizontalMax<Half>(samples), Half(9));
+    EXPECT_EQ(kernel::HorizontalMax<Half>(samples), Half(9));
   }
 
   {
     const auto samples =
         std::to_array<Half>({-9, -1, -2, -3, -4, -5, -1, -7, -8, -6});
-    EXPECT_EQ(HorizontalMax<Half>(samples), Half(-1));
+    EXPECT_EQ(kernel::HorizontalMax<Half>(samples), Half(-1));
   }
 }
 

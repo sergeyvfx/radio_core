@@ -14,7 +14,7 @@
 #include "radio_core/math/kernel/internal/kernel_common.h"
 #include "radio_core/math/math.h"
 
-namespace radio_core::power_spectral_density_kernel_internal {
+namespace radio_core::kernel::power_spectral_density_internal {
 
 template <class Real, bool SpecializationMarker>
 struct Kernel {
@@ -84,4 +84,4 @@ struct Kernel {
   }
 };
 
-}  // namespace radio_core::power_spectral_density_kernel_internal
+}  // namespace radio_core::kernel::power_spectral_density_internal

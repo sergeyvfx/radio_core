@@ -16,7 +16,7 @@
 #  include "radio_core/math/half_complex.h"
 #endif
 
-namespace radio_core::experimental {
+namespace radio_core {
 
 using testing::ComplexNear;
 
@@ -97,15 +97,15 @@ struct ComplexFloatData {
 };
 
 TEST(Dot, float_float) {
-  const float dot_flip = DotFlipG<float, float>(FloatFloatData<float>::a,
-                                                FloatFloatData<float>::b);
+  const float dot_flip = kernel::experimental::DotFlipG<float, float>(
+      FloatFloatData<float>::a, FloatFloatData<float>::b);
 
   EXPECT_NEAR(dot_flip, FloatFloatData<float>::dot_flip, 1e-6f);
 }
 
 TEST(Dot, complex_float) {
-  const Complex dot_flip = DotFlipG<Complex, float>(ComplexFloatData<float>::a,
-                                                    ComplexFloatData<float>::b);
+  const Complex dot_flip = kernel::experimental::DotFlipG<Complex, float>(
+      ComplexFloatData<float>::a, ComplexFloatData<float>::b);
 
   EXPECT_THAT(dot_flip, ComplexNear(ComplexFloatData<float>::dot_flip, 1e-6f));
 }
@@ -113,15 +113,16 @@ TEST(Dot, complex_float) {
 #if RADIO_CORE_HAVE_HALF
 
 TEST(Dot, half_half) {
-  const Half dot_flip =
-      DotFlipG<Half, Half>(FloatFloatData<Half>::a, FloatFloatData<Half>::b);
+  const Half dot_flip = kernel::experimental::DotFlipG<Half, Half>(
+      FloatFloatData<Half>::a, FloatFloatData<Half>::b);
 
   EXPECT_NEAR(float(dot_flip), float(FloatFloatData<Half>::dot_flip), 1e-6f);
 }
 
 TEST(Dot, half_complex_half) {
-  const HalfComplex dot_flip = DotFlipG<HalfComplex, Half>(
-      ComplexFloatData<Half>::a, ComplexFloatData<Half>::b);
+  const HalfComplex dot_flip =
+      kernel::experimental::DotFlipG<HalfComplex, Half>(
+          ComplexFloatData<Half>::a, ComplexFloatData<Half>::b);
 
   EXPECT_THAT(Complex(float(dot_flip.real), float(dot_flip.imag)),
               ComplexNear(ComplexFloatData<float>::dot_flip, 1e-6f));
@@ -129,4 +130,4 @@ TEST(Dot, half_complex_half) {
 
 #endif  // RADIO_CORE_HAVE_HALF
 
-}  // namespace radio_core::experimental
+}  // namespace radio_core

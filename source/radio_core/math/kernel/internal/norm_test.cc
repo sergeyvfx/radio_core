@@ -31,7 +31,7 @@ TEST(Norm, Complex) {
   });
 
   std::array<float, 10> abs_values;
-  Norm<float>(samples, abs_values);
+  kernel::Norm<float>(samples, abs_values);
   EXPECT_THAT(abs_values,
               Pointwise(FloatNear(2e-2f),
                         std::to_array<float>({
@@ -65,7 +65,7 @@ TEST(Norm, HalfComplex) {
   });
 
   std::array<Half, 10> abs_values;
-  Norm<Half>(samples, abs_values);
+  kernel::Norm<Half>(samples, abs_values);
 
   std::array<float, 10> abs_float_values;
   for (int i = 0; i < abs_values.size(); ++i) {

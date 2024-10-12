@@ -13,7 +13,7 @@
 
 #include "radio_core/math/kernel/internal/kernel_common.h"
 
-namespace radio_core::horizontal_max_kernel_internal {
+namespace radio_core::kernel::horizontal_max_internal {
 
 template <class T, bool SpecializationMarker>
 struct Kernel {
@@ -80,4 +80,4 @@ struct Kernel {
   }
 };
 
-}  // namespace radio_core::horizontal_max_kernel_internal
+}  // namespace radio_core::kernel::horizontal_max_internal

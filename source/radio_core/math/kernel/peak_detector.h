@@ -13,7 +13,7 @@
 #include "radio_core/math/kernel/internal/peak_detector_vectorized.h"
 #include "radio_core/math/math.h"
 
-namespace radio_core {
+namespace radio_core::kernel {
 
 // Detect peaks using linear interpolation between current state of the peak
 // detector (stored in the `peak`) and the new samples. The peak is detected
@@ -66,7 +66,7 @@ inline auto PerPointLerpPeakDetector(const std::span<const float> samples,
                                      const float charge_rate,
                                      const float discharge_rate)
     -> std::span<float> {
-  return peak_detector_kernel_internal::Kernel<float, true>::Execute(
+  return peak_detector_internal::Kernel<float, true>::Execute(
       samples, peak, charge_rate, discharge_rate);
 }
 
@@ -79,10 +79,10 @@ inline auto PerPointLerpPeakDetector(const std::span<const Half> samples,
                                      const Half charge_rate,
                                      const Half discharge_rate)
     -> std::span<Half> {
-  return peak_detector_kernel_internal::Kernel<Half, true>::Execute(
+  return peak_detector_internal::Kernel<Half, true>::Execute(
       samples, peak, charge_rate, discharge_rate);
 }
 
 #endif  // RADIO_CORE_HAVE_HALF
 
-}  // namespace radio_core
+}  // namespace radio_core::kernel

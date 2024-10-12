@@ -20,7 +20,7 @@
 
 #include "radio_core/math/kernel/internal/fast_abs_neon.h"
 
-namespace radio_core {
+namespace radio_core::kernel {
 
 // The output buffer must have at least same number of elements as the input
 // samples buffer. It is possible to have the output buffer bigger than input
@@ -37,7 +37,7 @@ inline auto FastAbs(const std::span<const T>& samples,
 
   const size_t num_samples = samples.size();
   for (size_t i = 0; i < num_samples; ++i) {
-    absolute_values[i] = FastAbs(samples[i]);
+    absolute_values[i] = radio_core::FastAbs(samples[i]);
   }
 
   return absolute_values.subspan(0, num_samples);
@@ -48,8 +48,8 @@ template <>
 inline auto FastAbs(const std::span<const Complex>& samples,
                     const std::span<float>& absolute_values)
     -> std::span<float> {
-  return fast_abs_kernel_internal::Kernel<Complex, true>::Execute(
-      samples, absolute_values);
+  return fast_abs_internal::Kernel<Complex, true>::Execute(samples,
+                                                           absolute_values);
 }
 
 #if RADIO_CORE_HAVE_HALF
@@ -58,10 +58,10 @@ inline auto FastAbs(const std::span<const Complex>& samples,
 template <>
 inline auto FastAbs(const std::span<const HalfComplex>& samples,
                     const std::span<Half>& absolute_values) -> std::span<Half> {
-  return fast_abs_kernel_internal::Kernel<HalfComplex, true>::Execute(
-      samples, absolute_values);
+  return fast_abs_internal::Kernel<HalfComplex, true>::Execute(samples,
+                                                               absolute_values);
 }
 
 #endif  // RADIO_CORE_HAVE_HALF
 
-}  // namespace radio_core
+}  // namespace radio_core::kernel

@@ -60,7 +60,8 @@ class BaseMonoDemodulator : public IQDemodulator<T> {
 
     // Calculate phase angle.
     // The phase is written to the output buffer.
-    const std::span<T> written_samples = FastArg(input_samples, output_samples);
+    const std::span<T> written_samples =
+        kernel::FastArg(input_samples, output_samples);
 
     // Calculate and unwrap instant frequency, and divide by deviation to get
     // amplitude of the output signal. Uses phase stored in the output buffer

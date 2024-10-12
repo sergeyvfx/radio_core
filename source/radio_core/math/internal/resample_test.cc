@@ -21,7 +21,7 @@ TEST(math, Resample) {
   {
     std::vector<float> resampled;
     ForeachResampledValue<float>(
-        {}, 4, radio_core::HorizontalMax<float>, [&](const float sample) {
+        {}, 4, kernel::HorizontalMax<float>, [&](const float sample) {
           resampled.push_back(sample);
         });
     EXPECT_TRUE(resampled.empty());
@@ -33,7 +33,7 @@ TEST(math, Resample) {
     ForeachResampledValue<float>(
         {{0, 1, 2, 3}},
         4,
-        radio_core::HorizontalMax<float>,
+        kernel::HorizontalMax<float>,
         [&](const float sample) { resampled.push_back(sample); });
     EXPECT_THAT(
         resampled,
@@ -46,7 +46,7 @@ TEST(math, Resample) {
     ForeachResampledValue<float>(
         {{0, 1, 2, 3, 4, 5, 6, 7}},
         4,
-        radio_core::HorizontalMax<float>,
+        kernel::HorizontalMax<float>,
         [&](const float sample) { resampled.push_back(sample); });
     EXPECT_THAT(
         resampled,
@@ -59,7 +59,7 @@ TEST(math, Resample) {
     ForeachResampledValue<float>(
         {{0, 1, 2, 3, 4, 5, 6, 7}},
         6,
-        radio_core::HorizontalMax<float>,
+        kernel::HorizontalMax<float>,
         [&](const float sample) { resampled.push_back(sample); });
     EXPECT_THAT(
         resampled,
@@ -72,7 +72,7 @@ TEST(math, Resample) {
     ForeachResampledValue<float>(
         {{0, 1, 2, 3, 4, 5, 6, 7, 8}},
         4,
-        radio_core::HorizontalMax<float>,
+        kernel::HorizontalMax<float>,
         [&](const float sample) { resampled.push_back(sample); });
     EXPECT_THAT(
         resampled,
@@ -85,7 +85,7 @@ TEST(math, Resample) {
     ForeachResampledValue<float>(
         {{0, 1, 2, 3}},
         8,
-        radio_core::HorizontalMax<float>,
+        kernel::HorizontalMax<float>,
         [&](const float sample) { resampled.push_back(sample); });
     EXPECT_THAT(resampled,
                 Pointwise(FloatNear(1e-6f),
@@ -96,10 +96,9 @@ TEST(math, Resample) {
   {
     std::vector<float> resampled;
     ForeachResampledValue<float>(
-        {{0, 1, 2}},
-        5,
-        radio_core::HorizontalMax<float>,
-        [&](const float sample) { resampled.push_back(sample); });
+        {{0, 1, 2}}, 5, kernel::HorizontalMax<float>, [&](const float sample) {
+          resampled.push_back(sample);
+        });
     EXPECT_THAT(
         resampled,
         Pointwise(FloatNear(1e-6f), std::to_array<float>({0, 0, 1, 1, 2})));
@@ -111,7 +110,7 @@ TEST(math, Resample) {
     ForeachResampledValue<float>(
         {{0, 1, 2, 3}},
         9,
-        radio_core::HorizontalMax<float>,
+        kernel::HorizontalMax<float>,
         [&](const float sample) { resampled.push_back(sample); });
     EXPECT_THAT(resampled,
                 Pointwise(FloatNear(1e-6f),

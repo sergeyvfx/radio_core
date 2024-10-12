@@ -82,13 +82,14 @@ class AbsBenchmark : public Benchmark {
   void Iteration() override {
     switch (input_sample_type_) {
       case InputSampleType::kComplex:
-        FastAbs<Complex, float>(complex_data_.samples, complex_data_.magnitude);
+        kernel::FastAbs<Complex, float>(complex_data_.samples,
+                                        complex_data_.magnitude);
         break;
 
 #if RADIO_CORE_HAVE_HALF
       case InputSampleType::kHalfComplex:
-        FastAbs<HalfComplex, Half>(half_complex_data_.samples,
-                                   half_complex_data_.magnitude);
+        kernel::FastAbs<HalfComplex, Half>(half_complex_data_.samples,
+                                           half_complex_data_.magnitude);
         break;
 #endif
     }

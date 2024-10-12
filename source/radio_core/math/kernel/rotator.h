@@ -19,7 +19,7 @@
 #  include "radio_core/math/half_complex.h"
 #endif
 
-namespace radio_core {
+namespace radio_core::kernel {
 
 // Rotate input samples at a fixed rate per sample, staring from the given
 // phase.
@@ -71,7 +71,7 @@ inline auto Rotator(const std::span<const Complex> samples,
                     Complex& phase,
                     const Complex phase_increment_per_sample,
                     const std::span<Complex> output) -> std::span<Complex> {
-  return rotator_kernel_internal::Kernel<float, true>::Execute(
+  return rotator_internal::Kernel<float, true>::Execute(
       samples, phase, phase_increment_per_sample, output);
 }
 
@@ -84,10 +84,10 @@ inline auto Rotator(const std::span<const HalfComplex> samples,
                     const HalfComplex phase_increment_per_sample,
                     const std::span<HalfComplex> output)
     -> std::span<HalfComplex> {
-  return rotator_kernel_internal::Kernel<Half, true>::Execute(
+  return rotator_internal::Kernel<Half, true>::Execute(
       samples, phase, phase_increment_per_sample, output);
 }
 
 #endif  // RADIO_CORE_HAVE_HALF
 
-}  // namespace radio_core
+}  // namespace radio_core::kernel
