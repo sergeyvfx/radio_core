@@ -13,6 +13,7 @@ import argparse
 import json
 import os
 import shutil
+import sys
 
 from pathlib import Path
 from typing import Iterable, Optional
@@ -255,6 +256,10 @@ class Report:
         result_tmp_filename.write_text(
             json.dumps(result, cls=_SuitResultEncoder)
         )
+
+        # On Windows os.rename() fails if the destination exists.
+        if sys.platform == "win32" and result_filename.exists():
+            result_filename.unlink()
 
         os.rename(result_tmp_filename, result_filename)
 
