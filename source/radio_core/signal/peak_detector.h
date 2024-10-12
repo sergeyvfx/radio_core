@@ -81,6 +81,9 @@ class LerpPeakDetector {
     (*this)(samples, samples);
   }
 
+  // Reset the peak value to the given value.
+  inline void ResetPeak(const T value) { current_peak_ = value; }
+
  private:
   T charge_rate_ = 0;
   T discharge_rate_ = 0;
