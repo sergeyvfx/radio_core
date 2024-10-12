@@ -94,6 +94,7 @@ set(PUBLIC_HEADERS
   kernel/dot_flip.h
   kernel/fast_abs.h
   kernel/fast_arg.h
+  kernel/norm.h
   kernel/peak_detector.h
   kernel/power_spectral_density.h
 
@@ -109,6 +110,8 @@ set(PUBLIC_HEADERS
   kernel/internal/fast_arg_neon.h
   kernel/internal/horizontal_max_vectorized.h
   kernel/internal/horizontal_max_neon.h
+  kernel/internal/norm_vectorized.h
+  kernel/internal/norm_neon.h
   kernel/internal/peak_detector_vectorized.h
   kernel/internal/power_spectral_density_vectorized.h
   kernel/internal/rotator_vectorized.h
