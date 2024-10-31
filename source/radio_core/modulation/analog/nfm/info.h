@@ -36,6 +36,9 @@ class Info<Type::kNFM> {
   // of the center frequency within the bandwidth.
   static constexpr BandwidthReference kBandwidthReference =
       BandwidthReference::kCenter;
+
+  // Whether AGC is used by default demodulation configuration.
+  static constexpr bool kDefaultUseAGC = false;
 };
 
 }  // namespace radio_core::modulation::analog

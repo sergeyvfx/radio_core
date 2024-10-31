@@ -125,4 +125,21 @@ inline auto GetBandwidthReference(const Type modulation) -> BandwidthReference {
   Unreachable();
 }
 
+// Get whether AGC is to be used by default demodulation AGC.
+inline auto GetDefaultUseAGC(const Type modulation) -> bool {
+  switch (modulation) {
+    case Type::kAM: return Info<Type::kAM>::kDefaultUseAGC;
+
+    case Type::kNFM: return Info<Type::kNFM>::kDefaultUseAGC;
+    case Type::kWFM: return Info<Type::kWFM>::kDefaultUseAGC;
+
+    case Type::kLSB: return Info<Type::kLSB>::kDefaultUseAGC;
+    case Type::kUSB: return Info<Type::kUSB>::kDefaultUseAGC;
+
+    case Type::kCW: return Info<Type::kCW>::kDefaultUseAGC;
+  }
+
+  Unreachable();
+}
+
 }  // namespace radio_core::modulation::analog

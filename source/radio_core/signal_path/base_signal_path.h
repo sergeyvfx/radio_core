@@ -180,6 +180,8 @@ class BaseSignalPath : public Sink<BaseComplex<T>> {
       int sample_rate{0};
 
       struct {
+        bool enabled{true};
+
         T charge_rate{0.007};
         T discharge_rate{0.00003};
       } agc;
@@ -343,11 +345,10 @@ class BaseSignalPath : public Sink<BaseComplex<T>> {
     for (T& af_sample : af_samples) {
       // TODO(sergey): Implement squelch.
 
-      // TODO(sergey): Is the really AGC needed for all modulation types? It
-      // seems that it makes popping sound when NFM transmission ends worse.
-      // (Even without AGC there is some popping, but it is not as bad as when
-      // the AGC is used).
-      af_sample = agc_(af_sample) * soft_start_volume_ * soft_configure_volume_;
+      if (agc_enabled_) {
+        af_sample = agc_(af_sample);
+      }
+      af_sample *= soft_start_volume_ * soft_configure_volume_;
 
       soft_start_volume_ = Min(T(1), soft_start_volume_ + soft_start_weight_);
       soft_configure_volume_ =
@@ -486,6 +487,7 @@ class BaseSignalPath : public Sink<BaseComplex<T>> {
   void ConfigureAudioOutput(const Options& options) {
     const int af_sample_rate = options.audio.sample_rate;
 
+    agc_enabled_ = options.audio.agc.enabled;
     agc_.Configure(options.audio.agc.charge_rate,
                    options.audio.agc.discharge_rate);
 
@@ -543,6 +545,7 @@ class BaseSignalPath : public Sink<BaseComplex<T>> {
   Demodulator demodulator_;
 
   // Automatic gain control for audio.
+  bool agc_enabled_{true};
   signal::EMAAGC<T> agc_;
 
   // Configuration of the soft startup and soft re-configure.
