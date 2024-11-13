@@ -82,7 +82,7 @@ struct VectorizedIntTypeInfo<uint32_t, 4, true> {
 
   template <int Index>
   static inline auto SetLane(const uint32x4_t& value,
-                             const float new_lane_value) -> uint32x4_t {
+                             const uint32_t new_lane_value) -> uint32x4_t {
     static_assert(Index >= 0);
     static_assert(Index < kSize);
 
