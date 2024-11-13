@@ -12,6 +12,7 @@
 
 #pragma once
 
+#include <cstdint>
 #include <functional>
 
 #include "radio_core/picture/sstv/vis.h"
