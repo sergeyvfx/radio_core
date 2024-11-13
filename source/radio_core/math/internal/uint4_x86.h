@@ -21,6 +21,36 @@ static_assert(ISA_CPU_X86_SSE2, "SSE 2 is the required minimum");
 template <class T, int N, bool SpecializationMarker>
 struct VectorizedIntTypeInfo;
 
+namespace internal::x64 {
+
+// An implementation pf _mm_min_epi32() from SSE4.1 which falls back to an
+// emulation for SSE2.
+inline auto mm_min_epi32(__m128i a, __m128i b) -> __m128i {
+#  if ISA_CPU_X86_SSE4_1
+  return _mm_min_epi32(a, b);
+#  else
+  const __m128i mask = _mm_cmplt_epi32(a, b);
+  a = _mm_and_si128(a, mask);
+  b = _mm_andnot_si128(mask, b);
+  return _mm_or_si128(a, b);
+#  endif
+}
+
+// An implementation pf _mm_max_epi32() from SSE4.1 which falls back to an
+// emulation for SSE2.
+inline auto mm_max_epi32(__m128i a, __m128i b) -> __m128i {
+#  if ISA_CPU_X86_SSE4_1
+  return _mm_max_epi32(a, b);
+#  else
+  const __m128i mask = _mm_cmpgt_epi32(a, b);
+  a = _mm_and_si128(a, mask);
+  b = _mm_andnot_si128(mask, b);
+  return _mm_or_si128(a, b);
+#  endif
+}
+
+}  // namespace internal::x64
+
 template <>
 struct VectorizedIntTypeInfo<uint32_t, 4, true> {
   using RegisterType = __m128i;
@@ -122,18 +152,18 @@ struct VectorizedIntTypeInfo<uint32_t, 4, true> {
   // Non-class functions.
 
   static inline auto Min(const __m128i& a, const __m128i& b) -> __m128i {
-    return _mm_min_epi32(a, b);
+    return internal::x64::mm_min_epi32(a, b);
   }
 
   static inline auto Max(const __m128i& a, const __m128i& b) -> __m128i {
-    return _mm_max_epi32(a, b);
+    return internal::x64::mm_max_epi32(a, b);
   }
 
-  static inline auto HorizontalMax(const __m128i& value) -> float {
+  static inline auto HorizontalMax(const __m128i& value) -> uint32_t {
     const __m128i max1 = _mm_shuffle_epi32(value, _MM_SHUFFLE(0, 0, 3, 2));
-    const __m128i max2 = _mm_max_epi32(value, max1);
+    const __m128i max2 = internal::x64::mm_max_epi32(value, max1);
     const __m128i max3 = _mm_shuffle_epi32(max2, _MM_SHUFFLE(0, 0, 0, 1));
-    return _mm_cvtsi128_si32(_mm_max_epi32(max2, max3));
+    return _mm_cvtsi128_si32(internal::x64::mm_max_epi32(max2, max3));
   }
 
   static inline auto Select(const __m128i& mask,
