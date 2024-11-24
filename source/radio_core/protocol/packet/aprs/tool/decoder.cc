@@ -21,6 +21,7 @@
 #include <argparse/argparse.hpp>
 
 #include "radio_core/base/scoped_timer.h"
+#include "radio_core/base/string_util.h"
 #include "radio_core/modulation/digital/fsk/tones_bell.h"
 #include "radio_core/protocol/datalink/ax25/message.h"
 #include "radio_core/protocol/packet/aprs/decoder.h"
@@ -103,9 +104,9 @@ inline void AX25AddressToString(const Address& address,
   const std::string_view clean_callsign = address.callsign.GetCleanView();
 
   if (address.ssid == 0) {
-    strncpy(buffer.data(),
-            clean_callsign.data(),
-            std::min(clean_callsign.length() + 1, buffer.size()));
+    StringCopy(buffer.data(),
+               clean_callsign.data(),
+               std::min(clean_callsign.length() + 1, buffer.size()));
     return;
   }
 
