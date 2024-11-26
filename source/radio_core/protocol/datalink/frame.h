@@ -17,14 +17,14 @@
 
 namespace radio_core::protocol::datalink {
 
-// Representation of a frame delimeter.
+// Representation of a frame delimiter.
 enum class FrameMarker {
   kBegin,
   kEnd,
 };
 
-inline auto operator<<(std::ostream& os,
-                       const FrameMarker marker) -> std::ostream& {
+inline auto operator<<(std::ostream& os, const FrameMarker marker)
+    -> std::ostream& {
   switch (marker) {
     case FrameMarker::kBegin: os << "FrameMarker::kBegin"; return os;
     case FrameMarker::kEnd: os << "FrameMarker::kEnd"; return os;
@@ -35,7 +35,7 @@ inline auto operator<<(std::ostream& os,
 
 // Representation of a decoded byte from frame transmission.
 //
-// Can either be a frame delimeter marker indicating beginning/ending of a frame
+// Can either be a frame delimiter marker indicating beginning/ending of a frame
 // or a byte of a data.
 //
 // In the actual representation of a marker in the protocol might be different
@@ -75,8 +75,8 @@ class FrameByte {
   std::optional<FrameMarker> marker_;
 };
 
-inline auto operator<<(std::ostream& os,
-                       const FrameByte& frame_byte) -> std::ostream& {
+inline auto operator<<(std::ostream& os, const FrameByte& frame_byte)
+    -> std::ostream& {
   if (frame_byte.IsMarker()) {
     os << "FrameByte(" << frame_byte.GetMarker() << ")";
   } else if (frame_byte.IsData()) {

@@ -37,17 +37,39 @@ TEST(StringUtil, StringReplaceAll) {
 TEST(StringUtil, StringCopy) {
   char buffer[64] = {0};
 
-  StringCopy(buffer, "", 1);
-  EXPECT_EQ(StringView(buffer), "");
+  {
+    memset(buffer, 0, sizeof(buffer));
+    EXPECT_EQ(StringCopy(buffer, "", 1), 0);
+    EXPECT_EQ(StringView(buffer), "");
+  }
 
-  StringCopy(buffer, "foo", 1);
-  EXPECT_EQ(StringView(buffer), "");
+  {
+    memset(buffer, 0, sizeof(buffer));
+    EXPECT_EQ(StringCopy(buffer, "foo", 1), 0);
+    EXPECT_EQ(StringView(buffer), "");
+  }
 
-  StringCopy(buffer, "foobar", 3);
-  EXPECT_EQ(StringView(buffer), "fo");
+  {
+    memset(buffer, 0, sizeof(buffer));
+    EXPECT_EQ(StringCopy(buffer, "foobar", 3), 2);
+    EXPECT_EQ(StringView(buffer), "fo");
+  }
 
-  StringCopy(buffer, "foobar", 0);
-  EXPECT_EQ(StringView(buffer), "fo");
+  {
+    // Test that no null-pointer is written then the buffer is advertized
+    // as having zero size.
+    memset(buffer, 0, sizeof(buffer));
+    buffer[0] = 'f';
+    buffer[1] = 'o';
+    EXPECT_EQ(StringCopy(buffer, "foobar", 0), 0);
+    EXPECT_EQ(StringView(buffer), "fo");
+  }
+
+  {
+    memset(buffer, 0, sizeof(buffer));
+    EXPECT_EQ(StringCopy(buffer, "foobar", 16), 6);
+    EXPECT_EQ(StringView(buffer), "foobar");
+  }
 }
 
 TEST(StringUtil, StringPrintFormat) {

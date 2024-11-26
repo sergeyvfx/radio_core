@@ -100,7 +100,7 @@ class Encoder {
   inline void PushPIDField(const Message& message,
                            F&& callback,
                            Args&&... args) {
-    if (!message.UsesPIDField()) {
+    if (!FrameControlUsesPID(message.control)) {
       return;
     }
     PushByteToCRCAndOutput(
@@ -111,7 +111,7 @@ class Encoder {
   inline void PushInfoField(const Message& message,
                             F&& callback,
                             Args&&... args) {
-    if (!message.UsesInfoField()) {
+    if (!FrameControlUsesInfo(message.control)) {
       return;
     }
 
@@ -167,6 +167,9 @@ class Encoder {
     if (address.has_been_repeated) {
       ssid_byte |= 0b10000000;
     }
+    if (address.command_response_bit) {
+      ssid_byte |= 0b10000000;
+    }
 
     if (!has_repeater) {
       ssid_byte |= 1;
@@ -195,7 +198,7 @@ class Encoder {
   inline void FinalizeCRC() {
     crc_ = crypto::crc16ccitt::Finalize<crypto::crc16ccitt::FCS>(crc_);
   }
-  inline void UpdareCRC(const uint8_t byte) {
+  inline void UpdateCRC(const uint8_t byte) {
     crc_ = crypto::crc16ccitt::Update<crypto::crc16ccitt::FCS>(crc_, byte);
   }
 
@@ -207,7 +210,7 @@ class Encoder {
                 FrameByte(std::byte{byte}),
                 std::forward<Args>(args)...);
 
-    UpdareCRC(byte);
+    UpdateCRC(byte);
   }
 
   // CRC of the encoded message.

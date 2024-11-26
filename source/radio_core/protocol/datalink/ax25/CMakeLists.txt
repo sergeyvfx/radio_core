@@ -3,9 +3,11 @@
 # SPDX-License-Identifier: MIT-0
 
 set(PUBLIC_HEADERS
+  control.h
   decoder.h
   encoder.h
   message.h
+  print.h
 )
 
 add_library(radio_core_protocol_datalink_ax25 INTERFACE ${PUBLIC_HEADERS})
@@ -30,6 +32,8 @@ function(radio_core_datalink_test PRIMITIVE_NAME)
       LIBRARIES radio_core_protocol_datalink)
 endfunction()
 
+radio_core_datalink_test(control)
 radio_core_datalink_test(decoder)
 radio_core_datalink_test(encoder)
 radio_core_datalink_test(message)
+radio_core_datalink_test(print)

@@ -69,8 +69,9 @@ auto StringReplaceAll(const std::string_view haystack,
 //
 // Copies characters from a null-terminated `src` to `dst`. At maximum of
 // `dst_size` will be written to the `dst` (including the null-terminator).
-inline void StringCopy(char* dst, const char* src, const size_t dst_size) {
-  bundled_tiny_lib::string_portable::strncpy(dst, src, dst_size);
+inline auto StringCopy(char* dst, const char* src, const size_t dst_size)
+    -> size_t {
+  return bundled_tiny_lib::string_portable::strncpy(dst, src, dst_size);
 }
 
 // Portable version of `::vsnprintf()` which ensures the result is always

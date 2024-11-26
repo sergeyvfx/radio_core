@@ -210,6 +210,44 @@ TEST_F(AX25Bell202Tone1200bdDireWolfTest, sps44100) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// Off-the-air recordings.
+
+class AX25Bell202Tone1200bdTest : public BaseAX25Bell202Tone1200bdTest {
+ protected:
+  auto ReadMessage(const Path& filename) -> std::optional<Message> {
+    const std::vector<Message> messages = DecodeAllMessagesFromFile(filename);
+
+    EXPECT_EQ(messages.size(), 1);
+
+    if (messages.size() != 1) {
+      return std::nullopt;
+    }
+
+    return messages[0];
+  }
+};
+
+TEST_F(AX25Bell202Tone1200bdTest, Supervisory) {
+  std::optional<Message> message =
+      ReadMessage("ax25_bell202_1200bd_supervisory.wav");
+  if (!message.has_value()) {
+    return;
+  }
+
+  EXPECT_EQ(message->address.source, Address("SRC"));
+  EXPECT_EQ(message->address.source.command_response_bit, 1);
+
+  EXPECT_EQ(message->address.destination, Address("DST"));
+  EXPECT_EQ(message->address.destination.command_response_bit, 0);
+
+  EXPECT_EQ(message->address.repeaters.size(), 1);
+  EXPECT_EQ(message->address.repeaters[0], Address("RPTR", 12, true));
+
+  EXPECT_EQ(message->control, 17);
+  EXPECT_EQ(message->pid, 0);
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // TNC Test CD.
 
 class TNCTestCDTest : public BaseAX25Bell202Tone1200bdTest {

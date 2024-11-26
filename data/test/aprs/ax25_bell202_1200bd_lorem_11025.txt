@@ -1,4 +1,4 @@
-packet_encoder \
+aprs_encoder \
     --source SRC \
     --destination DST \
     --repeater 'RPTR-12*' \

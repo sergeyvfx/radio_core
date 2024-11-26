@@ -1,0 +1,9 @@
+./bin/tool/aprs_encoder \
+    --source SRC \
+    --source-control-set \
+    --destination DST \
+    --repeater 'RPTR-12*' \
+    --control 17 \
+    --pid 0 \
+    --rate 44100 \
+    ax25_bell202_1200bd_supervisory.wav

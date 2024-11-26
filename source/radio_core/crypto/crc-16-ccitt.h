@@ -87,7 +87,7 @@ inline auto Update(const uint16_t crc, const uint8_t byte) -> uint16_t {
   return ((crc) >> 8) ^ Parametrization::kTable[index];
 }
 
-// FInalize CRC.
+// Finalize CRC.
 // This is the final step of CRC calculation.
 template <class Parametrization>
 inline auto Finalize(const uint16_t crc) -> uint16_t {

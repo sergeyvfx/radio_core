@@ -115,14 +115,14 @@ class Decoder {
 
     // Convert to an integral type to simplify bit magic (make it less verbose)
     // and to simplify cast to boolean and wide integer types (such as uint16_t
-    // and and uint32_t).
+    // and uint32_t).
     const auto byte_value = std::to_integer<uint8_t>(new_byte);
 
     // Central place to handle CRC calculation.
     // It is needed for all stages except to when the data stream is out of the
     // frame and hence all the data bytes are ignored.
     if (field_state_ != FieldState::kFrameSkip) {
-      ProcessFCSByte(byte_value);
+      AppendByteToFCS(byte_value);
     }
 
     switch (field_state_) {
@@ -138,6 +138,8 @@ class Decoder {
       case FieldState::kPID: return ProcessPIDByte(byte_value);
 
       case FieldState::kInformation: return ProcessInformationByte(byte_value);
+
+      case FieldState::kFCS: return ProcessFCSByte(byte_value);
 
       case FieldState::kFrameSkip: return Result(Error::kUnavailable);
     }
@@ -197,6 +199,7 @@ class Decoder {
 
     address_state_.Clear();
     information_state_.Clear();
+    fcs_field_state_.Clear();
     fcs_state_.Clear();
 
     message_.Clear();
@@ -235,6 +238,7 @@ class Decoder {
 
     // Finalize address decoding.
     address_state_.address.ssid = (byte >> 1) & 0xf;
+    address_state_.address.command_response_bit = (byte & 0x80) >> 7;
     address_state_.address.has_been_repeated = false;
     address_state_.extension_bit = (byte & 1);
 
@@ -278,6 +282,7 @@ class Decoder {
 
     // Finalize address decoding.
     address_state_.address.ssid = (byte >> 1) & 0xf;
+    address_state_.address.command_response_bit = (byte & 0x80) >> 7;
     address_state_.address.has_been_repeated = false;
     address_state_.extension_bit = (byte & 1);
 
@@ -317,6 +322,7 @@ class Decoder {
 
     // Finalize address decoding.
     address_state_.address.ssid = (byte >> 1) & 0xf;
+    address_state_.address.command_response_bit = (byte & 0x80) >> 7;
     address_state_.address.has_been_repeated = (byte & 0b10000000);
     address_state_.extension_bit = (byte & 1);
 
@@ -367,11 +373,14 @@ class Decoder {
   auto ProcessControlByte(const uint8_t byte) -> Result {
     message_.control = byte;
 
-    if (message_.UsesPIDField()) {
+    if (FrameControlUsesPID(message_.control)) {
       field_state_ = FieldState::kPID;
     } else {
-      // TODO(sergey): Support message types which do not use PID field.
-      field_state_ = FieldState::kFrameSkip;
+      if (FrameControlUsesInfo(message_.control)) {
+        field_state_ = FieldState::kInformation;
+      } else {
+        field_state_ = FieldState::kFCS;
+      }
     }
 
     return Result(Error::kUnavailable);
@@ -383,11 +392,10 @@ class Decoder {
   auto ProcessPIDByte(const uint8_t byte) -> Result {
     message_.pid = byte;
 
-    if (message_.UsesInfoField()) {
+    if (FrameControlUsesInfo(message_.control)) {
       field_state_ = FieldState::kInformation;
     } else {
-      // TODO(sergey): Support message types which do not use Info field.
-      field_state_ = FieldState::kFrameSkip;
+      field_state_ = FieldState::kFCS;
     }
 
     return Result(Error::kUnavailable);
@@ -456,7 +464,8 @@ class Decoder {
   //////////////////////////////////////////////////////////////////////////////
   // FCS field.
 
-  inline void ProcessFCSByte(const uint8_t byte) {
+  // Append byte to the FCS calculation of the received frame.
+  inline void AppendByteToFCS(const uint8_t byte) {
     if (fcs_state_.num_data_bytes == 2) {
       fcs_state_.actual_frame_fcs = crypto::crc16ccitt::Update<FCSSpec>(
           fcs_state_.actual_frame_fcs, fcs_state_.data & 0xff);
@@ -470,6 +479,31 @@ class Decoder {
   inline void FinalizeFCS() {
     fcs_state_.actual_frame_fcs =
         crypto::crc16ccitt::Finalize<FCSSpec>(fcs_state_.actual_frame_fcs);
+  }
+
+  // Process byte from the FCS field of the frame.
+  auto ProcessFCSByte(const uint8_t byte) -> Result {
+    // Append byte to the FCS field.
+    fcs_field_state_.data |= (byte << fcs_field_state_.num_data_bytes * 8);
+    ++fcs_field_state_.num_data_bytes;
+
+    if (fcs_field_state_.num_data_bytes != 2) {
+      return Result(Error::kUnavailable);
+    }
+
+    // Finalize calculation of the checksum of the received bytes.
+    FinalizeFCS();
+
+    // Assume the frame has finished, without waiting for the marker to appear
+    // in the stream. This way there is a bigger change of decoding message from
+    // a noisy environment.
+    field_state_ = FieldState::kFrameSkip;
+
+    if (fcs_field_state_.data != fcs_state_.actual_frame_fcs) {
+      return Result(message_, Error::kChecksumMismatch);
+    }
+
+    return Result(message_);
   }
 
   //////////////////////////////////////////////////////////////////////////////
@@ -491,6 +525,8 @@ class Decoder {
     kPID,
 
     kInformation,
+
+    kFCS,
 
     // Ignore the rest of the frame.
     // Used for unknown or unsupported messages.
@@ -538,6 +574,20 @@ class Decoder {
     int length;
   } information_state_;
 
+  // State of reading the FCS field from the frame.
+  struct {
+    inline void Clear() {
+      data = 0;
+      num_data_bytes = 0;
+    }
+
+    // The data of the FCS field from the frame.
+    uint32_t data;
+
+    // The number of bytes of FCS field read from the frame.
+    int num_data_bytes;
+  } fcs_field_state_;
+
   using FCSSpec = crypto::crc16ccitt::FCS;
 
   struct {
@@ -553,7 +603,8 @@ class Decoder {
     // The FCS calculation ignores two last bytes of the frame (as those belong
     // to FCS transmitted with the message).
     // This is a cyclic buffer used to ensure that the transmitted FCS is
-    // ignoed: the actual FCS is calculated once this buffer goes above 2 bytes.
+    // ignored: the actual FCS is calculated once this buffer goes above 2
+    // bytes.
     uint32_t data;
     int num_data_bytes;
   } fcs_state_;

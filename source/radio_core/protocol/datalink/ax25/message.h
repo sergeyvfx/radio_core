@@ -6,20 +6,26 @@
 //
 // Follows description of the AX.25 Link Access Protocol:
 //
-//  http://www.ax25.net/AX25.2.2-Jul%2098-2.pdf
+//  [ax25] AX.25 Link Access Protocol for Amateur Packet Radio
+//         Version 2.2 Revision: July 1998
+//         http://www.ax25.net/AX25.2.2-Jul%2098-2.pdf
 
 #pragma once
 
 #include <algorithm>
 #include <array>
 #include <cassert>
+#include <cstdint>
 #include <initializer_list>
 #include <ostream>
 #include <string_view>
 #include <utility>
 
+#include "radio_core/protocol/datalink/ax25/control.h"
+
 namespace radio_core::protocol::datalink::ax25 {
 
+namespace ax25_internal {
 // Simple string implementation which uses fixed amount of space allocated
 // within the object itself to store data. It provided very limited operations
 // but allows to have sting fields in the AX.25 message without heap
@@ -170,6 +176,8 @@ inline auto operator<<(std::ostream& os,
   return os;
 }
 
+}  // namespace ax25_internal
+
 // Callsign of source or destination of AX.25 frame.
 //
 // By the specification the callsign has maximum length of 6 characters and all
@@ -178,7 +186,7 @@ inline auto operator<<(std::ostream& os,
 //
 // By default the callsign object is constructed with all characters initialized
 // to their empty state.
-class Callsign : public FixedString<6, ' '> {
+class Callsign : public ax25_internal::FixedString<6, ' '> {
  public:
   using FixedString::FixedString;
 
@@ -227,11 +235,18 @@ class Address {
   Callsign callsign;
 
   // Secondary Station Identifier.
+  // It consists of the SSSS bits of the field encoded in the frame, directly
+  // identifying SSID. No need to do any bit operation to access the SSID.
   int ssid = 0;
 
-  // Corresponds to the H bit ([H]as-been-repeated) of the AX.25 specification.
-  // The H bits indicate that the Layer 2 repeater station has repeated the
-  // frame.
+  // Value of the command/repsonse bit from the SSID.
+  // Corresponds to the C bit ([C]ontrol) of the AX.25 shifted to the left so
+  // its value is 0 or 1.
+  uint8_t command_response_bit = 0;
+
+  // Corresponds to the H bit ([H]as-been-repeated) of the AX.25
+  // specification. The H bits indicate that the Layer 2 repeater station
+  // has repeated the frame.
   bool has_been_repeated = false;
 };
 
@@ -334,67 +349,6 @@ class Repeaters {
   size_type num_repeaters_ = 0;
 };
 
-class ControlBits {
- public:
-  // Control field type.
-  //
-  // The mask denotes which bits of the control field are responsible for
-  // defining corresponding type (different types are indicated by the different
-  // set of bits).
-  //
-  //   ┌───────────────┬───────────────────────────┐
-  //   │ Control Field │    Control-Field Bits     │
-  //   │     Type      ├─────────┬─────┬───────┬───┤
-  //   │               │ 7  6  5 │  4  │ 3 2 1 │ 0 │
-  //   ├───────────────┼─────────┼─────┼───────┼───┤
-  //   │    I Frame    │  N(R)   │  P  │ N(S)  │ 0 │
-  //   ├───────────────┼─────────┼─────┼───────┴───┤
-  //   │    S Frame    │  N(R)   │ P/F │ S S 0   1 │
-  //   ├───────────────┼─────────┼─────┼───────────┤
-  //   │    U Frame    │  M M M  │ P/F │ M M 1   1 │
-  //   └───────────────┴─────────┴─────┴───────────┘
-  struct Type {
-    inline static constexpr int kInformation = 0b00000000;
-    inline static constexpr int kInformationMask = 0b00000001;
-
-    inline static constexpr int kSupervisory = 0b00000011;
-    inline static constexpr int kSupervisoryMask = 0b00000011;
-
-    inline static constexpr int kUnnumbered = 0b00000011;
-    inline static constexpr int kUnnumberedMask = 0b00000011;
-  };
-
-  // Format of the UNNUMBERED frame type.
-  //
-  // The mask denotes bits which are set by the command or a response (as in,
-  // the bit 4 denotes pull/final bit, the rest bits are denotes the command or
-  // response).
-  //
-  // The values include the frame type bits.
-  struct Unnumbered {
-    inline static constexpr int kMASK = 0b11101111;
-
-    // Set Asynchronous Balanced Mode Extended (SABME), command.
-    inline static constexpr int kSABME = 0b01101111;
-    // Set Asynchronous Balanced Mode (SABM), command.
-    inline static constexpr int kSABM = 0b00101111;
-    // Disconnect (DISC), command
-    inline static constexpr int kDISC = 0b01000011;
-    // Disconnect Mode (DM), response
-    inline static constexpr int kDM = 0b00001111;
-    // Unnumbered Acknowledge (UA), response
-    inline static constexpr int kUA = 0b01100011;
-    // Frame Reject (FRMR) Response
-    inline static constexpr int kFRMR = 0b10000111;
-    // Unnumbered Information (UI), either
-    inline static constexpr int kUI = 0b00000011;
-    // Exchange Identification (XID), either.
-    inline static constexpr int kXID = 0b10101111;
-    // Test (TEST), rither.
-    inline static constexpr int kTEST = 0b11100011;
-  };
-};
-
 // Standard values for the AX.25 protocol identifiers.
 class PID {
  public:
@@ -406,7 +360,7 @@ class PID {
 //
 // The length corresponds to the default length of the I field as per the
 // protocol specification.
-class Information : public FixedString<256, '\0'> {
+class Information : public ax25_internal::FixedString<256, '\0'> {
  public:
   using FixedString::FixedString;
 
@@ -429,46 +383,50 @@ class Message {
   auto operator=(const Message& other) -> Message& = default;
   auto operator=(Message&& other) -> Message& = default;
 
+  // Clear the message,bring it back to the initial state.
   inline void Clear() {
     address.source.Clear();
     address.destination.Clear();
     address.repeaters.Clear();
 
     control = ControlBits::Unnumbered::kUI;
+    pid = 0;
 
     information.Clear();
   }
 
-  // Check whether PID field is used by the message type.
-  // The Protocol Identifier (PID) field appears in information frames (I and
-  // UI) only.
-  inline auto UsesPIDField() const -> bool {
-    if ((control & ControlBits::Unnumbered::kMASK) ==
-        ControlBits::Unnumbered::kUI) {
-      return true;
+  // Get version used to encode fields in the frame:
+  //
+  //   - Version 1 is what the [ax25] refers to as "Previous Version".
+  //     In this version there is no information about command/responce fields.
+  //   - Version 2 is what the [ax25] refers to V2.
+  //     In this version the C bits of the SSID field indicate command/response.
+  [[nodiscard]] inline auto GetVersion() const -> int {
+    if (address.source.command_response_bit ==
+        address.destination.command_response_bit) {
+      return 1;
     }
-
-    if ((control & ControlBits::Type::kInformationMask) ==
-        ControlBits::Type::kInformation) {
-      return true;
-    }
-
-    return false;
+    return 2;
   }
 
-  // Check whether Info field is used by the message type.
-  inline auto UsesInfoField() const -> bool {
-    if ((control & ControlBits::Unnumbered::kMASK) ==
-        ControlBits::Unnumbered::kUI) {
-      return true;
+  // Returns true if this message is a command.
+  // If the message uses old protocol version false is returned.
+  [[nodiscard]] inline auto IsCommand() const -> bool {
+    if (GetVersion() != 2) {
+      return false;
     }
+    return address.destination.command_response_bit == 1 &&
+           address.source.command_response_bit == 0;
+  }
 
-    if ((control & ControlBits::Type::kInformationMask) ==
-        ControlBits::Type::kInformation) {
-      return true;
+  // Returns true if this message is a response.
+  // If the message uses old protocol version false is returned.
+  [[nodiscard]] inline auto IsResponse() const -> bool {
+    if (GetVersion() != 2) {
+      return false;
     }
-
-    return false;
+    return address.destination.command_response_bit == 0 &&
+           address.source.command_response_bit == 1;
   }
 
   struct Addr {
@@ -477,14 +435,16 @@ class Message {
     Repeaters repeaters;
   } address;
 
-  int control;
+  // Value of the control field.
+  // As-is from the frame encoding.
+  int control = ControlBits::Unnumbered::kUI;
 
   // The Protocol Identifier (PID).
   //
   // NOTE: Not strongly typed because transmission does not guarantee validness
-  // of the value: in other words, tranmission could use value which will not
+  // of the value: in other words, transmission could use value which will not
   // fall under any of the strong types.
-  int pid;
+  int pid = 0;
 
   Information information;
 };

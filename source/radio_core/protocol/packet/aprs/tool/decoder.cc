@@ -24,6 +24,7 @@
 #include "radio_core/base/string_util.h"
 #include "radio_core/modulation/digital/fsk/tones_bell.h"
 #include "radio_core/protocol/datalink/ax25/message.h"
+#include "radio_core/protocol/datalink/ax25/print.h"
 #include "radio_core/protocol/packet/aprs/decoder.h"
 #include "tl_audio_wav/tl_audio_wav_reader.h"
 #include "tl_io/tl_io_file.h"
@@ -128,7 +129,13 @@ void PrintMessage(const Message& message) {
   std::array<char, kAddressStrSize> dst_address;
   AX25AddressToString(message.address.destination, dst_address);
 
-  printf("\nFm:%s To:%s\n", src_address.data(), dst_address.data());
+  std::array<char, 32> encoded_indo;
+  datalink::ax25::EncodeMessageInfo(message, encoded_indo);
+
+  printf("\nFm:%s To:%s <%s>\n",
+         src_address.data(),
+         dst_address.data(),
+         encoded_indo.data());
 
   for (const Address& address : message.address.repeaters) {
     std::array<char, kAddressStrSize> repeater_address;

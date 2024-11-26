@@ -42,8 +42,12 @@ struct CLIOptions {
   std::filesystem::path output_wav_filepath;
 
   std::string source;
+  bool source_control_set{false};
   std::string destination;
+  bool destination_control_set{false};
   std::vector<std::string> repeaters;
+  int control{datalink::ax25::ControlBits::Unnumbered::kUI};
+  int pid{datalink::ax25::PID::kNoLayer3};
   std::string message;
   int sample_rate = kDefaultSampleRate;
 };
@@ -65,9 +69,19 @@ auto ConstructCLIParser() -> argparse::ArgumentParser {
       .required()
       .help("Callsign and SSID of the source station (<callsign>-<ssid>)");
 
+  program.add_argument("--source-control-set")
+      .default_value(false)
+      .implicit_value(true)
+      .help("Set the [C]ontrol bit of the source SSID");
+
   program.add_argument("--destination")
       .required()
       .help("Callsign and SSID of the destination station (<callsign>-<ssid>)");
+
+  program.add_argument("--destination-control-set")
+      .default_value(false)
+      .implicit_value(true)
+      .help("Set the [C]ontrol bit of the destination SSID");
 
   program.add_argument("--repeater")
       .help(
@@ -76,7 +90,17 @@ auto ConstructCLIParser() -> argparse::ArgumentParser {
           "Multiple repeater arguments are allowed.")
       .append();
 
-  program.add_argument("--message").required().help("Message to transmit");
+  program.add_argument("--control")
+      .default_value(datalink::ax25::ControlBits::Unnumbered::kUI)
+      .help("Value of the Control field")
+      .scan<'i', int>();
+
+  program.add_argument("--pid")
+      .default_value(datalink::ax25::PID::kNoLayer3)
+      .help("Value of the PID field")
+      .scan<'i', int>();
+
+  program.add_argument("--message").help("Message to transmit");
 
   program.add_argument("--rate")
       .default_value(CLIOptions::kDefaultSampleRate)
@@ -105,13 +129,23 @@ auto ParseCLIAndGetOptions(int argc, char** argv) -> CLIOptions {
   options.output_wav_filepath = program.get<std::string>("output_audio");
 
   options.source = program.get<std::string>("--source");
+  options.source_control_set = program.get<bool>("--source-control-set");
+
   options.destination = program.get<std::string>("--destination");
+  options.destination_control_set =
+      program.get<bool>("--destination-control-set");
 
   if (program.is_used("--repeater")) {
     options.repeaters = program.get<std::vector<std::string>>("--repeater");
   }
 
-  options.message = program.get<std::string>("--message");
+  options.control = program.get<int>("--control");
+  options.pid = program.get<int>("--pid");
+
+  if (program.is_used("--message")) {
+    options.message = program.get<std::string>("--message");
+  }
+
   options.sample_rate = program.get<int>("--rate");
 
   return options;
@@ -155,15 +189,20 @@ auto AddressFromString(std::string_view str, bool use_repeater = false)
 
 auto MessageFromOptions(const CLIOptions& options) {
   Message message;
+
   message.address.source = AddressFromString(options.source);
+  message.address.source.command_response_bit = options.source_control_set;
+
   message.address.destination = AddressFromString(options.destination);
+  message.address.destination.command_response_bit =
+      options.destination_control_set;
 
   for (const std::string& repeater : options.repeaters) {
     message.address.repeaters.TryAppend(AddressFromString(repeater, true));
   }
 
-  message.control = datalink::ax25::ControlBits::Unnumbered::kUI;
-  message.pid = datalink::ax25::PID::kNoLayer3;
+  message.control = options.control;
+  message.pid = options.pid;
   message.information = options.message;
 
   return message;

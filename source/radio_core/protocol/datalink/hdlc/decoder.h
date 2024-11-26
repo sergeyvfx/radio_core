@@ -4,7 +4,7 @@
 
 // High-Level Data Link Control (HDLC) decoder implementation.
 //
-// Common information of HDLC can be found in the the `spec.h` file.
+// Common information of HDLC can be found in the `spec.h` file.
 //
 // This is a streamed decoder which does not require having a frame-sized buffer
 // to operate. Instead it provides information about frame start/end markers,
@@ -14,7 +14,7 @@
 // when there is no data to be transmitted. This decoder will ignore those and
 // will only provide frame start marker when frame contains actual data.
 //
-// The protocol allows to use use the same marker to indicate both end of the
+// The protocol allows to use the same marker to indicate both end of the
 // previous frame and beginning of the next one. This decoder converts such
 // markers to explicit frame-end and frame-start markers.
 //
@@ -40,7 +40,7 @@ class Decoder {
     kError,
   };
 
-  // Staticly sized storage of frame bytes in the result.
+  // Statically sized storage of frame bytes in the result.
   //
   // The result can never have more than 2 frame bytes. The 2 bytes are seen in
   // the output when a first byte of data has been decoded. At that point it
