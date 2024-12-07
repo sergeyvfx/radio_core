@@ -10,6 +10,7 @@
 #include <cassert>
 
 #include "radio_core/base/constants.h"
+#include "radio_core/signal/frequency.h"
 
 namespace radio_core::signal {
 
@@ -31,15 +32,10 @@ class InstantFrequency {
     constexpr RealType kPi = constants::pi_v<RealType>;
 
     // Differentiate the phase into instant frequency in radians per sample.
-    RealType instant_frequency = phase - prev_diff_phase_;
-
     // Unwrap the frequency, so that it stays positive when the phase crosses
     // 0 radians.
-    if (instant_frequency > kPi) {
-      instant_frequency -= 2 * kPi;
-    } else if (instant_frequency < -kPi) {
-      instant_frequency += 2 * kPi;
-    }
+    const RealType instant_frequency =
+        UnwrapInstantFrequency(phase - prev_diff_phase_);
 
     prev_diff_phase_ = phase;
 

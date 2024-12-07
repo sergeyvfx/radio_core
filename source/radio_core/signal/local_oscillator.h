@@ -76,6 +76,8 @@ class LocalOscillator {
   //
   // The real part of the complex value corresponds to the in-phase signal,
   // the imaginary part corresponds to the quadrature signal.
+  //
+  // The output value rotates counter-clockwise with an increase of the phase.
   inline auto IQ() -> BaseComplex<RealType> {
     BaseComplex<RealType> iq;
     SinCos(Phase(), iq.imag, iq.real);

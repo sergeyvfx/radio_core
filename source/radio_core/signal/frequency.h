@@ -22,6 +22,7 @@ inline constexpr auto NormalizedAngularFrequency(const T frequency,
 
 // Unwrap the frequency, so that it stays positive when the phase crosses 0
 // radians.
+// Note that the wrapping only happens once.
 template <class T>
 inline auto UnwrapInstantFrequency(const T instant_frequency) -> T {
   if (instant_frequency > T(constants::pi)) {
