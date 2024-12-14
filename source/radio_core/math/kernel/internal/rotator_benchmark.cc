@@ -114,9 +114,10 @@ class FastAbsBenchmark : public Benchmark {
               phase_inc,
               &phase,
               complex_data_.samples.size());
-        }
+#  endif
+        } else
 #endif
-        else {
+        {
           Complex phase(1.0f, 0.0f);
           kernel::Rotator<float>(complex_data_.samples,
                                  phase,
