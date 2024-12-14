@@ -108,6 +108,14 @@ class FastAbsBenchmark : public Benchmark {
         if (use_volk_) {
           const lv_32fc_t phase_inc = lv_cmake(Cos(-0.1f), Sin(-0.1f));
           lv_32fc_t phase = lv_cmake(1.f, 0.0f);
+#  if VOLK_VERSION >= 030100
+          volk_32fc_s32fc_x2_rotator2_32fc(
+              (lv_32fc_t*)complex_data_.samples.data(),
+              (const lv_32fc_t*)complex_data_.samples.data(),
+              (lv_32fc_t*)&phase_inc,
+              &phase,
+              complex_data_.samples.size());
+#  else
           volk_32fc_s32fc_x2_rotator_32fc(
               (lv_32fc_t*)complex_data_.samples.data(),
               (const lv_32fc_t*)complex_data_.samples.data(),
@@ -215,7 +223,9 @@ class FastAbsBenchmark : public Benchmark {
   Data<Half> half_complex_data_;
 #endif
 
+#if defined(WITH_BENCHMARKS_VOLK)
   bool use_volk_{false};
+#endif
 };
 
 }  // namespace radio_core::benchmark
