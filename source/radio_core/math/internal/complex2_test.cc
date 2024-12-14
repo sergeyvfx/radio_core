@@ -259,10 +259,10 @@ TEST(Complex2, MultiplyAdd) {
 TEST(Complex2, FastArg) {
   const Complex2 a(Complex(1.0f, 0.0f), Complex(0.0f, 1.0f));
 
-  const Float2 arg4 = FastArg(a);
+  const Float2 arg2 = FastArg(a);
 
   float arg_values[2];
-  arg4.Store(arg_values);
+  arg2.Store(arg_values);
 
   EXPECT_NEAR(arg_values[0], 0.0f, 0.005f);
   EXPECT_NEAR(arg_values[1], 1.57079637f, 0.005f);
