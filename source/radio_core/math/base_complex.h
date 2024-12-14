@@ -215,6 +215,13 @@ inline auto FastAbs(const BaseComplex<T>& a) -> T {
 }
 
 // Calculates the phase angle (in radians) of the complex number.
+// `Arg(a)` is equivalent to `ArcTan2(a.imag, a.real)`
+template <class T>
+inline auto Arg(const BaseComplex<T>& a) -> T {
+  return ArcTan2(a.imag, a.real);
+}
+
+// Calculates the phase angle (in radians) of the complex number.
 // `FastArg(a)` is equivalent to `FastArcTan2(a.imag, a.real)`
 template <class T>
 inline auto FastArg(const BaseComplex<T>& a) -> T {

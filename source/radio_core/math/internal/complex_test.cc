@@ -167,6 +167,13 @@ TEST(Complex, FastAbs) {
   EXPECT_NEAR(FastAbs(Complex(2.0f, 3.0f)), 3.6055513f, 1e-6f);
 }
 
+TEST(Complex, Arg) {
+  EXPECT_NEAR(Arg(Complex(1.0f, 0.0f)), 0.0f, 1e-6f);
+  EXPECT_NEAR(Arg(Complex(0.0f, 1.0f)), 1.57079637f, 1e-6f);
+  EXPECT_NEAR(Arg(Complex(-3.0f, 2.0f)), 2.55359006f, 1e-6f);
+  EXPECT_NEAR(Arg(Complex(3.0f, -2.0f)), -0.58800262f, 1e-6f);
+}
+
 TEST(Complex, FastArg) {
   EXPECT_NEAR(FastArg(Complex(1.0f, 0.0f)), 0.0f, 0.005f);
   EXPECT_NEAR(FastArg(Complex(0.0f, 1.0f)), 1.57079637f, 0.005f);

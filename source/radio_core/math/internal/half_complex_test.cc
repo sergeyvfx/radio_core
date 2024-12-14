@@ -168,6 +168,13 @@ TEST(HalfComplex, FastAbs) {
   EXPECT_NEAR(float(FastAbs(HalfComplex(2.0f, 3.0f))), 3.60546875f, 1e-6f);
 }
 
+TEST(HalfComplex, Arg) {
+  EXPECT_NEAR(float(Arg(HalfComplex(1.0f, 0.0f))), 0.0f, 0.001f);
+  EXPECT_NEAR(float(Arg(HalfComplex(0.0f, 1.0f))), 1.57079637f, 0.001f);
+  EXPECT_NEAR(float(Arg(HalfComplex(-3.0f, 2.0f))), 2.55359006f, 0.001f);
+  EXPECT_NEAR(float(Arg(HalfComplex(3.0f, -2.0f))), -0.58800262f, 0.001f);
+}
+
 TEST(HalfComplex, FastArg) {
   EXPECT_NEAR(float(FastArg(HalfComplex(1.0f, 0.0f))), 0.0f, 0.005f);
   EXPECT_NEAR(float(FastArg(HalfComplex(0.0f, 1.0f))), 1.57079637f, 0.005f);
