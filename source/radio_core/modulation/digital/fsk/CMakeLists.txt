@@ -26,14 +26,14 @@ radio_core_install_with_directory(
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/radio_core/modulation/digital/fsk
 )
 
-function(radio_core_modulation_test PRIMITIVE_NAME)
+function(radio_core_modulation_fsk_test PRIMITIVE_NAME)
   radio_core_test(
       modulation_digital_fsk_${PRIMITIVE_NAME}
       internal/${PRIMITIVE_NAME}_test.cc
       LIBRARIES radio_core_modulation_digital_fsk)
 endfunction()
 
-radio_core_modulation_test(demodulator)
-radio_core_modulation_test(symbol_demodulator)
-radio_core_modulation_test(modulator)
-radio_core_modulation_test(tones)
+radio_core_modulation_fsk_test(demodulator)
+radio_core_modulation_fsk_test(symbol_demodulator)
+radio_core_modulation_fsk_test(modulator)
+radio_core_modulation_fsk_test(tones)
