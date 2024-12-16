@@ -76,7 +76,10 @@
 // - Only uncompressed PCM 16-bit signed integer data type is supported.
 //
 // - Streaming is not optimized: it can take substantial time to read int16 file
-//   as float samples.
+//   as float samples. There are optimizations that use buffered operations, but
+//   it could still benefit from vectorization.
+//
+// - Reading RF64 files is only supported for file does not use tables.
 //
 //
 // Version history
