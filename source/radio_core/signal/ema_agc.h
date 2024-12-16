@@ -7,7 +7,7 @@
 //
 // The idea behind the implementation is to mimic to how a charging capacitor
 // via a rectifier will behave: fast exponential charge and slower exponential
-// discharge. The charge is used an an inverse of the normalization factor.
+// discharge. The charge is used as an inverse of the normalization factor.
 //
 // Reference:
 //   https://en.wikipedia.org/wiki/Moving_average#Exponential_moving_average
@@ -45,7 +45,7 @@ class EMAAGC {
   // Process single sample.
   // Returns normalized sample value.
   inline auto operator()(const SampleType sample) -> SampleType {
-    const SampleType abs_sample = Abs(sample);
+    const RealType abs_sample = Abs(sample);
 
     if (abs_sample > current_charge_) {
       current_charge_ = Lerp(current_charge_, abs_sample, charge_rate_);
@@ -55,7 +55,7 @@ class EMAAGC {
 
     // Avoid division by zero.
     if (current_charge_ == 0) {
-      return 0;
+      return SampleType{0};
     }
 
     return sample / current_charge_;
@@ -102,10 +102,10 @@ class EMAAGC {
   inline void Reset() { current_charge_ = 0; }
 
  private:
-  RealType charge_rate_ = 0;
-  RealType discharge_rate_ = 0;
+  RealType charge_rate_{0};
+  RealType discharge_rate_{0};
 
-  SampleType current_charge_ = 0;
+  RealType current_charge_{0};
 };
 
 }  // namespace radio_core::signal
