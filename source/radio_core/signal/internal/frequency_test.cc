@@ -10,8 +10,14 @@
 namespace radio_core::signal {
 
 TEST(NormalizedAngularFrequency, Basic) {
+  EXPECT_NEAR(NormalizedAngularFrequency<float>(1000, 44100),
+              0.14247585730565954f,
+              1e-6f);
+}
+
+TEST(RationalFrequency, Basic) {
   EXPECT_NEAR(
-      NormalizedAngularFrequency<float>(1000, 44100), 0.1424759f, 1e-6f);
+      RationalFrequency<float>(0.14247585730565954f, 44100), 1000.0f, 1e-6f);
 }
 
 TEST(UnwrapInstantFrequency, Basic) {

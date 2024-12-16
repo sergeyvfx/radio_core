@@ -20,6 +20,14 @@ inline constexpr auto NormalizedAngularFrequency(const T frequency,
   return 2 * T(constants::pi) * frequency / sample_rate;
 }
 
+// Calculate rational frequency from normalized angular frequency.
+// A reverse of NormalizedAngularFrequency().
+template <class T>
+inline constexpr auto RationalFrequency(const T angular_frequency,
+                                        const T sample_rate) -> T {
+  return (angular_frequency * sample_rate) / (2 * T(constants::pi));
+}
+
 // Unwrap the frequency, so that it stays positive when the phase crosses 0
 // radians.
 // Note that the wrapping only happens once.
