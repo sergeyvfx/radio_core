@@ -23,6 +23,7 @@ add_executable(sstv_decoder decoder.cc)
 
 target_link_libraries(sstv_decoder
   radio_core_picture_sstv
+  radio_core_tool
   external_stb
   external_tiny_lib
   Argparse::argparse

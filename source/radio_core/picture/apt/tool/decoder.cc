@@ -19,6 +19,7 @@
 #include "radio_core/base/variant.h"
 #include "radio_core/picture/apt/decoder.h"
 #include "radio_core/picture/apt/info.h"
+#include "radio_core/tool/log_util.h"
 #include "tl_audio_wav/tl_audio_wav_reader.h"
 #include "tl_io/tl_io_file.h"
 
@@ -279,12 +280,9 @@ auto Main(int argc, char** argv) -> int {
   const float decode_time_in_seconds = scoped_timer.GetElapsedTimeInSeconds();
   cout << endl;
   cout << result_processor.GetNumDecodedImages() << " images decoded in "
-       << decode_time_in_seconds << " seconds";
-  if (decode_time_in_seconds != 0) {
-    cout << " (" << (file_duration_in_seconds / decode_time_in_seconds)
-         << "x realtime)";
-  }
-  cout << endl;
+       << tool::LogTimeWithRealtimeComparison(decode_time_in_seconds,
+                                              file_duration_in_seconds)
+       << endl;
 
   return EXIT_SUCCESS;
 }

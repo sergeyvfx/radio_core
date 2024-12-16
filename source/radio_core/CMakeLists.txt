@@ -16,6 +16,10 @@ if(WITH_BENCHMARKS)
   add_subdirectory(benchmark)
 endif()
 
+if(WITH_TOOLS)
+  add_subdirectory(tool)
+endif()
+
 if(WITH_TESTS)
   add_subdirectory(unittest)
 endif()

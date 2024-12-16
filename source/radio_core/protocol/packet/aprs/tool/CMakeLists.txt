@@ -9,6 +9,7 @@ add_executable(aprs_decoder decoder.cc)
 
 target_link_libraries(aprs_decoder
   radio_core_protocol_packet_aprs
+  radio_core_tool
   external_tiny_lib
   Argparse::argparse
 )

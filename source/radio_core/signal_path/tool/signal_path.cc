@@ -10,6 +10,7 @@
 // channel 2.
 
 #include <array>
+#include <cassert>
 #include <cstdlib>
 #include <filesystem>
 #include <iostream>
@@ -23,6 +24,8 @@
 #include "radio_core/math/half_complex.h"
 #include "radio_core/modulation/analog/info.h"
 #include "radio_core/signal_path/simple_signal_path.h"
+#include "radio_core/tool/buffered_wav_reader.h"
+#include "radio_core/tool/log_util.h"
 #include "tl_audio_wav/tl_audio_wav_reader.h"
 #include "tl_audio_wav/tl_audio_wav_writer.h"
 #include "tl_io/tl_io_file.h"
@@ -225,65 +228,6 @@ auto ConfigureSignalPath(const CLIOptions cli_options,
   return true;
 }
 
-// Provider of IQ samples packed into a buffer of the given size.
-//
-// The samples are read from a WAV file reader: channel 1 is used for real part
-// and channel 2 is used for imaginary part.
-template <class WAVReader, class T, size_t kBufferSize>
-class WAVToBufferredIQProvider {
- public:
-  explicit WAVToBufferredIQProvider(WAVReader& wav_reader)
-      : wav_reader_(&wav_reader) {}
-
-  template <class F, class... Args>
-  void operator()(F&& callback, Args&&... args) {
-    std::array<BaseComplex<T>, kBufferSize> buffer;
-    size_t num_samples = 0;
-
-    wav_reader_->template ReadAllSamples<float, 2>(
-        [&](const std::span<const float> samples) {
-          // Convert the samples to a complex value.
-          buffer[num_samples].real = T(samples[0]);
-          buffer[num_samples].imag = T(samples[1]);
-
-          ++num_samples;
-
-          // Invoke the callback with the full buffer if it is full.
-          if (num_samples == kBufferSize) {
-            ProcessSamplesTimed(
-                buffer, std::forward<F>(callback), std::forward<Args>(args)...);
-            num_samples = 0;
-          }
-        });
-
-    // Invoke the callback with the trailing samples of a partially full buffer
-    // at the end of the file.
-    if (num_samples == kBufferSize) {
-      ProcessSamplesTimed(std::span(buffer.data(), num_samples),
-                          std::forward<F>(callback),
-                          std::forward<Args>(args)...);
-    }
-  }
-
-  auto GetDSPTime() const -> float { return dsp_time_; }
-
- private:
-  template <class F, class... Args>
-  void ProcessSamplesTimed(std::span<const BaseComplex<T>> samples,
-                           F&& callback,
-                           Args&&... args) {
-    const ScopedTimer scoped_timer;
-
-    std::invoke(
-        std::forward<F>(callback), std::forward<Args>(args)..., samples);
-
-    dsp_time_ += scoped_timer.GetElapsedTimeInSeconds();
-  }
-
-  WAVReader* wav_reader_{nullptr};
-  float dsp_time_{0};
-};
-
 // Sink of samples to a single-channel WAV file.
 template <class WAVWriter, class T>
 class WAVFileSink : public SimpleSignalPath<T>::AFSink {
@@ -301,33 +245,6 @@ class WAVFileSink : public SimpleSignalPath<T>::AFSink {
  private:
   WAVWriter* wav_writer_{nullptr};
   T volume_{1.0};
-};
-
-// Helper class to log the given processing time with its comparison to the
-// realtime.
-class LogTimeWithRealtimeComparison {
- public:
-  LogTimeWithRealtimeComparison(const float processing_time_in_seconds,
-                                const float real_time_in_seconds)
-      : processing_time_in_seconds_(processing_time_in_seconds),
-        real_time_in_seconds_(real_time_in_seconds) {}
-
-  friend auto operator<<(std::ostream& os,
-                         const LogTimeWithRealtimeComparison& info)
-      -> std::ostream& {
-    cout << info.processing_time_in_seconds_ << " seconds";
-    if (info.processing_time_in_seconds_ != 0) {
-      cout << " ("
-           << (info.real_time_in_seconds_ / info.processing_time_in_seconds_)
-           << "x realtime)";
-    }
-
-    return os;
-  }
-
- private:
-  const float processing_time_in_seconds_;
-  const float real_time_in_seconds_;
 };
 
 auto Main(int argc, char** argv) -> int {
@@ -448,14 +365,18 @@ auto Main(int argc, char** argv) -> int {
 
   const ScopedTimer scoped_timer;
 
-  // Provider of IQ samples from the input WAV to the signal path.
-  WAVToBufferredIQProvider<audio_wav_reader::Reader<File>, DSPReal, 65536>
-      iq_provider(iq_wav_file_reader);
-
-  // Read samples and push them to the processor.
-  iq_provider([&](const std::span<const DSPComplex> samples) {
-    signal_path.PushSamples(samples);
-  });
+  float dsp_time = 0;
+  tool::ReadWAVBuffered<DSPComplex, 65536>(
+      iq_wav_file_reader,
+      [](const std::span<const float> frame_samples) -> DSPComplex {
+        assert(frame_samples.size() >= 2);
+        return {frame_samples[0], frame_samples[1]};
+      },
+      [&](const std::span<const DSPComplex> samples) {
+        const ScopedTimer dsp_scoped_timer;
+        signal_path.PushSamples(samples);
+        dsp_time += dsp_scoped_timer.GetElapsedTimeInSeconds();
+      });
 
   // Close the output stream, it needed
   if (is_output_open) {
@@ -469,12 +390,13 @@ auto Main(int argc, char** argv) -> int {
   cout << "Statistics" << endl;
   cout << "==========" << endl;
   cout << "Processing took "
-       << LogTimeWithRealtimeComparison(scoped_timer.GetElapsedTimeInSeconds(),
-                                        iq_file_duration_in_seconds)
+       << tool::LogTimeWithRealtimeComparison(
+              scoped_timer.GetElapsedTimeInSeconds(),
+              iq_file_duration_in_seconds)
        << endl;
   cout << "  DSP took "
-       << LogTimeWithRealtimeComparison(iq_provider.GetDSPTime(),
-                                        iq_file_duration_in_seconds)
+       << tool::LogTimeWithRealtimeComparison(dsp_time,
+                                              iq_file_duration_in_seconds)
        << endl;
 
   return EXIT_SUCCESS;

@@ -24,6 +24,7 @@ target_link_libraries(radio_core INTERFACE
   radio_core_protocol_packet_aprs
   radio_core_signal
   radio_core_signal_path
+  radio_core_tool
 )
 
 if(WITH_BENCHMARKS)

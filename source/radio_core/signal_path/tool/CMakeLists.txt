@@ -6,6 +6,7 @@ add_executable(signal_path signal_path.cc)
 
 target_link_libraries(signal_path
   radio_core_signal_path
+  radio_core_tool
   external_tiny_lib
   Argparse::argparse
 )
