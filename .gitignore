@@ -7,6 +7,9 @@
 *.swp
 *.swo
 *#
+.idea
+.mypy_cache
+.venv
 .vscode
 
 # QtCreator.
