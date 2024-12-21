@@ -16,7 +16,7 @@
 #  include "radio_core/math/float4.h"
 #  include "radio_core/math/internal/math_x86.h"
 
-namespace radio_core ::complex4_internal {
+namespace radio_core {
 
 template <class T, int N, bool SpecializationMarker>
 struct VectorizedComplexTypeInfo;
@@ -177,6 +177,25 @@ struct VectorizedComplexTypeInfo<float, 4, true> {
   }
 
   //////////////////////////////////////////////////////////////////////////////
+  // Lane.
+
+  template <int Index>
+  static inline auto SetLane(const RegisterType& value,
+                             const Complex new_lane_value) -> RegisterType {
+    static_assert(Index >= 0);
+    static_assert(Index < kSize);
+
+    // TODO(sergey): With SSE4 available _mm_insert_ps or _mm_insert_epi16 can
+    // be used.
+
+    alignas(16) Complex tmp[4];
+    Store(value, tmp);
+    tmp[Index] = new_lane_value;
+
+    return Load(tmp);
+  }
+
+  //////////////////////////////////////////////////////////////////////////////
   // Non-class functions.
 
   static inline auto NormImpl(const RegisterType& value) -> __m128 {
@@ -229,8 +248,17 @@ struct VectorizedComplexTypeInfo<float, 4, true> {
 
     return FastArcTan2(y, x);
   }
+
+  static inline auto Reverse(const RegisterType& value) -> RegisterType {
+    RegisterType result;
+    result.val[0] =
+        _mm_shuffle_ps(value.val[0], value.val[0], _MM_SHUFFLE(0, 1, 2, 3));
+    result.val[1] =
+        _mm_shuffle_ps(value.val[1], value.val[1], _MM_SHUFFLE(0, 1, 2, 3));
+    return result;
+  }
 };
 
-}  // namespace radio_core::complex4_internal
+}  // namespace radio_core
 
 #endif
