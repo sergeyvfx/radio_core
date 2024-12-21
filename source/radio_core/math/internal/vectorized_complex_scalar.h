@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-// Implementation of N-element complex values values using naive scalar
+// Implementation of N-element complex values using naive scalar
 // operations.
 
 #pragma once

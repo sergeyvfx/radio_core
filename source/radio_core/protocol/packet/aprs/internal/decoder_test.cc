@@ -26,7 +26,7 @@ using Path = std::filesystem::path;
 
 // Base fixture for all APRS tests which use AX.25 framing.
 //
-// Takes care of the boiler plate needed to configure decoder and feed audio
+// Takes care of the boilerplate needed to configure decoder and feed audio
 // samples to it.
 class BaseAX25Test : public ::testing::Test {
  protected:

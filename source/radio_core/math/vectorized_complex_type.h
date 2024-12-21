@@ -374,7 +374,4 @@ inline auto Reverse(const VectorizedComplexType<T, N>& a)
       VectorizedComplexType<T, N>::TypeInfo::Reverse(a.GetRegister()));
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// Linear algebra.
-
 }  // namespace radio_core

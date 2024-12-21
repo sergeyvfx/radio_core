@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-// Implementation of 4-element complex values values using SSE2 and above CPU
+// Implementation of 4-element complex values using SSE2 and above CPU
 // instruction set.
 // The SSE2 is the minimum system requirement.
 
