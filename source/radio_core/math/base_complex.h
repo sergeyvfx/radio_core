@@ -228,4 +228,11 @@ inline auto FastArg(const BaseComplex<T>& a) -> T {
   return FastArcTan2(a.imag, a.real);
 }
 
+// Computes the complex conjugate of z by reversing the sign of the imaginary
+// part
+template <class T>
+inline auto Conj(const BaseComplex<T>& z) -> BaseComplex<T> {
+  return {z.real, -z.imag};
+}
+
 }  // namespace radio_core

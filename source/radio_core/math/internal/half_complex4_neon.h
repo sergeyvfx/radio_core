@@ -217,6 +217,13 @@ struct VectorizedComplexTypeInfo<Half, 4, true> {
     return FastArcTan2(y, x);
   }
 
+  static inline auto Conj(const float16x4x2_t& value) -> float16x4x2_t {
+    float16x4x2_t r;
+    r.val[0] = value.val[0];
+    r.val[1] = vneg_f16(value.val[1]);
+    return r;
+  }
+
   static inline auto Reverse(const float16x4x2_t& value) -> float16x4x2_t {
     float16x4x2_t r;
     r.val[0] = vrev64_f16(value.val[0]);

@@ -164,6 +164,10 @@ struct VectorizedComplexTypeInfo<Half, 8, SpecializationMarker> {
     return {radio_core::FastArg(value[0]), radio_core::FastArg(value[1])};
   }
 
+  static inline auto Conj(const RegisterType& value) -> RegisterType {
+    return {radio_core::Conj(value[0]), radio_core::Conj(value[1])};
+  }
+
   static inline auto Reverse(const RegisterType& value) -> RegisterType {
     return {radio_core::Reverse(value[1]), radio_core::Reverse(value[0])};
   }

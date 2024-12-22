@@ -280,6 +280,20 @@ TEST(HalfComplex3, FastArg) {
   EXPECT_NEAR(float(arg_values[2]), 2.55359006f, 0.005f);
 }
 
+TEST(HalfComplex3, Conj) {
+  const HalfComplex3 a(HalfComplex(1.0f, 0.0f),
+                       HalfComplex(0.0f, 1.0f),
+                       HalfComplex(-3.0f, 2.0f));
+
+  const HalfComplex3 result = Conj(a);
+
+  EXPECT_THAT(result.Extract<0>(), ComplexNear(HalfComplex(1.0f, 0.0f), 1e-6f));
+  EXPECT_THAT(result.Extract<1>(),
+              ComplexNear(HalfComplex(0.0f, -1.0f), 1e-6f));
+  EXPECT_THAT(result.Extract<2>(),
+              ComplexNear(HalfComplex(-3.0f, -2.0f), 1e-6f));
+}
+
 TEST(Complex3, Reverse) {
   const HalfComplex3 result = Reverse(HalfComplex3(HalfComplex(1.0f, 2.0f),
                                                    HalfComplex(3.0f, 4.0f),

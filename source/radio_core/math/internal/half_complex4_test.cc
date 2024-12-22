@@ -381,6 +381,22 @@ TEST(HalfComplex4, FastArg) {
   EXPECT_NEAR(float(arg_values[3]), -0.58800262f, 0.005f);
 }
 
+TEST(Complex4, Conj) {
+  const HalfComplex4 a(HalfComplex(1.0f, 0.0f),
+                       HalfComplex(0.0f, 1.0f),
+                       HalfComplex(-3.0f, 2.0f),
+                       HalfComplex(3.0f, -2.0f));
+
+  const HalfComplex4 result = Conj(a);
+
+  EXPECT_THAT(result.Extract<0>(), ComplexNear(HalfComplex(1.0f, 0.0f), 1e-6f));
+  EXPECT_THAT(result.Extract<1>(),
+              ComplexNear(HalfComplex(0.0f, -1.0f), 1e-6f));
+  EXPECT_THAT(result.Extract<2>(),
+              ComplexNear(HalfComplex(-3.0f, -2.0f), 1e-6f));
+  EXPECT_THAT(result.Extract<3>(), ComplexNear(HalfComplex(3.0f, 2.0f), 1e-6f));
+}
+
 TEST(HalfComplex4, Reverse) {
   const HalfComplex4 result = Reverse(HalfComplex4(HalfComplex(1.0f, 2.0f),
                                                    HalfComplex(3.0f, 4.0f),

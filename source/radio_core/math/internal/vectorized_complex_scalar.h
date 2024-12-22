@@ -195,6 +195,12 @@ struct VectorizedComplexTypeInfo {
     return FastArcTan2(y, x);
   }
 
+  static inline auto Conj(const RegisterType& value) -> RegisterType {
+    RegisterType result;
+    Unroll<N>([&](const auto i) { result[i] = radio_core::Conj(value[i]); });
+    return result;
+  }
+
   static inline auto Reverse(const RegisterType& value) -> RegisterType {
     RegisterType r;
     Unroll<N>([&](const auto i) { r[i] = value[N - i - 1]; });

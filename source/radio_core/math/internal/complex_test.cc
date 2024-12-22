@@ -181,4 +181,12 @@ TEST(Complex, FastArg) {
   EXPECT_NEAR(FastArg(Complex(3.0f, -2.0f)), -0.58800262f, 0.005f);
 }
 
+TEST(Complex, Conj) {
+  EXPECT_EQ(Conj(Complex(1.2f, 3.4f)), Complex(1.2f, -3.4f));
+  EXPECT_EQ(Conj(Complex(1.2f, -3.4f)), Complex(1.2f, 3.4f));
+
+  EXPECT_EQ(Conj(Complex(-1.2f, 3.4f)), Complex(-1.2f, -3.4f));
+  EXPECT_EQ(Conj(Complex(-1.2f, -3.4f)), Complex(-1.2f, 3.4f));
+}
+
 }  // namespace radio_core

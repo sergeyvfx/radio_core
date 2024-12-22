@@ -365,6 +365,15 @@ inline auto FastArg(const VectorizedComplexType<T, N>& a)
   return VectorizedComplexType<T, N>::TypeInfo::FastArg(a.GetRegister());
 }
 
+// Calculates per-element complex conjugate:
+//   RESULT[i] = Conj(a[i]) for i = 0 to N
+template <class T, int N>
+inline auto Conj(const VectorizedComplexType<T, N>& a)
+    -> VectorizedComplexType<T, N> {
+  return VectorizedComplexType<T, N>(
+      VectorizedComplexType<T, N>::TypeInfo::Conj(a.GetRegister()));
+}
+
 // Reverse the order of elements in the vectorized value:
 //   RESULT[i] = a[N - i - 1] for i = 0 to N
 template <class T, int N>

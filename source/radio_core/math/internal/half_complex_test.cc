@@ -182,6 +182,13 @@ TEST(HalfComplex, FastArg) {
   EXPECT_NEAR(float(FastArg(HalfComplex(3.0f, -2.0f))), -0.58800262f, 0.005f);
 }
 
+TEST(HalfComplex, Conj) {
+  EXPECT_EQ(Conj(HalfComplex(1.2f, 3.4f)), HalfComplex(1.2f, -3.4f));
+  EXPECT_EQ(Conj(HalfComplex(1.2f, -3.4f)), HalfComplex(1.2f, 3.4f));
+
+  EXPECT_EQ(Conj(HalfComplex(-1.2f, 3.4f)), HalfComplex(-1.2f, -3.4f));
+  EXPECT_EQ(Conj(HalfComplex(-1.2f, -3.4f)), HalfComplex(-1.2f, 3.4f));
+}
 }  // namespace radio_core
 
 #endif  // RADIO_CORE_HAVE_HALF

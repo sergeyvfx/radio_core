@@ -574,6 +574,32 @@ TEST(HalfComplex8, FastArg) {
   EXPECT_NEAR(float(arg_values[3]), -0.58800262f, 0.005f);
 }
 
+TEST(HalfComplex8, Conj) {
+  const HalfComplex8 a(HalfComplex(1.0f, 0.0f),
+                       HalfComplex(0.0f, 1.0f),
+                       HalfComplex(-3.0f, 2.0f),
+                       HalfComplex(3.0f, -2.0f),
+                       HalfComplex(3.0f, -2.0f),
+                       HalfComplex(-3.0f, 2.0f),
+                       HalfComplex(0.0f, 1.0f),
+                       HalfComplex(1.0f, 0.0f));
+
+  const HalfComplex8 result = Conj(a);
+
+  EXPECT_THAT(result.Extract<0>(), ComplexNear(HalfComplex(1.0f, 0.0f), 1e-6f));
+  EXPECT_THAT(result.Extract<1>(),
+              ComplexNear(HalfComplex(0.0f, -1.0f), 1e-6f));
+  EXPECT_THAT(result.Extract<2>(),
+              ComplexNear(HalfComplex(-3.0f, -2.0f), 1e-6f));
+  EXPECT_THAT(result.Extract<3>(), ComplexNear(HalfComplex(3.0f, 2.0f), 1e-6f));
+  EXPECT_THAT(result.Extract<4>(), ComplexNear(HalfComplex(3.0f, 2.0f), 1e-6f));
+  EXPECT_THAT(result.Extract<5>(),
+              ComplexNear(HalfComplex(-3.0f, -2.0f), 1e-6f));
+  EXPECT_THAT(result.Extract<6>(),
+              ComplexNear(HalfComplex(0.0f, -1.0f), 1e-6f));
+  EXPECT_THAT(result.Extract<7>(), ComplexNear(HalfComplex(1.0f, 0.0f), 1e-6f));
+}
+
 TEST(HalfComplex8, Reverse) {
   const HalfComplex8 result = Reverse(HalfComplex8(HalfComplex(1.0f, 2.0f),
                                                    HalfComplex(3.0f, 4.0f),

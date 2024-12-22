@@ -732,6 +732,28 @@ TEST(Complex8, FastArg) {
   EXPECT_NEAR(arg_values[3], -0.58800262f, 0.005f);
 }
 
+TEST(Complex8, Conj) {
+  const Complex8 a(Complex(1.0f, 0.0f),
+                   Complex(0.0f, 1.0f),
+                   Complex(-3.0f, 2.0f),
+                   Complex(3.0f, -2.0f),
+                   Complex(3.0f, -2.0f),
+                   Complex(-3.0f, 2.0f),
+                   Complex(0.0f, 1.0f),
+                   Complex(1.0f, 0.0f));
+
+  const Complex8 result = Conj(a);
+
+  EXPECT_THAT(result.Extract<0>(), ComplexNear(Complex(1.0f, 0.0f), 1e-6f));
+  EXPECT_THAT(result.Extract<1>(), ComplexNear(Complex(0.0f, -1.0f), 1e-6f));
+  EXPECT_THAT(result.Extract<2>(), ComplexNear(Complex(-3.0f, -2.0f), 1e-6f));
+  EXPECT_THAT(result.Extract<3>(), ComplexNear(Complex(3.0f, 2.0f), 1e-6f));
+  EXPECT_THAT(result.Extract<4>(), ComplexNear(Complex(3.0f, 2.0f), 1e-6f));
+  EXPECT_THAT(result.Extract<5>(), ComplexNear(Complex(-3.0f, -2.0f), 1e-6f));
+  EXPECT_THAT(result.Extract<6>(), ComplexNear(Complex(0.0f, -1.0f), 1e-6f));
+  EXPECT_THAT(result.Extract<7>(), ComplexNear(Complex(1.0f, 0.0f), 1e-6f));
+}
+
 TEST(Complex8, Reverse) {
   const Complex8 result = Reverse(Complex8(Complex(1.0f, 2.0f),
                                            Complex(3.0f, 4.0f),

@@ -255,6 +255,14 @@ struct VectorizedComplexTypeInfo<float, 4, true> {
     return FastArcTan2(y, x);
   }
 
+  static inline auto Conj(const RegisterType& value) -> RegisterType {
+    const __m128 sign_mask = _mm_set1_ps(-0.0f);
+    RegisterType result;
+    result.val[0] = value.val[0];
+    result.val[1] = _mm_xor_ps(value.val[1], sign_mask);
+    return result;
+  }
+
   static inline auto Reverse(const RegisterType& value) -> RegisterType {
     RegisterType result;
     result.val[0] =

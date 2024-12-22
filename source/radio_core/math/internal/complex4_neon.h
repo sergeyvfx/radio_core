@@ -220,6 +220,13 @@ struct VectorizedComplexTypeInfo<float, 4, true> {
     return FastArcTan2(y, x);
   }
 
+  static inline auto Conj(const float32x4x2_t& value) -> float32x4x2_t {
+    float32x4x2_t result;
+    result.val[0] = value.val[0];
+    result.val[1] = vnegq_f32(value.val[1]);
+    return result;
+  }
+
   static inline auto Reverse(const float32x4x2_t& value) -> float32x4x2_t {
     float32x4x2_t r;
     r.val[0] = internal::neon::vreveseq_f32(value.val[0]);
