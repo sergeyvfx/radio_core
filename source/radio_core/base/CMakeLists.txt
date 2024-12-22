@@ -27,6 +27,7 @@ set(PUBLIC_HEADERS
   reverse_storage_ring_double_buffer.h
   ring_buffer.h
   ring_buffer_stream.h
+  ring_double_buffer.h
   scoped_timer.h
   stream_util.h
   string_util.h
@@ -84,6 +85,7 @@ radio_core_base_test(reverse_storage_ring_buffer)
 radio_core_base_test(reverse_storage_ring_double_buffer)
 radio_core_base_test(ring_buffer)
 radio_core_base_test(ring_buffer_stream)
+radio_core_base_test(ring_double_buffer)
 radio_core_base_test(stream_util)
 radio_core_base_test(string_util)
 radio_core_base_test(source_location)
@@ -105,3 +107,4 @@ endfunction()
 
 radio_core_base_benchmark(reverse_storage_ring_buffer)
 radio_core_base_benchmark(reverse_storage_ring_double_buffer)
+radio_core_base_benchmark(ring_double_buffer)
