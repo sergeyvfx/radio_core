@@ -280,6 +280,16 @@ TEST(HalfComplex3, FastArg) {
   EXPECT_NEAR(float(arg_values[2]), 2.55359006f, 0.005f);
 }
 
+TEST(Complex3, Reverse) {
+  const HalfComplex3 result = Reverse(HalfComplex3(HalfComplex(1.0f, 2.0f),
+                                                   HalfComplex(3.0f, 4.0f),
+                                                   HalfComplex(5.0f, 6.0f)));
+
+  EXPECT_THAT(result.Extract<0>(), ComplexNear(HalfComplex(5.0f, 6.0f), 1e-6f));
+  EXPECT_THAT(result.Extract<1>(), ComplexNear(HalfComplex(3.0f, 4.0f), 1e-6f));
+  EXPECT_THAT(result.Extract<2>(), ComplexNear(HalfComplex(1.0f, 2.0f), 1e-6f));
+}
+
 }  // namespace radio_core
 
 #endif  // RADIO_CORE_HAVE_HALF

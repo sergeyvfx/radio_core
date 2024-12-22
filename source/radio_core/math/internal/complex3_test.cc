@@ -316,4 +316,13 @@ TEST(Complex3, FastArg) {
   EXPECT_NEAR(arg_values[2], 2.55359006f, 0.005f);
 }
 
+TEST(Complex3, Reverse) {
+  const Complex3 result = Reverse(
+      Complex3(Complex(1.0f, 2.0f), Complex(3.0f, 4.0f), Complex(5.0f, 6.0f)));
+
+  EXPECT_THAT(result.Extract<0>(), ComplexNear(Complex(5.0f, 6.0f), 1e-6f));
+  EXPECT_THAT(result.Extract<1>(), ComplexNear(Complex(3.0f, 4.0f), 1e-6f));
+  EXPECT_THAT(result.Extract<2>(), ComplexNear(Complex(1.0f, 2.0f), 1e-6f));
+}
+
 }  // namespace radio_core
