@@ -185,14 +185,20 @@ struct VectorizedComplexTypeInfo<float, 4, true> {
     static_assert(Index >= 0);
     static_assert(Index < kSize);
 
-    // TODO(sergey): With SSE4 available _mm_insert_ps or _mm_insert_epi16 can
-    // be used.
-
+#  if ISA_CPU_X86_SSE4_1
+    const int imm8 = Index << 4;
+    RegisterType result;
+    result.val[0] =
+        _mm_insert_ps(value.val[0], _mm_set_ss(new_lane_value.real), imm8);
+    result.val[1] =
+        _mm_insert_ps(value.val[1], _mm_set_ss(new_lane_value.imag), imm8);
+    return result;
+#  else
     alignas(16) Complex tmp[4];
     Store(value, tmp);
     tmp[Index] = new_lane_value;
-
     return Load(tmp);
+#  endif
   }
 
   //////////////////////////////////////////////////////////////////////////////

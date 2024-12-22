@@ -160,14 +160,14 @@ struct VectorizedFloatTypeInfo<float, 4, true> {
     static_assert(Index >= 0);
     static_assert(Index < kSize);
 
-    // TODO(sergey): With SSE4 available _mm_insert_ps or _mm_insert_epi16 can
-    // be used.
-
+#  if ISA_CPU_X86_SSE4_1
+    return _mm_insert_ps(value, _mm_set_ss(new_lane_value), Index << 4);
+#  else
     alignas(16) float tmp[4];
     Store(value, tmp);
     tmp[Index] = new_lane_value;
-
     return Load(tmp);
+#  endif
   }
 
   //////////////////////////////////////////////////////////////////////////////
