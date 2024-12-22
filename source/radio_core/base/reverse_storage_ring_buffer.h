@@ -112,7 +112,12 @@ class ReverseStorageRingBuffer {
   }
   inline auto operator[](const size_t index) const -> const T& {
     assert(!empty());
-    return data_[(tail_index_ + 1 + index) % size_];
+    size_t data_index = tail_index_ + 1 + index;
+    if (data_index >= size()) {
+      data_index -= size();
+    }
+    assert(data_index < size());
+    return data_[data_index];
   }
 
   // Get span of memory which contains oldest elements from the buffer.
