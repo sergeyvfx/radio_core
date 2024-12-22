@@ -15,6 +15,17 @@
 // Typical use-case of such storage is FIR filter implementation where samples
 // needs to be multiplied by kernel in a reverse order (from kernel and samples
 // array indices point of view).
+//
+// The buffer is optimized for sequential access of elements from newest to the
+// oldest. This is done by traversing two spans:
+//  - GetContinuousNewElements()
+//  - GetContinuousOldElements()
+//
+// A random access is supported, but it is not cheap: the requested index needs
+// to be mapped to an index within an internal storage array.
+//
+// The buffer uses the amount of memory that is needed to store the given number
+// of elements.
 
 #pragma once
 

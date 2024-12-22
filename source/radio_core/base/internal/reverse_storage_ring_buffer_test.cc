@@ -106,7 +106,7 @@ TEST(ReverseStorageRingBuffer, ElementAccess) {
     buffer.push(sample);
   }
 
-  // Expect samples 9, 8, 8 ... , 0.
+  // Expect samples 9, 8, 7 ... , 0.
   for (int i = 0; i < 10; ++i) {
     EXPECT_EQ(buffer[i], 9 - i);
   }

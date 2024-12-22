@@ -4,9 +4,20 @@
 
 // A ring buffer implementation of variable size.
 //
-// This buffer is a FIFO queue with the oldest element at the `Front()` and the
-// newest element at the `Back()`. Pushing new element to the back of the buffer
+// This buffer is a FIFO queue with the oldest element at the `front()` and the
+// newest element at the `back()`. Pushing new element to the back of the buffer
 // "pops" the oldest element from the front.
+//
+// The buffer is optimized for sequential access of elements from oldest to the
+// newest. This is done by traversing two spans:
+//  - GetContinuousOldElements()
+//  - GetContinuousNewElements()
+//
+// A random access is supported, but it is not cheap: the requested index needs
+// to be mapped to an index within an internal storage array.
+//
+// The buffer uses the amount of memory that is needed to store the given number
+// of elements.
 
 #pragma once
 

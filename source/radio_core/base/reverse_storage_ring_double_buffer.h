@@ -15,6 +15,10 @@
 // Typical use-case of such storage is FIR filter implementation where samples
 // needs to be multiplied by kernel in a reverse order (from kernel and samples
 // array indices point of view).
+//
+// There is a bit of overhead when adding samples to the buffer and accessing
+// random element. It is possible to optimize random element access by first
+// getting a span of continuous elements by calling `GetElements()`.
 
 #pragma once
 
