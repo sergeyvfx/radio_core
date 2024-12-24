@@ -21,14 +21,16 @@ class FrequencyShifter {
  public:
   FrequencyShifter() = default;
 
+  // The frequency is provided in Hz.
   FrequencyShifter(const T frequency_shift, const T sample_rate) {
     Configure(frequency_shift, sample_rate);
   }
 
   // Configure the frequency shift.
+  // The frequency is provided in Hz.
   //
   // If the input frequency is oscillating at frequency 100 Hz and the frequency
-  // shift is 400 Hz then the output is an oscillating signal a a frequency of
+  // shift is 400 Hz then the output is an oscillating signal a frequency of
   // 500 Hz.
   void Configure(const T frequency_shift, const T sample_rate) {
     const T normalized_frequency_shift =
