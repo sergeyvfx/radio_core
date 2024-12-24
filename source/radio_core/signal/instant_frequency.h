@@ -32,10 +32,8 @@ class InstantFrequency {
     constexpr RealType kPi = constants::pi_v<RealType>;
 
     // Differentiate the phase into instant frequency in radians per sample.
-    // Unwrap the frequency, so that it stays positive when the phase crosses
-    // 0 radians.
     const RealType instant_frequency =
-        UnwrapInstantFrequency(phase - prev_diff_phase_);
+        WrapInstantFrequency(phase - prev_diff_phase_);
 
     prev_diff_phase_ = phase;
 

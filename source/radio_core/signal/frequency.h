@@ -28,16 +28,20 @@ inline constexpr auto RationalFrequency(const T angular_frequency,
   return (angular_frequency * sample_rate) / (2 * T(constants::pi));
 }
 
-// Unwrap the frequency, so that it stays positive when the phase crosses 0
-// radians.
-// Note that the wrapping only happens once.
+// Wrap instant normalized instant frequency to the range (pi, pi] by adding or
+// subtracting 2*pi
+// Note that the wrapping only happens once..
+//
+// It is possible to apply this wrapping on any value that needs to be within
+// this range and follow the same rules. The name is kept less generic to make
+// it somewhat a policy about the range.
 template <class T>
-inline auto UnwrapInstantFrequency(const T instant_frequency) -> T {
+inline auto WrapInstantFrequency(const T instant_frequency) -> T {
   if (instant_frequency > T(constants::pi)) {
     return instant_frequency - T(2) * T(constants::pi);
   }
 
-  if (instant_frequency < -T(constants::pi)) {
+  if (instant_frequency <= -T(constants::pi)) {
     return instant_frequency + T(2) * T(constants::pi);
   }
 

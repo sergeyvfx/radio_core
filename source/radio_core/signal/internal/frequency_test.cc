@@ -20,16 +20,16 @@ TEST(RationalFrequency, Basic) {
       RationalFrequency<float>(0.14247585730565954f, 44100), 1000.0f, 1e-6f);
 }
 
-TEST(UnwrapInstantFrequency, Basic) {
+TEST(WrapInstantFrequency, Basic) {
   const double pi = constants::pi;
 
-  EXPECT_NEAR(UnwrapInstantFrequency(0.), 0, 1e-6);
-  EXPECT_NEAR(UnwrapInstantFrequency(pi), pi, 1e-6);
-  EXPECT_NEAR(UnwrapInstantFrequency(2 * pi), 0, 1e-6);
-  EXPECT_NEAR(UnwrapInstantFrequency(pi * 1.5), -pi / 2, 1e-6);
-  EXPECT_NEAR(UnwrapInstantFrequency(-pi), -pi, 1e-6);
-  EXPECT_NEAR(UnwrapInstantFrequency(-2 * pi), 0, 1e-6);
-  EXPECT_NEAR(UnwrapInstantFrequency(-pi * 1.5), pi / 2, 1e-6);
+  EXPECT_NEAR(WrapInstantFrequency(0.), 0, 1e-6);
+  EXPECT_NEAR(WrapInstantFrequency(pi), pi, 1e-6);
+  EXPECT_NEAR(WrapInstantFrequency(2 * pi), 0, 1e-6);
+  EXPECT_NEAR(WrapInstantFrequency(pi * 1.5), -pi / 2, 1e-6);
+  EXPECT_NEAR(WrapInstantFrequency(-pi), pi, 1e-6);
+  EXPECT_NEAR(WrapInstantFrequency(-2 * pi), 0, 1e-6);
+  EXPECT_NEAR(WrapInstantFrequency(-pi * 1.5), pi / 2, 1e-6);
 }
 
 }  // namespace radio_core::signal

@@ -46,7 +46,7 @@ class BaseMonoDemodulator : public IQDemodulator<T> {
   inline auto operator()(const BaseComplex<T> sample) -> T override {
     const T phase = FastArg(sample);
     const T instant_frequency =
-        signal::UnwrapInstantFrequency(phase - prev_phase_);
+        signal::WrapInstantFrequency(phase - prev_phase_);
 
     prev_phase_ = phase;
 
@@ -74,7 +74,7 @@ class BaseMonoDemodulator : public IQDemodulator<T> {
     // there are no additional load and store to/from registers.
     for (T& output_sample : written_samples) {
       const T phase = output_sample;
-      output_sample = signal::UnwrapInstantFrequency(phase - prev_phase_) *
+      output_sample = signal::WrapInstantFrequency(phase - prev_phase_) *
                       angular_deviation_inv_;
       prev_phase_ = phase;
     }
