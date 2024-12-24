@@ -10,6 +10,7 @@ add_library(radio_core_test_main
 
   internal/test-internal.h
 
+  complex_wav_file_reader.h
   memory_file_writer.h
   mock.h
   mock_unittest.h
@@ -17,6 +18,7 @@ add_library(radio_core_test_main
 )
 
 target_link_libraries(radio_core_test_main
+  external_tiny_lib
   GTest::gtest
   GTest::gmock
   gflags::gflags
@@ -32,4 +34,5 @@ endfunction()
 
 radio_core_test(unittest internal/unittest_test.cc)
 
+radio_core_unittest_test(complex_wav_file_reader)
 radio_core_unittest_test(memory_file_writer)

@@ -1,0 +1,25 @@
+Generated test signal for BPSK modulation on Agilent E4433B.
+
+Parameters:
+- Frequency:        1.0 GHz
+- Amplitude:        -30 dBm
+- Modulation type:  BPSK
+- Bits/Symbol:      1
+- Symbol Rate:      665.4ksps
+- Filter:           RNYQ(alpha=0.350)ACP
+- I/Q Scaling:      70%
+- Data:             PN23
+- Repeat:           Cont
+- Phase polarity:   Normal
+- DiffEncode:       Off
+
+Feed into Airspy via 20dB attenuator, recorded using SDRSharp.
+
+There is an offset of about 3294 Hz from the DC center. It was measured by
+squaring the signal, plotting its FFT using 64k points, and measuring the
+frequency of the highest peak.
+
+The center frequency in the SDRSharp was set to 1 GHz, however based on the
+naming of the initial file it was actually 999,998,418 Hz. The signal generator
+is not officially calibrated, and there might be other sources of mismatch,
+which explains the offset in this recording.
