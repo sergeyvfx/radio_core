@@ -250,4 +250,5 @@ backup:
 	  -xr!build-* \
 	  -xr!.venv \
 	  -xr!.cache \
+	  -xr!.mypy_cache \
 	  -xr!data/test/aprs/tnc_test_cd/*.wav
