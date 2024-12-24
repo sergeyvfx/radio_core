@@ -178,6 +178,11 @@ class RingBuffer {
   //////////////////////////////////////////////////////////////////////////////
   // Modification.
 
+  // Fill the buffer with the given value.
+  inline void fill(const T& value) {
+    std::fill(data_.begin(), data_.end(), value);
+  }
+
   // Push the given element value to the end of the buffer.
   inline void push_back(const T& element) {
     AdvanceWarped(head_);

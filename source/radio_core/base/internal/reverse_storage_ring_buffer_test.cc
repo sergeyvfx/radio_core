@@ -122,4 +122,14 @@ TEST(ReverseStorageRingBuffer, ElementAccess) {
   }
 }
 
+TEST(ReverseStorageRingBuffer, fill) {
+  {
+    ReverseStorageRingBuffer<int> buffer(10);
+    buffer.push_multiple(std::to_array({0, 1, 2, 3, 4, 5, 6, 7, 8, 9}));
+    buffer.fill(-2);
+    EXPECT_THAT(BufferToFlatNewToOldStorage(buffer),
+                ElementsAre(-2, -2, -2, -2, -2, -2, -2, -2, -2, -2));
+  }
+}
+
 }  // namespace radio_core

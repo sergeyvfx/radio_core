@@ -88,6 +88,13 @@ TEST(RingBuffer, Initial) {
   EXPECT_THAT(buffer, ElementsAre(0, 0, 0, 0, 0));
 }
 
+TEST(RingBuffer, fill) {
+  RingBuffer<float> buffer(5);
+  buffer.push_back_multiple({{1, 2, 3, 4, 5, 6, 7}});
+  buffer.fill(0);
+  EXPECT_THAT(buffer, ElementsAre(0, 0, 0, 0, 0));
+}
+
 TEST(RingBuffer, push_back) {
   {
     RingBuffer<float> buffer(5);

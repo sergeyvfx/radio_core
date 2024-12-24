@@ -47,8 +47,12 @@ class RingDoubleBuffer {
     head_index_ = 0;
 
     data_.resize(size * 2);
+    fill(T(0));
+  }
 
-    std::fill(data_.begin(), data_.end(), T(0));
+  // Fill the buffer with the given value.
+  inline void fill(const T& value) {
+    std::fill(data_.begin(), data_.end(), value);
   }
 
   // Get current size of the buffer.

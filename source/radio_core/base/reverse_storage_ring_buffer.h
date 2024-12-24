@@ -56,7 +56,12 @@ class ReverseStorageRingBuffer {
 
     data_.resize(size);
 
-    std::fill(data_.begin(), data_.end(), T(0));
+    fill(T(0));
+  }
+
+  // Fill the buffer with the given value.
+  inline void fill(const T& value) {
+    std::fill(data_.begin(), data_.end(), value);
   }
 
   // Get current size of the buffer.
