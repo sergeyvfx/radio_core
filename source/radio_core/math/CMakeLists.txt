@@ -15,6 +15,7 @@ set(PUBLIC_HEADERS
   complex3.h
   complex4.h
   complex8.h
+  dft.h
   distribution.h
   fft.h
   float2.h
@@ -132,6 +133,9 @@ radio_core_install_with_directory(
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/radio_core/math
 )
 
+################################################################################
+# Regression tests.
+
 function(radio_core_math_test PRIMITIVE_NAME)
   radio_core_test(
       math_${PRIMITIVE_NAME} internal/${PRIMITIVE_NAME}_test.cc
@@ -157,6 +161,7 @@ radio_core_math_test(complex2)
 radio_core_math_test(complex3)
 radio_core_math_test(complex4)
 radio_core_math_test(complex8)
+radio_core_math_test(dft)
 radio_core_math_test(distribution)
 radio_core_math_test(fft)
 radio_core_math_test(float2)
@@ -189,5 +194,20 @@ radio_core_math_test(vectorized_type)
 
 radio_core_math_unittest_test(complex_matchers)
 radio_core_math_unittest_test(vectorized_matchers)
+
+################################################################################
+# Benhcmarks.
+
+function(radio_core_math_benchmark PRIMITIVE_NAME)
+  radio_core_benchmark(
+          math_${PRIMITIVE_NAME} internal/${PRIMITIVE_NAME}_benchmark.cc
+          LIBRARIES radio_core_math
+  )
+endfunction()
+
+radio_core_math_benchmark(dft_goertzel)
+
+################################################################################
+# Sub-directories.
 
 add_subdirectory(kernel)

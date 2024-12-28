@@ -48,6 +48,7 @@ class Benchmark {
       << std::endl;
     // clang-format on
 
+    ConfigureBaseParser(parser);
     ConfigureParser(parser);
 
     try {
@@ -58,7 +59,7 @@ class Benchmark {
       return EXIT_FAILURE;
     }
 
-    if (!HandleArguments(parser)) {
+    if (!HandleBaseArguments(parser) || !HandleArguments(parser)) {
       return EXIT_SUCCESS;
     }
 
@@ -76,12 +77,34 @@ class Benchmark {
     std::cout << std::endl;
     std::cout << "Statistics" << std::endl;
     std::cout << "==========" << std::endl;
-    std::cout << "Wall time: " << execution_time_ms.count() << " ms"
+    std::cout << "Wall time               : " << execution_time_ms.count()
+              << " ms" << std::endl;
+    std::cout << "Avg. time per iteration : "
+              << execution_time_ms.count() / GetNumIterations() << " ms"
               << std::endl;
 
     Finalize();
 
     return 0;
+  }
+
+ private:
+  // THe number of iterations the benchmark code will be executed.
+  int num_iterations_{32768};
+
+  // Configure parser with arguments needed for the base application to
+  // function. These arguments are common for all benchmark applications.
+  void ConfigureBaseParser(argparse::ArgumentParser& parser) {
+    parser.add_argument("--num-iterations")
+        .default_value(32768)
+        .help("The number of iterations to run the benchmark code")
+        .scan<'i', int>();
+  }
+
+  // Handle arguments for the base application needs.
+  virtual auto HandleBaseArguments(argparse::ArgumentParser& parser) -> bool {
+    num_iterations_ = parser.get<int>("--num-iterations");
+    return true;
   }
 
  protected:
@@ -102,11 +125,7 @@ class Benchmark {
   virtual auto GetBenchmarkName() -> std::string { return "Benchmark"; }
   virtual auto GetBenchmarkVersion() -> std::string { return "0.1"; }
 
-  virtual auto GetNumIterations() -> int {
-    // TODO(sergey): Make the number of iterations configurable via the command
-    // line.
-    return 32768;
-  }
+  virtual auto GetNumIterations() -> int { return num_iterations_; }
 
   // Initialize benchmark.
   // For example, prepare data to be processed.
