@@ -47,6 +47,16 @@ struct VectorizedComplexTypeInfo<float, 8, SpecializationMarker> {
     return {Complex4(value), Complex4(value)};
   }
 
+  static inline auto Load(const Float8::RegisterType& real,
+                          const Float8::RegisterType& imag) -> RegisterType {
+    RegisterType result;
+    result[0] = Complex4(Float8::TypeInfo::ExtractLow(real),
+                         Float8::TypeInfo::ExtractLow(imag));
+    result[1] = Complex4(Float8::TypeInfo::ExtractHigh(real),
+                         Float8::TypeInfo::ExtractHigh(imag));
+    return result;
+  }
+
   //////////////////////////////////////////////////////////////////////////////
   // Unary operations.
 
@@ -68,6 +78,12 @@ struct VectorizedComplexTypeInfo<float, 8, SpecializationMarker> {
   }
 
   static inline auto Multiply(const RegisterType& lhs, const RegisterType& rhs)
+      -> RegisterType {
+    return {lhs[0] * rhs[0], lhs[1] * rhs[1]};
+  }
+
+  static inline auto Multiply(const RegisterType& lhs,
+                              const typename Float8::RegisterType& rhs)
       -> RegisterType {
     return {lhs[0] * rhs[0], lhs[1] * rhs[1]};
   }
@@ -126,6 +142,18 @@ struct VectorizedComplexTypeInfo<float, 8, SpecializationMarker> {
     return value[1];
   }
 
+  static inline auto ExtractReal(const RegisterType& value) -> Float8 {
+    const Float4 real_low = value[0].ExtractReal();
+    const Float4 real_high = value[1].ExtractReal();
+    return Float8(real_low, real_high);
+  }
+
+  static inline auto ExtractImag(const RegisterType& value) -> Float8 {
+    const Float4 imag_low = value[0].ExtractImag();
+    const Float4 imag_high = value[1].ExtractImag();
+    return Float8(imag_low, imag_high);
+  }
+
   //////////////////////////////////////////////////////////////////////////////
   // Lane.
 
@@ -179,6 +207,16 @@ struct VectorizedComplexTypeInfo<float, 8, SpecializationMarker> {
 
   static inline auto Conj(const RegisterType& value) -> RegisterType {
     return {radio_core::Conj(value[0]), radio_core::Conj(value[1])};
+  }
+
+  static inline auto ComplexExp(const typename Float8::RegisterType& x)
+      -> RegisterType {
+    return {radio_core::ComplexExp(Float8::TypeInfo::ExtractLow(x)),
+            radio_core::ComplexExp(Float8::TypeInfo::ExtractHigh(x))};
+  }
+
+  static inline auto Exp(const RegisterType& z) -> RegisterType {
+    return {radio_core::Exp(z[0]), radio_core::Exp(z[1])};
   }
 
   static inline auto Reverse(const RegisterType& value) -> RegisterType {

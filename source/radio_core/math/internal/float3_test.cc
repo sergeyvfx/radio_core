@@ -463,6 +463,114 @@ TEST(Float3, Dot) {
   EXPECT_NEAR(Dot(Float3(2, 3, 4), Float3(3, 4, 5)), 38.0f, 1e-6f);
 }
 
+TEST(Float3, Sin) {
+  {
+    // >>> import numpy
+    // >>> numpy.sin([0.0, 0.1, -0.1])
+    // array([ 0.        ,  0.09983342, -0.09983342])
+    const Float3 result = Sin(Float3(0.0f, 0.1f, -0.1f));
+    EXPECT_NEAR(result.Extract<0>(), 0.0f, 1e-6f);
+    EXPECT_NEAR(result.Extract<1>(), 0.09983342f, 1e-6f);
+    EXPECT_NEAR(result.Extract<2>(), -0.09983342f, 1e-6f);
+  }
+
+  // Test values in the range from -20*pi to 20*pi.
+  {
+    constexpr int N = 100000;
+    for (int i = 0; i < N; ++i) {
+      const float fac = (float(i) / (N - 1) - 0.5f) * 2;
+      const float arg = fac * 20 * constants::pi_v<float>;
+      const Float3 result = Sin(Float3(arg));
+      ASSERT_NEAR(result.Extract<0>(), Sin(arg), 1e-6f) << "arg=" << arg;
+    }
+  }
+}
+
+TEST(Float3, Cos) {
+  {
+    // >>> import numpy
+    // >>> numpy.cos([0.0, 0.1, -0.1])
+    // array([1.        , 0.99500417, 0.99500417])
+    const Float3 result = Cos(Float3(0.0f, 0.1f, -0.1f));
+    EXPECT_NEAR(result.Extract<0>(), 1.0f, 1e-6f);
+    EXPECT_NEAR(result.Extract<1>(), 0.99500417f, 1e-6f);
+    EXPECT_NEAR(result.Extract<2>(), 0.99500417f, 1e-6f);
+  }
+
+  // Test values in the range from -20*pi to 20*pi.
+  {
+    constexpr int N = 100000;
+    for (int i = 0; i < N; ++i) {
+      const float fac = (float(i) / (N - 1) - 0.5f) * 2;
+      const float arg = fac * 20 * constants::pi_v<float>;
+      const Float3 result = Cos(Float3(arg));
+      ASSERT_NEAR(result.Extract<0>(), Cos(arg), 1e-6f) << "arg=" << arg;
+    }
+  }
+}
+
+TEST(Float3, SinCos) {
+  {
+    Float3 sin, cos;
+    SinCos(Float3(0.0f, 0.1f, -0.1f), sin, cos);
+
+    // >>> import numpy
+    // >>> numpy.sin([0.0, 0.1, -0.1])
+    // array([ 0.        ,  0.09983342, -0.09983342])
+    EXPECT_NEAR(sin.Extract<0>(), 0.0f, 1e-6f);
+    EXPECT_NEAR(sin.Extract<1>(), 0.09983342f, 1e-6f);
+    EXPECT_NEAR(sin.Extract<2>(), -0.09983342f, 1e-6f);
+
+    // >>> import numpy
+    // >>> numpy.cos([0.0, 0.1, -0.1])
+    // array([1.        , 0.99500417, 0.99500417])
+    EXPECT_NEAR(cos.Extract<0>(), 1.0f, 1e-6f);
+    EXPECT_NEAR(cos.Extract<1>(), 0.99500417f, 1e-6f);
+    EXPECT_NEAR(cos.Extract<2>(), 0.99500417f, 1e-6f);
+  }
+}
+
+TEST(Float3, Exp) {
+  {
+    // >>> import numpy
+    // >>> numpy.exp([0.0, 0.1, -0.1])
+    // array([1.        , 1.10517092, 0.90483742])
+    const Float3 result = Exp(Float3(0.0f, 0.1f, -0.1f));
+    EXPECT_NEAR(result.Extract<0>(), 1.0f, 1e-6f);
+    EXPECT_NEAR(result.Extract<1>(), 1.10517092f, 1e-6f);
+    EXPECT_NEAR(result.Extract<2>(), 0.90483742f, 1e-6f);
+  }
+
+  // Test values in the range from -5 to 5.
+  {
+    constexpr int N = 100000;
+    for (int i = 0; i < N; ++i) {
+      const float fac = (float(i) / (N - 1) - 0.5f) * 2;
+      const float arg = fac * 5.0f;
+      const float actual = Exp(Float3(arg)).Extract<0>();
+      const float expected = Exp(arg);
+      ASSERT_NEAR(actual, expected, 2e-5f) << "arg=" << arg;
+      ASSERT_LE(Abs((actual - expected) / expected), 1e-6f) << "arg=" << arg;
+    }
+  }
+
+  // Test values in the range from -10 to 10.
+  {
+    constexpr int N = 100000;
+    for (int i = 0; i < N; ++i) {
+      const float fac = (float(i) / (N - 1) - 0.5f) * 2;
+      const float arg = fac * 10.0f;
+      const float actual = Exp(Float3(arg)).Extract<0>();
+      const float expected = Exp(arg);
+      // GCC and CLang have different prevision of their built-in exp function,
+      // which makes it hard to agree on a single eps. Hence rather a large
+      // value.
+      ASSERT_NEAR(actual, expected, 1e-2f) << "arg=" << arg;
+      ASSERT_LE(Abs((actual - expected) / expected), 1e-6f) << "arg=" << arg;
+    }
+  }
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // Linear algebra.
 

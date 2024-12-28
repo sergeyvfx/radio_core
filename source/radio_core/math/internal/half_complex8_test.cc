@@ -8,12 +8,14 @@
 
 #  include "radio_core/math/math.h"
 #  include "radio_core/math/unittest/complex_matchers.h"
+#  include "radio_core/math/unittest/vectorized_matchers.h"
 #  include "radio_core/unittest/mock.h"
 #  include "radio_core/unittest/test.h"
 
 namespace radio_core {
 
 using testing::ComplexNear;
+using testing::VectorizedNear;
 
 TEST(HalfComplex8, Load) {
   {
@@ -69,6 +71,20 @@ TEST(HalfComplex8, Load) {
     EXPECT_THAT(complex8.Extract<5>(), ComplexNear(HalfComplex(2, 3), 1e-6f));
     EXPECT_THAT(complex8.Extract<6>(), ComplexNear(HalfComplex(2, 3), 1e-6f));
     EXPECT_THAT(complex8.Extract<7>(), ComplexNear(HalfComplex(2, 3), 1e-6f));
+  }
+
+  {
+    const HalfComplex8 complex8(Half8(2, 4, 6, 8, 10, 12, 14, 16),
+                                Half8(3, 5, 7, 9, 11, 13, 15, 17));
+
+    EXPECT_THAT(complex8.Extract<0>(), ComplexNear(HalfComplex(2, 3), 1e-6f));
+    EXPECT_THAT(complex8.Extract<1>(), ComplexNear(HalfComplex(4, 5), 1e-6f));
+    EXPECT_THAT(complex8.Extract<2>(), ComplexNear(HalfComplex(6, 7), 1e-6f));
+    EXPECT_THAT(complex8.Extract<3>(), ComplexNear(HalfComplex(8, 9), 1e-6f));
+    EXPECT_THAT(complex8.Extract<4>(), ComplexNear(HalfComplex(10, 11), 1e-6f));
+    EXPECT_THAT(complex8.Extract<5>(), ComplexNear(HalfComplex(12, 13), 1e-6f));
+    EXPECT_THAT(complex8.Extract<6>(), ComplexNear(HalfComplex(14, 15), 1e-6f));
+    EXPECT_THAT(complex8.Extract<7>(), ComplexNear(HalfComplex(16, 17), 1e-6f));
   }
 }
 
@@ -196,6 +212,240 @@ TEST(HalfComplex8, ExtractHigh) {
   }
 }
 
+TEST(HalfComplex8, ExtractReal) {
+  const HalfComplex8 complex8(HalfComplex(2, 3),
+                              HalfComplex(4, 5),
+                              HalfComplex(6, 7),
+                              HalfComplex(8, 9),
+                              HalfComplex(10, 11),
+                              HalfComplex(12, 13),
+                              HalfComplex(14, 15),
+                              HalfComplex(16, 17));
+  EXPECT_THAT(
+      complex8.ExtractReal(),
+      testing::VectorizedNear<Half>(Half8(2, 4, 6, 8, 10, 12, 14, 16), 1e-6f));
+}
+
+TEST(HalfComplex8, ExtractImag) {
+  const HalfComplex8 complex8(HalfComplex(2, 3),
+                              HalfComplex(4, 5),
+                              HalfComplex(6, 7),
+                              HalfComplex(8, 9),
+                              HalfComplex(10, 11),
+                              HalfComplex(12, 13),
+                              HalfComplex(14, 15),
+                              HalfComplex(16, 17));
+  EXPECT_THAT(
+      complex8.ExtractImag(),
+      testing::VectorizedNear<Half>(Half8(3, 5, 7, 9, 11, 13, 15, 17), 1e-6f));
+}
+
+TEST(HalfComplex8, SetLane) {
+  {
+    const HalfComplex8 value(HalfComplex(2, 3),
+                             HalfComplex(4, 5),
+                             HalfComplex(6, 7),
+                             HalfComplex(8, 9),
+                             HalfComplex(10, 11),
+                             HalfComplex(12, 13),
+                             HalfComplex(14, 15),
+                             HalfComplex(16, 17));
+    const HalfComplex8 new_value = value.SetLane<0>(HalfComplex(199, 299));
+
+    EXPECT_THAT(new_value.Extract<0>(),
+                ComplexNear(HalfComplex(199, 299), 1e-6f));
+    EXPECT_THAT(new_value.Extract<1>(), ComplexNear(HalfComplex(4, 5), 1e-6f));
+    EXPECT_THAT(new_value.Extract<2>(), ComplexNear(HalfComplex(6, 7), 1e-6f));
+    EXPECT_THAT(new_value.Extract<3>(), ComplexNear(HalfComplex(8, 9), 1e-6f));
+    EXPECT_THAT(new_value.Extract<4>(),
+                ComplexNear(HalfComplex(10, 11), 1e-6f));
+    EXPECT_THAT(new_value.Extract<5>(),
+                ComplexNear(HalfComplex(12, 13), 1e-6f));
+    EXPECT_THAT(new_value.Extract<6>(),
+                ComplexNear(HalfComplex(14, 15), 1e-6f));
+    EXPECT_THAT(new_value.Extract<7>(),
+                ComplexNear(HalfComplex(16, 17), 1e-6f));
+  }
+
+  {
+    const HalfComplex8 value(HalfComplex(2, 3),
+                             HalfComplex(4, 5),
+                             HalfComplex(6, 7),
+                             HalfComplex(8, 9),
+                             HalfComplex(10, 11),
+                             HalfComplex(12, 13),
+                             HalfComplex(14, 15),
+                             HalfComplex(16, 17));
+    const HalfComplex8 new_value = value.SetLane<1>(HalfComplex(199, 299));
+
+    EXPECT_THAT(new_value.Extract<0>(), ComplexNear(HalfComplex(2, 3), 1e-6f));
+    EXPECT_THAT(new_value.Extract<1>(),
+                ComplexNear(HalfComplex(199, 299), 1e-6f));
+    EXPECT_THAT(new_value.Extract<2>(), ComplexNear(HalfComplex(6, 7), 1e-6f));
+    EXPECT_THAT(new_value.Extract<3>(), ComplexNear(HalfComplex(8, 9), 1e-6f));
+    EXPECT_THAT(new_value.Extract<4>(),
+                ComplexNear(HalfComplex(10, 11), 1e-6f));
+    EXPECT_THAT(new_value.Extract<5>(),
+                ComplexNear(HalfComplex(12, 13), 1e-6f));
+    EXPECT_THAT(new_value.Extract<6>(),
+                ComplexNear(HalfComplex(14, 15), 1e-6f));
+    EXPECT_THAT(new_value.Extract<7>(),
+                ComplexNear(HalfComplex(16, 17), 1e-6f));
+  }
+
+  {
+    const HalfComplex8 value(HalfComplex(2, 3),
+                             HalfComplex(4, 5),
+                             HalfComplex(6, 7),
+                             HalfComplex(8, 9),
+                             HalfComplex(10, 11),
+                             HalfComplex(12, 13),
+                             HalfComplex(14, 15),
+                             HalfComplex(16, 17));
+    const HalfComplex8 new_value = value.SetLane<2>(HalfComplex(199, 299));
+
+    EXPECT_THAT(new_value.Extract<0>(), ComplexNear(HalfComplex(2, 3), 1e-6f));
+    EXPECT_THAT(new_value.Extract<1>(), ComplexNear(HalfComplex(4, 5), 1e-6f));
+    EXPECT_THAT(new_value.Extract<2>(),
+                ComplexNear(HalfComplex(199, 299), 1e-6f));
+    EXPECT_THAT(new_value.Extract<3>(), ComplexNear(HalfComplex(8, 9), 1e-6f));
+    EXPECT_THAT(new_value.Extract<4>(),
+                ComplexNear(HalfComplex(10, 11), 1e-6f));
+    EXPECT_THAT(new_value.Extract<5>(),
+                ComplexNear(HalfComplex(12, 13), 1e-6f));
+    EXPECT_THAT(new_value.Extract<6>(),
+                ComplexNear(HalfComplex(14, 15), 1e-6f));
+    EXPECT_THAT(new_value.Extract<7>(),
+                ComplexNear(HalfComplex(16, 17), 1e-6f));
+  }
+
+  {
+    const HalfComplex8 value(HalfComplex(2, 3),
+                             HalfComplex(4, 5),
+                             HalfComplex(6, 7),
+                             HalfComplex(8, 9),
+                             HalfComplex(10, 11),
+                             HalfComplex(12, 13),
+                             HalfComplex(14, 15),
+                             HalfComplex(16, 17));
+    const HalfComplex8 new_value = value.SetLane<3>(HalfComplex(199, 299));
+
+    EXPECT_THAT(new_value.Extract<0>(), ComplexNear(HalfComplex(2, 3), 1e-6f));
+    EXPECT_THAT(new_value.Extract<1>(), ComplexNear(HalfComplex(4, 5), 1e-6f));
+    EXPECT_THAT(new_value.Extract<2>(), ComplexNear(HalfComplex(6, 7), 1e-6f));
+    EXPECT_THAT(new_value.Extract<3>(),
+                ComplexNear(HalfComplex(199, 299), 1e-6f));
+    EXPECT_THAT(new_value.Extract<4>(),
+                ComplexNear(HalfComplex(10, 11), 1e-6f));
+    EXPECT_THAT(new_value.Extract<5>(),
+                ComplexNear(HalfComplex(12, 13), 1e-6f));
+    EXPECT_THAT(new_value.Extract<6>(),
+                ComplexNear(HalfComplex(14, 15), 1e-6f));
+    EXPECT_THAT(new_value.Extract<7>(),
+                ComplexNear(HalfComplex(16, 17), 1e-6f));
+  }
+
+  {
+    const HalfComplex8 value(HalfComplex(2, 3),
+                             HalfComplex(4, 5),
+                             HalfComplex(6, 7),
+                             HalfComplex(8, 9),
+                             HalfComplex(10, 11),
+                             HalfComplex(12, 13),
+                             HalfComplex(14, 15),
+                             HalfComplex(16, 17));
+    const HalfComplex8 new_value = value.SetLane<4>(HalfComplex(199, 299));
+
+    EXPECT_THAT(new_value.Extract<0>(), ComplexNear(HalfComplex(2, 3), 1e-6f));
+    EXPECT_THAT(new_value.Extract<1>(), ComplexNear(HalfComplex(4, 5), 1e-6f));
+    EXPECT_THAT(new_value.Extract<2>(), ComplexNear(HalfComplex(6, 7), 1e-6f));
+    EXPECT_THAT(new_value.Extract<3>(), ComplexNear(HalfComplex(8, 9), 1e-6f));
+    EXPECT_THAT(new_value.Extract<4>(),
+                ComplexNear(HalfComplex(199, 299), 1e-6f));
+    EXPECT_THAT(new_value.Extract<5>(),
+                ComplexNear(HalfComplex(12, 13), 1e-6f));
+    EXPECT_THAT(new_value.Extract<6>(),
+                ComplexNear(HalfComplex(14, 15), 1e-6f));
+    EXPECT_THAT(new_value.Extract<7>(),
+                ComplexNear(HalfComplex(16, 17), 1e-6f));
+  }
+
+  {
+    const HalfComplex8 value(HalfComplex(2, 3),
+                             HalfComplex(4, 5),
+                             HalfComplex(6, 7),
+                             HalfComplex(8, 9),
+                             HalfComplex(10, 11),
+                             HalfComplex(12, 13),
+                             HalfComplex(14, 15),
+                             HalfComplex(16, 17));
+    const HalfComplex8 new_value = value.SetLane<5>(HalfComplex(199, 299));
+
+    EXPECT_THAT(new_value.Extract<0>(), ComplexNear(HalfComplex(2, 3), 1e-6f));
+    EXPECT_THAT(new_value.Extract<1>(), ComplexNear(HalfComplex(4, 5), 1e-6f));
+    EXPECT_THAT(new_value.Extract<2>(), ComplexNear(HalfComplex(6, 7), 1e-6f));
+    EXPECT_THAT(new_value.Extract<3>(), ComplexNear(HalfComplex(8, 9), 1e-6f));
+    EXPECT_THAT(new_value.Extract<4>(),
+                ComplexNear(HalfComplex(10, 11), 1e-6f));
+    EXPECT_THAT(new_value.Extract<5>(),
+                ComplexNear(HalfComplex(199, 299), 1e-6f));
+    EXPECT_THAT(new_value.Extract<6>(),
+                ComplexNear(HalfComplex(14, 15), 1e-6f));
+    EXPECT_THAT(new_value.Extract<7>(),
+                ComplexNear(HalfComplex(16, 17), 1e-6f));
+  }
+
+  {
+    const HalfComplex8 value(HalfComplex(2, 3),
+                             HalfComplex(4, 5),
+                             HalfComplex(6, 7),
+                             HalfComplex(8, 9),
+                             HalfComplex(10, 11),
+                             HalfComplex(12, 13),
+                             HalfComplex(14, 15),
+                             HalfComplex(16, 17));
+    const HalfComplex8 new_value = value.SetLane<6>(HalfComplex(199, 299));
+
+    EXPECT_THAT(new_value.Extract<0>(), ComplexNear(HalfComplex(2, 3), 1e-6f));
+    EXPECT_THAT(new_value.Extract<1>(), ComplexNear(HalfComplex(4, 5), 1e-6f));
+    EXPECT_THAT(new_value.Extract<2>(), ComplexNear(HalfComplex(6, 7), 1e-6f));
+    EXPECT_THAT(new_value.Extract<3>(), ComplexNear(HalfComplex(8, 9), 1e-6f));
+    EXPECT_THAT(new_value.Extract<4>(),
+                ComplexNear(HalfComplex(10, 11), 1e-6f));
+    EXPECT_THAT(new_value.Extract<5>(),
+                ComplexNear(HalfComplex(12, 13), 1e-6f));
+    EXPECT_THAT(new_value.Extract<6>(),
+                ComplexNear(HalfComplex(199, 299), 1e-6f));
+    EXPECT_THAT(new_value.Extract<7>(),
+                ComplexNear(HalfComplex(16, 17), 1e-6f));
+  }
+
+  {
+    const HalfComplex8 value(HalfComplex(2, 3),
+                             HalfComplex(4, 5),
+                             HalfComplex(6, 7),
+                             HalfComplex(8, 9),
+                             HalfComplex(10, 11),
+                             HalfComplex(12, 13),
+                             HalfComplex(14, 15),
+                             HalfComplex(16, 17));
+    const HalfComplex8 new_value = value.SetLane<7>(HalfComplex(199, 299));
+
+    EXPECT_THAT(new_value.Extract<0>(), ComplexNear(HalfComplex(2, 3), 1e-6f));
+    EXPECT_THAT(new_value.Extract<1>(), ComplexNear(HalfComplex(4, 5), 1e-6f));
+    EXPECT_THAT(new_value.Extract<2>(), ComplexNear(HalfComplex(6, 7), 1e-6f));
+    EXPECT_THAT(new_value.Extract<3>(), ComplexNear(HalfComplex(8, 9), 1e-6f));
+    EXPECT_THAT(new_value.Extract<4>(),
+                ComplexNear(HalfComplex(10, 11), 1e-6f));
+    EXPECT_THAT(new_value.Extract<5>(),
+                ComplexNear(HalfComplex(12, 13), 1e-6f));
+    EXPECT_THAT(new_value.Extract<6>(),
+                ComplexNear(HalfComplex(14, 15), 1e-6f));
+    EXPECT_THAT(new_value.Extract<7>(),
+                ComplexNear(HalfComplex(199, 299), 1e-6f));
+  }
+}
+
 TEST(HalfComplex8, Negate) {
   const HalfComplex8 complex8(HalfComplex(2, 3),
                               HalfComplex(-4, 5),
@@ -316,7 +566,7 @@ TEST(HalfComplex8, Subtract) {
   }
 }
 
-TEST(HalfComplex8, Multiply) {
+TEST(HalfComplex8, MultiplyComplex) {
   const HalfComplex8 a(HalfComplex(2, 3),
                        HalfComplex(4, 10),
                        HalfComplex(6, 7),
@@ -359,6 +609,45 @@ TEST(HalfComplex8, Multiply) {
     EXPECT_THAT(c.Extract<5>(), ComplexNear(HalfComplex(-108, 196), 1e-6f));
     EXPECT_THAT(c.Extract<6>(), ComplexNear(HalfComplex(-125, 257), 1e-6f));
     EXPECT_THAT(c.Extract<7>(), ComplexNear(HalfComplex(-142, 326), 1e-6f));
+  }
+}
+
+TEST(HalfComplex8, MultiplyScalar) {
+  const HalfComplex8 a(HalfComplex(2, 3),
+                       HalfComplex(4, 10),
+                       HalfComplex(6, 7),
+                       HalfComplex(8, 9),
+                       HalfComplex(10, 11),
+                       HalfComplex(12, 13),
+                       HalfComplex(14, 15),
+                       HalfComplex(16, 17));
+  const Half8 b(3, 5, 9, 2, 3, 4, 5, 6);
+
+  {
+    const HalfComplex8 c = a * b;
+
+    EXPECT_THAT(c.Extract<0>(), ComplexNear(HalfComplex(6, 9), 1e-6f));
+    EXPECT_THAT(c.Extract<1>(), ComplexNear(HalfComplex(20, 50), 1e-6f));
+    EXPECT_THAT(c.Extract<2>(), ComplexNear(HalfComplex(54, 63), 1e-6f));
+    EXPECT_THAT(c.Extract<3>(), ComplexNear(HalfComplex(16, 18), 1e-6f));
+    EXPECT_THAT(c.Extract<4>(), ComplexNear(HalfComplex(30, 33), 1e-6f));
+    EXPECT_THAT(c.Extract<5>(), ComplexNear(HalfComplex(48, 52), 1e-6f));
+    EXPECT_THAT(c.Extract<6>(), ComplexNear(HalfComplex(70, 75), 1e-6f));
+    EXPECT_THAT(c.Extract<7>(), ComplexNear(HalfComplex(96, 102), 1e-6f));
+  }
+
+  {
+    HalfComplex8 c = a;
+    c *= b;
+
+    EXPECT_THAT(c.Extract<0>(), ComplexNear(HalfComplex(6, 9), 1e-6f));
+    EXPECT_THAT(c.Extract<1>(), ComplexNear(HalfComplex(20, 50), 1e-6f));
+    EXPECT_THAT(c.Extract<2>(), ComplexNear(HalfComplex(54, 63), 1e-6f));
+    EXPECT_THAT(c.Extract<3>(), ComplexNear(HalfComplex(16, 18), 1e-6f));
+    EXPECT_THAT(c.Extract<4>(), ComplexNear(HalfComplex(30, 33), 1e-6f));
+    EXPECT_THAT(c.Extract<5>(), ComplexNear(HalfComplex(48, 52), 1e-6f));
+    EXPECT_THAT(c.Extract<6>(), ComplexNear(HalfComplex(70, 75), 1e-6f));
+    EXPECT_THAT(c.Extract<7>(), ComplexNear(HalfComplex(96, 102), 1e-6f));
   }
 }
 
@@ -598,6 +887,84 @@ TEST(HalfComplex8, Conj) {
   EXPECT_THAT(result.Extract<6>(),
               ComplexNear(HalfComplex(0.0f, -1.0f), 1e-6f));
   EXPECT_THAT(result.Extract<7>(), ComplexNear(HalfComplex(1.0f, 0.0f), 1e-6f));
+}
+
+TEST(HalfComplex8, ComplexExp) {
+  constexpr float kEpsilon = 1e-3f;
+
+  const Half8 x(0.0, 0.1f, 0.2f, 0.3f, -0.2f, -0.3f, -0.4f, -0.5f);
+
+  const HalfComplex8 result = ComplexExp(x);
+
+  EXPECT_THAT(result.Extract<0>(),
+              ComplexNear(HalfComplex(1.0f, 0.0f), kEpsilon));
+  EXPECT_THAT(result.Extract<1>(),
+              ComplexNear(HalfComplex(0.9950041652780258, 0.09983341664682815f),
+                          kEpsilon));
+  EXPECT_THAT(
+      result.Extract<2>(),
+      ComplexNear(HalfComplex(0.9800665778412416f, 0.19866933079506122f),
+                  kEpsilon));
+  EXPECT_THAT(result.Extract<3>(),
+              ComplexNear(HalfComplex(0.955336489125606f, 0.29552020666133955f),
+                          kEpsilon));
+  EXPECT_THAT(
+      result.Extract<4>(),
+      ComplexNear(HalfComplex(0.9800665778412416f, -0.19866933079506122f),
+                  kEpsilon));
+  EXPECT_THAT(
+      result.Extract<5>(),
+      ComplexNear(HalfComplex(0.955336489125606f, -0.29552020666133955f),
+                  kEpsilon));
+  EXPECT_THAT(
+      result.Extract<6>(),
+      ComplexNear(HalfComplex(0.9210609940028851f, -0.3894183423086505f),
+                  kEpsilon));
+  EXPECT_THAT(result.Extract<7>(),
+              ComplexNear(HalfComplex(0.8775825618903728f, -0.479425538604203f),
+                          kEpsilon));
+}
+
+TEST(HalfComplex8, Exp) {
+  constexpr float kEpsilon = 1e-3f;
+
+  const HalfComplex8 z(HalfComplex(0.0f, 0.0f),
+                       HalfComplex(0.1f, 0.2f),
+                       HalfComplex(-0.3f, 0.4f),
+                       HalfComplex(-0.4f, 0.5f),
+                       HalfComplex(0.1f, -0.2f),
+                       HalfComplex(-0.3f, -0.4f),
+                       HalfComplex(-0.4f, -0.5f),
+                       HalfComplex(0.5f, -0.6f));
+
+  const HalfComplex8 result = Exp(z);
+
+  EXPECT_THAT(result.Extract<0>(),
+              ComplexNear(HalfComplex(1.0f, 0.0f), kEpsilon));
+  EXPECT_THAT(
+      result.Extract<1>(),
+      ComplexNear(HalfComplex(1.0831410796080632f, 0.21956356670825236f),
+                  kEpsilon));
+  EXPECT_THAT(result.Extract<2>(),
+              ComplexNear(HalfComplex(0.6823387667165518f, 0.2884882034499186f),
+                          kEpsilon));
+  EXPECT_THAT(result.Extract<3>(),
+              ComplexNear(HalfComplex(0.588261183286429f, 0.3213685491078305f),
+                          kEpsilon));
+  EXPECT_THAT(
+      result.Extract<4>(),
+      ComplexNear(HalfComplex(1.0831410796080632f, -0.21956356670825236f),
+                  kEpsilon));
+  EXPECT_THAT(
+      result.Extract<5>(),
+      ComplexNear(HalfComplex(0.6823387667165518f, -0.2884882034499186f),
+                  kEpsilon));
+  EXPECT_THAT(result.Extract<6>(),
+              ComplexNear(HalfComplex(0.588261183286429f, -0.3213685491078305),
+                          kEpsilon));
+  EXPECT_THAT(result.Extract<7>(),
+              ComplexNear(HalfComplex(1.3607483837679566f, -0.930938056227126f),
+                          kEpsilon));
 }
 
 TEST(HalfComplex8, Reverse) {

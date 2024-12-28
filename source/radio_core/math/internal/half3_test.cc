@@ -465,6 +465,120 @@ TEST(Half3, Dot) {
   EXPECT_NEAR(float(Dot(Half3(2, 3, 4), Half3(3, 4, 5))), 38.0f, 1e-6f);
 }
 
+TEST(Half3, Sin) {
+  {
+    // >>> import numpy
+    // >>> numpy.sin([0.0, 0.1, -0.1])
+    // array([ 0.        ,  0.09983342, -0.09983342])
+    const Half3 result = Sin(Half3(0.0f, 0.1f, -0.1f));
+    EXPECT_NEAR(float(result.Extract<0>()), 0.0f, 1e-3f);
+    EXPECT_NEAR(float(result.Extract<1>()), 0.09983342f, 1e-3f);
+    EXPECT_NEAR(float(result.Extract<2>()), -0.09983342f, 1e-3f);
+  }
+
+  // Test values in the range from -2*pi to 2*pi.
+  {
+    constexpr int N = 10000;
+    for (int i = 0; i < N; ++i) {
+      const float fac = (float(i) / (N - 1) - 0.5f) * 2;
+      const float arg = fac * 2 * constants::pi_v<float>;
+      const Half3 result = Sin(Half3(arg));
+      ASSERT_NEAR(float(result.Extract<0>()), Sin(arg), 2e-3f) << "arg=" << arg;
+    }
+  }
+
+  // Test values in the range from -20*pi to 20*pi.
+  {
+    constexpr int N = 100000;
+    for (int i = 0; i < N; ++i) {
+      const float fac = (float(i) / (N - 1) - 0.5f) * 2;
+      const float arg = fac * 20 * constants::pi_v<float>;
+      const Half3 result = Sin(Half3(arg));
+      ASSERT_NEAR(float(result.Extract<0>()), Sin(arg), 2e-2f) << "arg=" << arg;
+    }
+  }
+}
+
+TEST(Half3, Cos) {
+  {
+    // >>> import numpy
+    // >>> numpy.cos([0.0, 0.1, -0.1])
+    // array([1.        , 0.99500417, 0.99500417])
+    const Half3 result = Cos(Half3(0.0f, 0.1f, -0.1f));
+    EXPECT_NEAR(float(result.Extract<0>()), 1.0f, 1e-3f);
+    EXPECT_NEAR(float(result.Extract<1>()), 0.99500417f, 1e-3f);
+    EXPECT_NEAR(float(result.Extract<2>()), 0.99500417f, 1e-3f);
+  }
+
+  // Test values in the range from -2*pi to 2*pi.
+  {
+    constexpr int N = 10000;
+    for (int i = 0; i < N; ++i) {
+      const float fac = (float(i) / (N - 1) - 0.5f) * 2;
+      const float arg = fac * 2 * constants::pi_v<float>;
+      const Half3 result = Cos(Half3(arg));
+      ASSERT_NEAR(float(result.Extract<0>()), Cos(arg), 2e-3f) << "arg=" << arg;
+    }
+  }
+
+  // Test values in the range from -20*pi to 20*pi.
+  {
+    constexpr int N = 100000;
+    for (int i = 0; i < N; ++i) {
+      const float fac = (float(i) / (N - 1) - 0.5f) * 2;
+      const float arg = fac * 20 * constants::pi_v<float>;
+      const Half3 result = Cos(Half3(arg));
+      ASSERT_NEAR(float(result.Extract<0>()), Cos(arg), 2e-2f) << "arg=" << arg;
+    }
+  }
+}
+
+TEST(Half3, SinCos) {
+  {
+    Half3 sin, cos;
+    SinCos(Half3(0.0f, 0.1f, -0.1f), sin, cos);
+
+    // >>> import numpy
+    // >>> numpy.sin([0.0, 0.1, -0.1])
+    // array([ 0.        ,  0.09983342, -0.09983342])
+    EXPECT_NEAR(float(sin.Extract<0>()), 0.0f, 1e-3f);
+    EXPECT_NEAR(float(sin.Extract<1>()), 0.09983342f, 1e-3f);
+    EXPECT_NEAR(float(sin.Extract<2>()), -0.09983342f, 1e-3f);
+
+    // >>> import numpy
+    // >>> numpy.cos([0.0, 0.1, -0.1])
+    // array([1.        , 0.99500417, 0.99500417])
+    EXPECT_NEAR(float(cos.Extract<0>()), 1.0f, 1e-3f);
+    EXPECT_NEAR(float(cos.Extract<1>()), 0.99500417f, 1e-3f);
+    EXPECT_NEAR(float(cos.Extract<2>()), 0.99500417f, 1e-3f);
+  }
+}
+
+TEST(Half3, Exp) {
+  {
+    // >>> import numpy
+    // >>> numpy.exp([0.0, 0.1, -0.1])
+    // array([1.        , 1.10517092, 0.90483742])
+    const Half3 result = Exp(Half3(0.0f, 0.1f, -0.1f));
+    EXPECT_NEAR(float(result.Extract<0>()), 1.0f, 1e-3f);
+    EXPECT_NEAR(float(result.Extract<1>()), 1.10517092f, 1e-3f);
+    EXPECT_NEAR(float(result.Extract<2>()), 0.90483742f, 1e-3f);
+  }
+
+  // Test values in the range from -5 to 5.
+  {
+    constexpr int N = 100000;
+    for (int i = 0; i < N; ++i) {
+      const float fac = (float(i) / (N - 1) - 0.5f) * 2;
+      const float arg = fac * 5.0f;
+      const float actual = float(Exp(Half3(arg)).Extract<0>());
+      const float expected = Exp(arg);
+      EXPECT_NEAR(actual, expected, 4e-1f) << "arg=" << arg;
+      ASSERT_LE(Abs((actual - expected) / expected), 1e-2f) << "arg=" << arg;
+    }
+  }
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // Linear algebra.
 

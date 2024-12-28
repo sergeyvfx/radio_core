@@ -229,10 +229,24 @@ inline auto FastArg(const BaseComplex<T>& a) -> T {
 }
 
 // Computes the complex conjugate of z by reversing the sign of the imaginary
-// part
+// part.
 template <class T>
 inline auto Conj(const BaseComplex<T>& z) -> BaseComplex<T> {
   return {z.real, -z.imag};
+}
+
+// Compute complex exponential: base-e exponential to the power of i*x where i
+// is the imaginary unit.
+template <class T>
+inline auto ComplexExp(const T x) -> BaseComplex<T> {
+  return {Cos(x), Sin(x)};
+}
+
+// Compute base-e exponential of the complex number z: the Euler's number raised
+// to the power of z.
+template <class T>
+inline auto Exp(const BaseComplex<T>& z) -> BaseComplex<T> {
+  return Exp(z.real) * ComplexExp(z.imag);
 }
 
 }  // namespace radio_core

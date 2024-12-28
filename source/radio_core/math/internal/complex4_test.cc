@@ -6,12 +6,14 @@
 
 #include "radio_core/math/math.h"
 #include "radio_core/math/unittest/complex_matchers.h"
+#include "radio_core/math/unittest/vectorized_matchers.h"
 #include "radio_core/unittest/mock.h"
 #include "radio_core/unittest/test.h"
 
 namespace radio_core {
 
 using testing::ComplexNear;
+using testing::VectorizedNear;
 
 TEST(Complex4, Load) {
   {
@@ -42,6 +44,15 @@ TEST(Complex4, Load) {
     EXPECT_THAT(complex4.Extract<1>(), ComplexNear(Complex(2, 3), 1e-6f));
     EXPECT_THAT(complex4.Extract<2>(), ComplexNear(Complex(2, 3), 1e-6f));
     EXPECT_THAT(complex4.Extract<3>(), ComplexNear(Complex(2, 3), 1e-6f));
+  }
+
+  {
+    const Complex4 complex4(Float4(2, 4, 6, 8), Float4(3, 5, 7, 9));
+
+    EXPECT_THAT(complex4.Extract<0>(), ComplexNear(Complex(2, 3), 1e-6f));
+    EXPECT_THAT(complex4.Extract<1>(), ComplexNear(Complex(4, 5), 1e-6f));
+    EXPECT_THAT(complex4.Extract<2>(), ComplexNear(Complex(6, 7), 1e-6f));
+    EXPECT_THAT(complex4.Extract<3>(), ComplexNear(Complex(8, 9), 1e-6f));
   }
 }
 
@@ -125,6 +136,20 @@ TEST(Complex4, ExtractXYZW) {
     EXPECT_THAT(complex4.z(), ComplexNear(Complex(6, 7), 1e-6f));
     EXPECT_THAT(complex4.w(), ComplexNear(Complex(8, 9), 1e-6f));
   }
+}
+
+TEST(Complex4, ExtractReal) {
+  const Complex4 complex4(
+      Complex(2, 3), Complex(4, 5), Complex(6, 7), Complex(8, 9));
+  EXPECT_THAT(complex4.ExtractReal(),
+              testing::VectorizedNear(Float4(2, 4, 6, 8), 1e-6f));
+}
+
+TEST(Complex4, ExtractImag) {
+  const Complex4 complex4(
+      Complex(2, 3), Complex(4, 5), Complex(6, 7), Complex(8, 9));
+  EXPECT_THAT(complex4.ExtractImag(),
+              testing::VectorizedNear(Float4(3, 5, 7, 9), 1e-6f));
 }
 
 TEST(Complex4, SetLane) {
@@ -274,7 +299,7 @@ TEST(Complex4, Subtract) {
   }
 }
 
-TEST(Complex4, Multiply) {
+TEST(Complex4, MultiplyComplex) {
   const Complex4 a(Complex(2, 3), Complex(4, 10), Complex(6, 7), Complex(8, 9));
   const Complex4 b(Complex(3, 4), Complex(5, 7), Complex(9, 6), Complex(2, 10));
 
@@ -295,6 +320,30 @@ TEST(Complex4, Multiply) {
     EXPECT_THAT(c.Extract<1>(), ComplexNear(Complex(-50, 78), 1e-6f));
     EXPECT_THAT(c.Extract<2>(), ComplexNear(Complex(12, 99), 1e-6f));
     EXPECT_THAT(c.Extract<3>(), ComplexNear(Complex(-74, 98), 1e-6f));
+  }
+}
+
+TEST(Complex4, MultiplyScalar) {
+  const Complex4 a(Complex(2, 3), Complex(4, 10), Complex(6, 7), Complex(8, 9));
+  const Float4 b(3, 5, 9, 2);
+
+  {
+    const Complex4 c = a * b;
+
+    EXPECT_THAT(c.Extract<0>(), ComplexNear(Complex(6, 9), 1e-6f));
+    EXPECT_THAT(c.Extract<1>(), ComplexNear(Complex(20, 50), 1e-6f));
+    EXPECT_THAT(c.Extract<2>(), ComplexNear(Complex(54, 63), 1e-6f));
+    EXPECT_THAT(c.Extract<3>(), ComplexNear(Complex(16, 18), 1e-6f));
+  }
+
+  {
+    Complex4 c = a;
+    c *= b;
+
+    EXPECT_THAT(c.Extract<0>(), ComplexNear(Complex(6, 9), 1e-6f));
+    EXPECT_THAT(c.Extract<1>(), ComplexNear(Complex(20, 50), 1e-6f));
+    EXPECT_THAT(c.Extract<2>(), ComplexNear(Complex(54, 63), 1e-6f));
+    EXPECT_THAT(c.Extract<3>(), ComplexNear(Complex(16, 18), 1e-6f));
   }
 }
 
@@ -419,6 +468,43 @@ TEST(Complex4, Conj) {
   EXPECT_THAT(result.Extract<1>(), ComplexNear(Complex(0.0f, -1.0f), 1e-6f));
   EXPECT_THAT(result.Extract<2>(), ComplexNear(Complex(-3.0f, -2.0f), 1e-6f));
   EXPECT_THAT(result.Extract<3>(), ComplexNear(Complex(3.0f, 2.0f), 1e-6f));
+}
+
+TEST(Complex4, ComplexExp) {
+  const Float4 x(0.0, 0.1f, -0.2f, -0.3f);
+
+  const Complex4 result = ComplexExp(x);
+
+  EXPECT_THAT(result.Extract<0>(), ComplexNear(Complex(1.0f, 0.0f), 1e-6f));
+  EXPECT_THAT(
+      result.Extract<1>(),
+      ComplexNear(Complex(0.9950041652780258, 0.09983341664682815f), 1e-6f));
+  EXPECT_THAT(
+      result.Extract<2>(),
+      ComplexNear(Complex(0.9800665778412416f, -0.19866933079506122f), 1e-6f));
+  EXPECT_THAT(
+      result.Extract<3>(),
+      ComplexNear(Complex(0.955336489125606f, -0.29552020666133955f), 1e-6f));
+}
+
+TEST(Complex4, Exp) {
+  const Complex4 z(Complex(0.0f, 0.0f),
+                   Complex(0.1f, 0.2f),
+                   Complex(-0.3f, 0.4f),
+                   Complex(0.1f, -0.2f));
+
+  const Complex4 result = Exp(z);
+
+  EXPECT_THAT(result.Extract<0>(), ComplexNear(Complex(1.0f, 0.0f), 1e-6f));
+  EXPECT_THAT(
+      result.Extract<1>(),
+      ComplexNear(Complex(1.0831410796080632f, 0.21956356670825236f), 1e-6f));
+  EXPECT_THAT(
+      result.Extract<2>(),
+      ComplexNear(Complex(0.6823387667165518f, 0.2884882034499186f), 1e-6f));
+  EXPECT_THAT(
+      result.Extract<3>(),
+      ComplexNear(Complex(1.0831410796080632f, -0.21956356670825236f), 1e-6f));
 }
 
 TEST(Complex4, Reverse) {

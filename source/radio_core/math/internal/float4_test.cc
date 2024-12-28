@@ -4,6 +4,7 @@
 
 #include "radio_core/math/float4.h"
 
+#include "radio_core/base/constants.h"
 #include "radio_core/unittest/test.h"
 
 namespace radio_core {
@@ -593,6 +594,119 @@ TEST(Float4, Dot) {
   // >>> import numpy
   // >>> numpy.dot([2, 3, 4, 5], [3, 4, 5, 6])
   EXPECT_NEAR(Dot(Float4(2, 3, 4, 5), Float4(3, 4, 5, 6)), 68.0f, 1e-6f);
+}
+
+TEST(Float4, Sin) {
+  {
+    // >>> import numpy
+    // >>> numpy.sin([0.0, 0.1, -0.1, -0.2])
+    // array([ 0.        ,  0.09983342, -0.09983342, -0.19866933])
+    const Float4 result = Sin(Float4(0.0f, 0.1f, -0.1f, -0.2f));
+    EXPECT_NEAR(result.Extract<0>(), 0.0f, 1e-6f);
+    EXPECT_NEAR(result.Extract<1>(), 0.09983342f, 1e-6f);
+    EXPECT_NEAR(result.Extract<2>(), -0.09983342f, 1e-6f);
+    EXPECT_NEAR(result.Extract<3>(), -0.19866933f, 1e-6f);
+  }
+
+  // Test values in the range from -20*pi to 20*pi.
+  {
+    constexpr int N = 100000;
+    for (int i = 0; i < N; ++i) {
+      const float fac = (float(i) / (N - 1) - 0.5f) * 2;
+      const float arg = fac * 20 * constants::pi_v<float>;
+      const Float4 result = Sin(Float4(arg));
+      ASSERT_NEAR(result.Extract<0>(), Sin(arg), 1e-6f) << "arg=" << arg;
+    }
+  }
+}
+
+TEST(Float4, Cos) {
+  {
+    // >>> import numpy
+    // >>> numpy.cos([0.0, 0.1, -0.1, -0.2])
+    // array([1.        , 0.99500417, 0.99500417, 0.98006658])
+    const Float4 result = Cos(Float4(0.0f, 0.1f, -0.1f, -0.2f));
+    EXPECT_NEAR(result.Extract<0>(), 1.0f, 1e-6f);
+    EXPECT_NEAR(result.Extract<1>(), 0.99500417f, 1e-6f);
+    EXPECT_NEAR(result.Extract<2>(), 0.99500417f, 1e-6f);
+    EXPECT_NEAR(result.Extract<3>(), 0.98006658f, 1e-6f);
+  }
+
+  // Test values in the range from -20*pi to 20*pi.
+  {
+    constexpr int N = 100000;
+    for (int i = 0; i < N; ++i) {
+      const float fac = (float(i) / (N - 1) - 0.5f) * 2;
+      const float arg = fac * 20 * constants::pi_v<float>;
+      const Float4 result = Cos(Float4(arg));
+      ASSERT_NEAR(result.Extract<0>(), Cos(arg), 1e-6f) << "arg=" << arg;
+    }
+  }
+}
+
+TEST(Float4, SinCos) {
+  {
+    Float4 sin, cos;
+    SinCos(Float4(0.0f, 0.1f, -0.1f, -0.2f), sin, cos);
+
+    // >>> import numpy
+    // >>> numpy.sin([0.0, 0.1, -0.1, -0.2])
+    // array([ 0.        ,  0.09983342, -0.09983342, -0.19866933])
+    EXPECT_NEAR(sin.Extract<0>(), 0.0f, 1e-6f);
+    EXPECT_NEAR(sin.Extract<1>(), 0.09983342f, 1e-6f);
+    EXPECT_NEAR(sin.Extract<2>(), -0.09983342f, 1e-6f);
+    EXPECT_NEAR(sin.Extract<3>(), -0.19866933f, 1e-6f);
+
+    // >>> import numpy
+    // >>> numpy.cos([0.0, 0.1, -0.1, -0.2])
+    // array([1.        , 0.99500417, 0.99500417, 0.98006658])
+    EXPECT_NEAR(cos.Extract<0>(), 1.0f, 1e-6f);
+    EXPECT_NEAR(cos.Extract<1>(), 0.99500417f, 1e-6f);
+    EXPECT_NEAR(cos.Extract<2>(), 0.99500417f, 1e-6f);
+    EXPECT_NEAR(cos.Extract<3>(), 0.98006658f, 1e-6f);
+  }
+}
+
+TEST(Float4, Exp) {
+  {
+    // >>> import numpy
+    // >>> numpy.exp([0.0, 0.1, -0.1, -0.2])
+    // array([1.        , 1.10517092, 0.90483742, 0.81873075])
+    const Float4 result = Exp(Float4(0.0f, 0.1f, -0.1f, -0.2f));
+    EXPECT_NEAR(result.Extract<0>(), 1.0f, 1e-6f);
+    EXPECT_NEAR(result.Extract<1>(), 1.10517092f, 1e-6f);
+    EXPECT_NEAR(result.Extract<2>(), 0.90483742f, 1e-6f);
+    EXPECT_NEAR(result.Extract<3>(), 0.81873075f, 1e-6f);
+  }
+
+  // Test values in the range from -5 to 5.
+  {
+    constexpr int N = 100000;
+    for (int i = 0; i < N; ++i) {
+      const float fac = (float(i) / (N - 1) - 0.5f) * 2;
+      const float arg = fac * 5.0f;
+      const float actual = Exp(Float4(arg)).Extract<0>();
+      const float expected = Exp(arg);
+      ASSERT_NEAR(actual, expected, 2e-5f) << "arg=" << arg;
+      ASSERT_LE(Abs((actual - expected) / expected), 1e-6f) << "arg=" << arg;
+    }
+  }
+
+  // Test values in the range from -10 to 10.
+  {
+    constexpr int N = 100000;
+    for (int i = 0; i < N; ++i) {
+      const float fac = (float(i) / (N - 1) - 0.5f) * 2;
+      const float arg = fac * 10.0f;
+      const float actual = Exp(Float4(arg)).Extract<0>();
+      const float expected = Exp(arg);
+      // GCC and CLang have different prevision of their built-in exp function,
+      // which makes it hard to agree on a single eps. Hence rather a large
+      // value.
+      ASSERT_NEAR(actual, expected, 1e-2f) << "arg=" << arg;
+      ASSERT_LE(Abs((actual - expected) / expected), 1e-6f) << "arg=" << arg;
+    }
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////

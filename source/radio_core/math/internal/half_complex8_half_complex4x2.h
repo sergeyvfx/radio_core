@@ -52,6 +52,17 @@ struct VectorizedComplexTypeInfo<Half, 8, SpecializationMarker> {
     return {HalfComplex4(value), HalfComplex4(value)};
   }
 
+  static inline auto Load(const typename Half8::RegisterType& real,
+                          const typename Half8::RegisterType& imag)
+      -> RegisterType {
+    RegisterType result;
+    result[0] = HalfComplex4(Half8::TypeInfo::ExtractLow(real),
+                             Half8::TypeInfo::ExtractLow(imag));
+    result[1] = HalfComplex4(Half8::TypeInfo::ExtractHigh(real),
+                             Half8::TypeInfo::ExtractHigh(imag));
+    return result;
+  }
+
   //////////////////////////////////////////////////////////////////////////////
   // Unary operations.
 
@@ -73,6 +84,12 @@ struct VectorizedComplexTypeInfo<Half, 8, SpecializationMarker> {
   }
 
   static inline auto Multiply(const RegisterType& lhs, const RegisterType& rhs)
+      -> RegisterType {
+    return {lhs[0] * rhs[0], lhs[1] * rhs[1]};
+  }
+
+  static inline auto Multiply(const RegisterType& lhs,
+                              const typename Half8::RegisterType& rhs)
       -> RegisterType {
     return {lhs[0] * rhs[0], lhs[1] * rhs[1]};
   }
@@ -131,6 +148,36 @@ struct VectorizedComplexTypeInfo<Half, 8, SpecializationMarker> {
     return value[1];
   }
 
+  static inline auto ExtractReal(const RegisterType& value) -> Half8 {
+    const Half4 real_low = value[0].ExtractReal();
+    const Half4 real_high = value[1].ExtractReal();
+    return Half8(real_low, real_high);
+  }
+
+  static inline auto ExtractImag(const RegisterType& value) -> Half8 {
+    const Half4 imag_low = value[0].ExtractImag();
+    const Half4 imag_high = value[1].ExtractImag();
+    return Half8(imag_low, imag_high);
+  }
+
+  //////////////////////////////////////////////////////////////////////////////
+  // Lane.
+
+  template <int Index>
+  static inline auto SetLane(const RegisterType& value,
+                             const HalfComplex new_lane_value) -> RegisterType {
+    static_assert(Index >= 0);
+    static_assert(Index < kSize);
+
+    if constexpr (Index < 4) {
+      return {value[0].SetLane<Index>(new_lane_value), value[1]};
+    }
+
+    if constexpr (Index >= 4) {
+      return {value[0], value[1].SetLane<Index - 4>(new_lane_value)};
+    }
+  }
+
   //////////////////////////////////////////////////////////////////////////////
   // Non-class functions.
 
@@ -166,6 +213,16 @@ struct VectorizedComplexTypeInfo<Half, 8, SpecializationMarker> {
 
   static inline auto Conj(const RegisterType& value) -> RegisterType {
     return {radio_core::Conj(value[0]), radio_core::Conj(value[1])};
+  }
+
+  static inline auto ComplexExp(const typename Half8::RegisterType& x)
+      -> RegisterType {
+    return {radio_core::ComplexExp(Half8::TypeInfo::ExtractLow(x)),
+            radio_core::ComplexExp(Half8::TypeInfo::ExtractHigh(x))};
+  }
+
+  static inline auto Exp(const RegisterType& z) -> RegisterType {
+    return {radio_core::Exp(z[0]), radio_core::Exp(z[1])};
   }
 
   static inline auto Reverse(const RegisterType& value) -> RegisterType {

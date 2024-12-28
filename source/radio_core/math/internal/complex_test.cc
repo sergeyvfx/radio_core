@@ -189,4 +189,26 @@ TEST(Complex, Conj) {
   EXPECT_EQ(Conj(Complex(-1.2f, -3.4f)), Complex(-1.2f, 3.4f));
 }
 
+TEST(Complex, ComplexExp) {
+  // >>> np.exp(-1j)
+  // np.complex128(0.5403023058681398-0.8414709848078965j)
+  EXPECT_THAT(
+      ComplexExp(-1.0f),
+      ComplexNear(Complex(0.5403023058681398f, -0.8414709848078965f), 1e-6f));
+}
+
+TEST(Complex, Exp) {
+  // >>> np.exp(-1j)
+  // np.complex128(0.5403023058681398-0.8414709848078965j)
+  EXPECT_THAT(
+      Exp(Complex(0.0f, -1.0f)),
+      ComplexNear(Complex(0.5403023058681398f, -0.8414709848078965f), 1e-6f));
+
+  // >>> np.exp(0.2-1j)
+  // np.complex128(0.6599267266276456 - 1.0277749817561193j)
+  EXPECT_THAT(
+      Exp(Complex(0.2f, -1.0f)),
+      ComplexNear(Complex(0.6599267266276456f, -1.0277749817561193f), 1e-6f));
+}
+
 }  // namespace radio_core

@@ -64,6 +64,15 @@ struct VectorizedComplexTypeInfo<float, 4, true> {
     return Load(value, value, value, value);
   }
 
+  static inline auto Load(const typename Float4::RegisterType& real,
+                          const typename Float4::RegisterType& imag)
+      -> RegisterType {
+    RegisterType r;
+    r.val[0] = real;
+    r.val[1] = imag;
+    return r;
+  }
+
   //////////////////////////////////////////////////////////////////////////////
   // Unary operations.
 
@@ -103,6 +112,15 @@ struct VectorizedComplexTypeInfo<float, 4, true> {
     RegisterType result;
     result.val[0] = _mm_sub_ps(ac, bd);
     result.val[1] = _mm_add_ps(ad, bc);
+    return result;
+  }
+
+  static inline auto Multiply(const RegisterType& lhs,
+                              const typename Float4::RegisterType& rhs)
+      -> RegisterType {
+    RegisterType result;
+    result.val[0] = _mm_mul_ps(lhs.val[0], rhs);
+    result.val[1] = _mm_mul_ps(lhs.val[1], rhs);
     return result;
   }
 
@@ -174,6 +192,14 @@ struct VectorizedComplexTypeInfo<float, 4, true> {
 
   static inline auto ExtractHigh(const RegisterType& value) -> Complex2 {
     return Complex2(Extract<2>(value), Extract<3>(value));
+  }
+
+  static inline auto ExtractReal(const RegisterType& value) -> Float4 {
+    return Float4(value.val[0]);
+  }
+
+  static inline auto ExtractImag(const RegisterType& value) -> Float4 {
+    return Float4(value.val[1]);
   }
 
   //////////////////////////////////////////////////////////////////////////////
@@ -260,6 +286,21 @@ struct VectorizedComplexTypeInfo<float, 4, true> {
     RegisterType result;
     result.val[0] = value.val[0];
     result.val[1] = _mm_xor_ps(value.val[1], sign_mask);
+    return result;
+  }
+
+  static inline auto ComplexExp(const typename Float4::RegisterType& x)
+      -> RegisterType {
+    RegisterType result;
+    internal::x86::sincos_ps(x, &result.val[1], &result.val[0]);
+    return result;
+  }
+
+  static inline auto Exp(const RegisterType& z) -> RegisterType {
+    const __m128 exp_real = internal::x86::exp_ps(z.val[0]);
+    RegisterType result = ComplexExp(z.val[1]);
+    result.val[0] = _mm_mul_ps(result.val[0], exp_real);
+    result.val[1] = _mm_mul_ps(result.val[1], exp_real);
     return result;
   }
 

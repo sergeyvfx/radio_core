@@ -242,6 +242,22 @@ struct VectorizedFloatTypeInfo<float, 4, true> {
   static inline auto Reverse(const __m128& value) -> __m128 {
     return _mm_shuffle_ps(value, value, _MM_SHUFFLE(0, 1, 2, 3));
   }
+
+  static inline auto Sin(const __m128& arg) -> __m128 {
+    return internal::x86::sin_ps(arg);
+  }
+
+  static inline auto Cos(const __m128& arg) -> __m128 {
+    return internal::x86::cos_ps(arg);
+  }
+
+  static inline void SinCos(const __m128& arg, __m128& sin, __m128& cos) {
+    return internal::x86::sincos_ps(arg, &sin, &cos);
+  }
+
+  static inline auto Exp(const __m128& arg) -> __m128 {
+    return internal::x86::exp_ps(arg);
+  }
 };
 
 }  // namespace radio_core

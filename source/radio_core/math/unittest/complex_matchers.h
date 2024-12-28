@@ -7,6 +7,9 @@
 
 #pragma once
 
+#include <tuple>
+#include <type_traits>
+
 #include "radio_core/math/complex.h"
 #include "radio_core/math/math.h"
 #include "radio_core/unittest/mock.h"
@@ -165,6 +168,87 @@ class ComplexEqMatcher {
   const ErrorType max_abs_error_;
 };
 
+// A 2-tuple ("binary") wrapper around ComplexEqMatcher:
+// ComplexEq2Matcher(e) matches ComplexEqMatcher(x, e) against y.
+template <class RealType>
+class ComplexEq2Matcher {
+ public:
+  ComplexEq2Matcher() { Init(-1, false); }
+
+  explicit ComplexEq2Matcher(const bool nan_eq_nan) { Init(-1, nan_eq_nan); }
+
+  explicit ComplexEq2Matcher(const RealType max_abs_error) {
+    Init(max_abs_error, false);
+  }
+
+  ComplexEq2Matcher(const RealType max_abs_error, const bool nan_eq_nan) {
+    Init(max_abs_error, nan_eq_nan);
+  }
+
+  template <typename T1, typename T2>
+  operator Matcher<std::tuple<T1, T2>>() const {
+    return MakeMatcher(
+        new Impl<std::tuple<T1, T2>>(max_abs_error_, nan_eq_nan_));
+  }
+  template <typename T1, typename T2>
+  operator Matcher<const std::tuple<T1, T2>&>() const {
+    return MakeMatcher(
+        new Impl<const std::tuple<T1, T2>&>(max_abs_error_, nan_eq_nan_));
+  }
+
+ private:
+  static std::ostream& GetDesc(std::ostream& os) {  // NOLINT
+    return os << "an almost-equal pair";
+  }
+
+  template <typename Tuple>
+  class Impl : public MatcherInterface<Tuple> {
+   public:
+    Impl(const RealType max_abs_error, const bool nan_eq_nan)
+        : max_abs_error_(max_abs_error), nan_eq_nan_(nan_eq_nan) {}
+
+    bool MatchAndExplain(Tuple args,
+                         MatchResultListener* listener) const override {
+      using TupleType = std::remove_reference_t<Tuple>;
+      using LhsType = std::remove_cvref_t<std::tuple_element_t<0, TupleType>>;
+
+      // Expect that the matcher is created against two complex types.
+      using ComplexType = LhsType;
+      using ComplexScalarType = typename LhsType::value_type;
+
+      if (max_abs_error_ == -1) {
+        ComplexEqMatcher<ComplexScalarType, RealType> fm(std::get<0>(args),
+                                                         nan_eq_nan_);
+        return static_cast<Matcher<ComplexType>>(fm).MatchAndExplain(
+            std::get<1>(args), listener);
+      } else {
+        ComplexEqMatcher<ComplexScalarType, RealType> fm(
+            std::get<0>(args), nan_eq_nan_, max_abs_error_);
+        return static_cast<Matcher<ComplexType>>(fm).MatchAndExplain(
+            std::get<1>(args), listener);
+      }
+    }
+    void DescribeTo(std::ostream* os) const override {
+      *os << "are " << GetDesc;
+    }
+    void DescribeNegationTo(std::ostream* os) const override {
+      *os << "aren't " << GetDesc;
+    }
+
+   private:
+    RealType max_abs_error_;
+    const bool nan_eq_nan_;
+  };
+
+  void Init(RealType max_abs_error_val, bool nan_eq_nan_val) {
+    max_abs_error_ = max_abs_error_val;
+    nan_eq_nan_ = nan_eq_nan_val;
+  }
+
+  RealType max_abs_error_;
+  bool nan_eq_nan_;
+};
+
 }  // namespace internal
 
 // Creates a matcher that matches any complex value approximately equal to
@@ -177,6 +261,14 @@ inline auto ComplexNear(const BaseComplex<RealType>& rhs,
                         const ErrorType max_abs_error) {
   return internal::ComplexEqMatcher<RealType, ErrorType>(
       rhs, false, max_abs_error);
+}
+
+// Creates a polymorphic matcher that matches a 2-tuple where
+// ComplexNear(first field, max_abs_error) matches the second field.
+template <class RealType>
+inline auto ComplexNear(const RealType max_abs_error)
+    -> internal::ComplexEq2Matcher<RealType> {
+  return internal::ComplexEq2Matcher<RealType>(max_abs_error);
 }
 
 }  // namespace radio_core::testing

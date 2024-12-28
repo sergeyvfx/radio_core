@@ -17,6 +17,9 @@
 // vectorized type available.
 #include "radio_core/math/float8.h"
 
+// Types for extracting lower and upper parts, and constructing from 2 parts.
+#include "radio_core/math/complex4.h"
+
 namespace radio_core {
 
 using Complex8 = VectorizedComplexType<float, 8>;

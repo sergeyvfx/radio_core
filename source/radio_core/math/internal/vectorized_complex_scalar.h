@@ -40,6 +40,18 @@ struct VectorizedComplexTypeInfo {
     return {value};
   }
 
+  static inline auto Load(
+      const typename VectorizedFloatType<T, N>::RegisterType& real,
+      const typename VectorizedFloatType<T, N>::RegisterType& imag)
+      -> RegisterType {
+    RegisterType result;
+    Unroll<N>([&](const auto i) {
+      result[i].real = real[i];
+      result[i].imag = imag[i];
+    });
+    return result;
+  }
+
   //////////////////////////////////////////////////////////////////////////////
   // Unary operations.
 
@@ -67,6 +79,15 @@ struct VectorizedComplexTypeInfo {
   }
 
   static inline auto Multiply(const RegisterType& lhs, const RegisterType& rhs)
+      -> RegisterType {
+    RegisterType r;
+    Unroll<N>([&](const auto i) { r[i] = lhs[i] * rhs[i]; });
+    return r;
+  }
+
+  static inline auto Multiply(
+      const RegisterType& lhs,
+      const typename VectorizedFloatType<T, N>::RegisterType& rhs)
       -> RegisterType {
     RegisterType r;
     Unroll<N>([&](const auto i) { r[i] = lhs[i] * rhs[i]; });
@@ -120,6 +141,20 @@ struct VectorizedComplexTypeInfo {
                               vectorized_internal::HasLowAndHighParts<N>(),
                           VectorizedComplexType<T, HalfN>> {
     return VectorizedComplexType<T, HalfN>(&value[HalfN]);
+  }
+
+  static inline auto ExtractReal(const RegisterType& value)
+      -> VectorizedFloatType<T, N> {
+    T real[N];
+    Unroll<N>([&](const auto i) { real[i] = value[i].real; });
+    return VectorizedFloatType<T, N>(real);
+  }
+
+  static inline auto ExtractImag(const RegisterType& value)
+      -> VectorizedFloatType<T, N> {
+    T imag[N];
+    Unroll<N>([&](const auto i) { imag[i] = value[i].imag; });
+    return VectorizedFloatType<T, N>(imag);
   }
 
   //////////////////////////////////////////////////////////////////////////////
@@ -198,6 +233,23 @@ struct VectorizedComplexTypeInfo {
   static inline auto Conj(const RegisterType& value) -> RegisterType {
     RegisterType result;
     Unroll<N>([&](const auto i) { result[i] = radio_core::Conj(value[i]); });
+    return result;
+  }
+
+  static inline auto ComplexExp(
+      const typename VectorizedFloatType<T, N>::RegisterType& x)
+      -> RegisterType {
+    RegisterType result;
+    Unroll<N>([&](const auto i) {
+      result[i] = radio_core::ComplexExp(
+          VectorizedFloatType<T, N>::TypeInfo::template Extract<i>(x));
+    });
+    return result;
+  }
+
+  static inline auto Exp(const RegisterType& z) -> RegisterType {
+    RegisterType result;
+    Unroll<N>([&](const auto i) { result[i] = radio_core::Exp(z[i]); });
     return result;
   }
 

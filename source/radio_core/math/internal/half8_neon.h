@@ -251,6 +251,24 @@ struct VectorizedFloatTypeInfo<Half, 8, true> {
   static inline auto Reverse(const float16x8_t& value) -> float16x8_t {
     return internal::neon::vreveseq_f16(value);
   }
+
+  static inline auto Sin(const float16x8_t& arg) -> float16x8_t {
+    return internal::neon::vsinq_f16(arg);
+  }
+
+  static inline auto Cos(const float16x8_t& arg) -> float16x8_t {
+    return internal::neon::vcosq_f16(arg);
+  }
+
+  static inline void SinCos(const float16x8_t& arg,
+                            float16x8_t& sin,
+                            float16x8_t& cos) {
+    internal::neon::vsincosq_f16(arg, &sin, &cos);
+  }
+
+  static inline auto Exp(const float16x8_t& arg) -> float16x8_t {
+    return internal::neon::vexpq_f16(arg);
+  }
 };
 
 }  // namespace radio_core

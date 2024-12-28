@@ -1137,6 +1137,153 @@ TEST(Half8, Dot) {
       1e-6f);
 }
 
+TEST(Half8, Sin) {
+  {
+    // >>> import numpy
+    // >>> numpy.sin([0.0, 0.1, 0.2, 0.3, -0.1, -0.2, -0.3, -0.4])
+    // array([ 0.        ,  0.09983342,  0.19866933,  0.29552021, -0.09983342,
+    //        -0.19866933, -0.29552021, -0.38941834])
+    const Half8 result =
+        Sin(Half8(0.0f, 0.1f, 0.2f, 0.3f, -0.1f, -0.2f, -0.3f, -0.4f));
+    EXPECT_NEAR(float(result.Extract<0>()), 0.0f, 1e-3f);
+    EXPECT_NEAR(float(result.Extract<1>()), 0.09983342f, 1e-3f);
+    EXPECT_NEAR(float(result.Extract<2>()), 0.19866933f, 1e-3f);
+    EXPECT_NEAR(float(result.Extract<3>()), 0.29552021f, 1e-3f);
+    EXPECT_NEAR(float(result.Extract<4>()), -0.09983342f, 1e-3f);
+    EXPECT_NEAR(float(result.Extract<5>()), -0.19866933f, 1e-3f);
+    EXPECT_NEAR(float(result.Extract<6>()), -0.29552021f, 1e-3f);
+    EXPECT_NEAR(float(result.Extract<7>()), -0.38941834f, 1e-3f);
+  }
+
+  // Test values in the range from -2*pi to 2*pi.
+  {
+    constexpr int N = 10000;
+    for (int i = 0; i < N; ++i) {
+      const float fac = (float(i) / (N - 1) - 0.5f) * 2;
+      const float arg = fac * 2 * constants::pi_v<float>;
+      const Half8 result = Sin(Half8(arg));
+      ASSERT_NEAR(float(result.Extract<0>()), Sin(arg), 2e-3f) << "arg=" << arg;
+    }
+  }
+
+  // Test values in the range from -20*pi to 20*pi.
+  {
+    constexpr int N = 100000;
+    for (int i = 0; i < N; ++i) {
+      const float fac = (float(i) / (N - 1) - 0.5f) * 2;
+      const float arg = fac * 20 * constants::pi_v<float>;
+      const Half8 result = Sin(Half8(arg));
+      ASSERT_NEAR(float(result.Extract<0>()), Sin(arg), 4e-2f) << "arg=" << arg;
+    }
+  }
+}
+
+TEST(Half8, Cos) {
+  {
+    // >>> import numpy
+    // >>> numpy.cos([0.0, 0.1, 0.2, 0.3, -0.1, -0.2, -0.3, -0.4])
+    // array([1.        , 0.99500417, 0.98006658, 0.95533649, 0.99500417,
+    // 0.98006658, 0.95533649, 0.92106099])
+    const Half8 result =
+        Cos(Half8(0.0f, 0.1f, 0.2f, 0.3f, -0.1f, -0.2f, -0.3f, -0.4f));
+    EXPECT_NEAR(float(result.Extract<0>()), 1.0f, 1e-3f);
+    EXPECT_NEAR(float(result.Extract<1>()), 0.99500417f, 1e-3f);
+    EXPECT_NEAR(float(result.Extract<2>()), 0.98006658f, 1e-3f);
+    EXPECT_NEAR(float(result.Extract<3>()), 0.95533649f, 1e-3f);
+    EXPECT_NEAR(float(result.Extract<4>()), 0.99500417f, 1e-3f);
+    EXPECT_NEAR(float(result.Extract<5>()), 0.98006658f, 1e-3f);
+    EXPECT_NEAR(float(result.Extract<6>()), 0.95533649f, 1e-3f);
+    EXPECT_NEAR(float(result.Extract<7>()), 0.92106099f, 1e-3f);
+  }
+
+  // Test values in the range from -2*pi to 2*pi.
+  {
+    constexpr int N = 10000;
+    for (int i = 0; i < N; ++i) {
+      const float fac = (float(i) / (N - 1) - 0.5f) * 2;
+      const float arg = fac * 2 * constants::pi_v<float>;
+      const Half8 result = Cos(Half8(arg));
+      ASSERT_NEAR(float(result.Extract<0>()), Cos(arg), 2e-3f) << "arg=" << arg;
+    }
+  }
+
+  // Test values in the range from -20*pi to 20*pi.
+  {
+    constexpr int N = 100000;
+    for (int i = 0; i < N; ++i) {
+      const float fac = (float(i) / (N - 1) - 0.5f) * 2;
+      const float arg = fac * 20 * constants::pi_v<float>;
+      const Half8 result = Cos(Half8(arg));
+      ASSERT_NEAR(float(result.Extract<0>()), Cos(arg), 4e-2f) << "arg=" << arg;
+    }
+  }
+}
+
+TEST(Half8, SinCos) {
+  {
+    Half8 sin, cos;
+    SinCos(Half8(0.0f, 0.1f, 0.2f, 0.3f, -0.1f, -0.2f, -0.3f, -0.4f), sin, cos);
+
+    // >>> import numpy
+    // >>> numpy.sin([0.0, 0.1, 0.2, 0.3, -0.1, -0.2, -0.3, -0.4])
+    // array([ 0.        ,  0.09983342,  0.19866933,  0.29552021, -0.09983342,
+    //        -0.19866933, -0.29552021, -0.38941834])
+    EXPECT_NEAR(float(sin.Extract<0>()), 0.0f, 1e-3f);
+    EXPECT_NEAR(float(sin.Extract<1>()), 0.09983342f, 1e-3f);
+    EXPECT_NEAR(float(sin.Extract<2>()), 0.19866933f, 1e-3f);
+    EXPECT_NEAR(float(sin.Extract<3>()), 0.29552021f, 1e-3f);
+    EXPECT_NEAR(float(sin.Extract<4>()), -0.09983342f, 1e-3f);
+    EXPECT_NEAR(float(sin.Extract<5>()), -0.19866933f, 1e-3f);
+    EXPECT_NEAR(float(sin.Extract<6>()), -0.29552021f, 1e-3f);
+    EXPECT_NEAR(float(sin.Extract<7>()), -0.38941834f, 1e-3f);
+
+    // >>> import numpy
+    // >>> numpy.cos([0.0, 0.1, 0.2, 0.3, -0.1, -0.2, -0.3, -0.4])
+    // array([1.        , 0.99500417, 0.98006658, 0.95533649, 0.99500417,
+    // 0.98006658, 0.95533649, 0.92106099])
+    EXPECT_NEAR(float(cos.Extract<0>()), 1.0f, 1e-3f);
+    EXPECT_NEAR(float(cos.Extract<1>()), 0.99500417f, 1e-3f);
+    EXPECT_NEAR(float(cos.Extract<2>()), 0.98006658f, 1e-3f);
+    EXPECT_NEAR(float(cos.Extract<3>()), 0.95533649f, 1e-3f);
+    EXPECT_NEAR(float(cos.Extract<4>()), 0.99500417f, 1e-3f);
+    EXPECT_NEAR(float(cos.Extract<5>()), 0.98006658f, 1e-3f);
+    EXPECT_NEAR(float(cos.Extract<6>()), 0.95533649f, 1e-3f);
+    EXPECT_NEAR(float(cos.Extract<7>()), 0.92106099f, 1e-3f);
+  }
+}
+
+TEST(Half8, Exp) {
+  {
+    // >>> import numpy
+    // >>> numpy.exp([0.0, 0.1, -0.1, -0.2, 0.3, -0.3, 0.4, -0.4])
+    // array([1.        , 1.10517092, 0.90483742, 0.81873075, 1.34985881,
+    // 0.74081822, 1.4918247 , 0.67032005])
+    const Half8 result =
+        Exp(Half8(0.0f, 0.1f, -0.1f, -0.2f, 0.3f, -0.3f, 0.4f, -0.4f));
+    EXPECT_NEAR(float(result.Extract<0>()), 1.0f, 1e-3f);
+    EXPECT_NEAR(float(result.Extract<1>()), 1.10517092f, 1e-3f);
+    EXPECT_NEAR(float(result.Extract<2>()), 0.90483742f, 1e-3f);
+    EXPECT_NEAR(float(result.Extract<3>()), 0.81873075f, 1e-3f);
+    EXPECT_NEAR(float(result.Extract<4>()), 1.34985881f, 1e-3f);
+    EXPECT_NEAR(float(result.Extract<5>()), 0.74081822f, 1e-3f);
+    EXPECT_NEAR(float(result.Extract<6>()), 1.4918247f, 1e-3f);
+    EXPECT_NEAR(float(result.Extract<7>()), 0.67032005f, 1e-3f);
+  }
+
+  // Test values in the range from -5 to 5.
+  {
+    constexpr int N = 10000;
+    for (int i = 0; i < N; ++i) {
+      const float fac = (float(i) / (N - 1) - 0.5f) * 2;
+      const float arg = fac * 5.0f;
+      const float actual = float(Exp(Half8(arg)).Extract<0>());
+      const float expected = Exp(arg);
+      ASSERT_NEAR(actual, expected, 4e-1f) << "arg=" << arg;
+      ASSERT_LE(Abs((actual - expected) / expected), 1e-2f) << "arg=" << arg;
+    }
+  }
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // Linear algebra.
 

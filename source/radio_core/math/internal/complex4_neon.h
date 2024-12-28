@@ -56,6 +56,14 @@ struct VectorizedComplexTypeInfo<float, 4, true> {
     return r;
   }
 
+  static inline auto Load(const float32x4_t& real, const float32x4_t& imag)
+      -> float32x4x2_t {
+    float32x4x2_t r;
+    r.val[0] = real;
+    r.val[1] = imag;
+    return r;
+  }
+
   //////////////////////////////////////////////////////////////////////////////
   // Unary operations.
 
@@ -95,6 +103,14 @@ struct VectorizedComplexTypeInfo<float, 4, true> {
     float32x4x2_t result;
     result.val[0] = vsubq_f32(ac, bd);
     result.val[1] = vaddq_f32(ad, bc);
+    return result;
+  }
+
+  static inline auto Multiply(const float32x4x2_t& lhs, const float32x4_t& rhs)
+      -> float32x4x2_t {
+    float32x4x2_t result;
+    result.val[0] = vmulq_f32(lhs.val[0], rhs);
+    result.val[1] = vmulq_f32(lhs.val[1], rhs);
     return result;
   }
 
@@ -150,6 +166,14 @@ struct VectorizedComplexTypeInfo<float, 4, true> {
 
   static inline auto ExtractHigh(const float32x4x2_t& value) -> Complex2 {
     return Complex2(Extract<2>(value), Extract<3>(value));
+  }
+
+  static inline auto ExtractReal(const float32x4x2_t& value) -> Float4 {
+    return Float4(value.val[0]);
+  }
+
+  static inline auto ExtractImag(const float32x4x2_t& value) -> Float4 {
+    return Float4(value.val[1]);
   }
 
   //////////////////////////////////////////////////////////////////////////////
@@ -224,6 +248,20 @@ struct VectorizedComplexTypeInfo<float, 4, true> {
     float32x4x2_t result;
     result.val[0] = value.val[0];
     result.val[1] = vnegq_f32(value.val[1]);
+    return result;
+  }
+
+  static inline auto ComplexExp(const float32x4_t& x) -> float32x4x2_t {
+    float32x4x2_t result;
+    internal::neon::vsincosq_f32(x, &result.val[1], &result.val[0]);
+    return result;
+  }
+
+  static inline auto Exp(const float32x4x2_t& z) -> float32x4x2_t {
+    const float32x4_t exp_real = internal::neon::vexpq_f32(z.val[0]);
+    float32x4x2_t result = ComplexExp(z.val[1]);
+    result.val[0] = vmulq_f32(result.val[0], exp_real);
+    result.val[1] = vmulq_f32(result.val[1], exp_real);
     return result;
   }
 

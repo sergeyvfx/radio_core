@@ -478,6 +478,47 @@ inline auto Dot(const VectorizedFloatType<T, N>& a,
   return HorizontalSum(a * b);
 }
 
+// Per-element sine calculation.
+//   RESULT[i] = Sin(arg[i]) for i = 0 to N
+template <class T, int N>
+inline auto Sin(const VectorizedFloatType<T, N>& arg)
+    -> VectorizedFloatType<T, N> {
+  return VectorizedFloatType<T, N>(
+      VectorizedFloatType<T, N>::TypeInfo::Sin(arg.GetRegister()));
+}
+
+// Per-element cosine calculation.
+//   RESULT[i] = Cos(arg[i]) for i = 0 to N
+template <class T, int N>
+inline auto Cos(const VectorizedFloatType<T, N>& arg)
+    -> VectorizedFloatType<T, N> {
+  return VectorizedFloatType<T, N>(
+      VectorizedFloatType<T, N>::TypeInfo::Cos(arg.GetRegister()));
+}
+
+// Per-element sine and cosine calculation.
+//   sin[i] = Sin(arg[i]) for i = 0 to N
+//   cos[i] = Cos(arg[i]) for i = 0 to N
+template <class T, int N>
+inline void SinCos(const VectorizedFloatType<T, N>& arg,
+                   VectorizedFloatType<T, N>& sin,
+                   VectorizedFloatType<T, N>& cos) {
+  typename VectorizedFloatType<T, N>::RegisterType s, c;
+  VectorizedFloatType<T, N>::TypeInfo::SinCos(arg.GetRegister(), s, c);
+  sin = VectorizedFloatType<T, N>(s);
+  cos = VectorizedFloatType<T, N>(c);
+}
+
+// Computes Per-element e (Euler's number, 2.7182818...) raised to the given
+// power arg.
+//   RESULT[i] = Exp(arg[i]) for i = 0 to N
+template <class T, int N>
+inline auto Exp(const VectorizedFloatType<T, N>& arg)
+    -> VectorizedFloatType<T, N> {
+  return VectorizedFloatType<T, N>(
+      VectorizedFloatType<T, N>::TypeInfo::Exp(arg.GetRegister()));
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // Linear algebra.
 

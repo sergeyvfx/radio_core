@@ -70,6 +70,14 @@ struct VectorizedComplexTypeInfo<Half, 4, true> {
     return r;
   }
 
+  static inline auto Load(const float16x4_t& real, const float16x4_t& imag)
+      -> float16x4x2_t {
+    float16x4x2_t r;
+    r.val[0] = real;
+    r.val[1] = imag;
+    return r;
+  }
+
   //////////////////////////////////////////////////////////////////////////////
   // Unary operations.
 
@@ -109,6 +117,14 @@ struct VectorizedComplexTypeInfo<Half, 4, true> {
     float16x4x2_t result;
     result.val[0] = vsub_f16(ac, bd);
     result.val[1] = vadd_f16(ad, bc);
+    return result;
+  }
+
+  static inline auto Multiply(const float16x4x2_t& lhs, const float16x4_t& rhs)
+      -> float16x4x2_t {
+    float16x4x2_t result;
+    result.val[0] = vmul_f16(lhs.val[0], rhs);
+    result.val[1] = vmul_f16(lhs.val[1], rhs);
     return result;
   }
 
@@ -164,6 +180,32 @@ struct VectorizedComplexTypeInfo<Half, 4, true> {
 
   static inline auto ExtractHigh(const float16x4x2_t& value) -> HalfComplex2 {
     return HalfComplex2(Extract<2>(value), Extract<3>(value));
+  }
+
+  static inline auto ExtractReal(const float16x4x2_t& value) -> Half4 {
+    return Half4(value.val[0]);
+  }
+
+  static inline auto ExtractImag(const float16x4x2_t& value) -> Half4 {
+    return Half4(value.val[1]);
+  }
+
+  //////////////////////////////////////////////////////////////////////////////
+  // Lane.
+
+  template <int Index>
+  static inline auto SetLane(const float16x4x2_t& value,
+                             const HalfComplex new_lane_value)
+      -> float16x4x2_t {
+    static_assert(Index >= 0);
+    static_assert(Index < kSize);
+
+    RegisterType result;
+    result.val[0] =
+        vset_lane_f16(_Float16(new_lane_value.real), value.val[0], Index);
+    result.val[1] =
+        vset_lane_f16(_Float16(new_lane_value.imag), value.val[1], Index);
+    return result;
   }
 
   //////////////////////////////////////////////////////////////////////////////
@@ -222,6 +264,20 @@ struct VectorizedComplexTypeInfo<Half, 4, true> {
     r.val[0] = value.val[0];
     r.val[1] = vneg_f16(value.val[1]);
     return r;
+  }
+
+  static inline auto ComplexExp(const float16x4_t& x) -> float16x4x2_t {
+    float16x4x2_t result;
+    internal::neon::vsincos_f16(x, &result.val[1], &result.val[0]);
+    return result;
+  }
+
+  static inline auto Exp(const float16x4x2_t& z) -> float16x4x2_t {
+    const float16x4_t exp_real = internal::neon::vexp_f16(z.val[0]);
+    float16x4x2_t result = ComplexExp(z.val[1]);
+    result.val[0] = vmul_f16(result.val[0], exp_real);
+    result.val[1] = vmul_f16(result.val[1], exp_real);
+    return result;
   }
 
   static inline auto Reverse(const float16x4x2_t& value) -> float16x4x2_t {

@@ -84,6 +84,12 @@ class VectorizedComplexType {
   inline explicit VectorizedComplexType(const BaseComplex<T>& value)
       : VectorizedComplexType(TypeInfo::Load(value)) {}
 
+  // Construct from given real and imaginary parts.
+  inline VectorizedComplexType(const VectorizedFloatType<T, N>& real,
+                               const VectorizedFloatType<T, N>& imag)
+      : VectorizedComplexType(
+            TypeInfo::Load(real.GetRegister(), imag.GetRegister())) {}
+
   // Store all values from this vector into the given memory.
   inline void Store(BaseComplex<T> dst[N]) const {
     TypeInfo::Store(GetRegister(), dst);
@@ -133,6 +139,11 @@ class VectorizedComplexType {
     *this = *this * rhs;
     return *this;
   }
+  inline auto operator*=(const VectorizedFloatType<T, N>& rhs)
+      -> VectorizedComplexType& {
+    *this = *this * rhs;
+    return *this;
+  }
 
   // Per-element division:
   //   RESULT[i] = lhs[i] / rhs[i] for i = 0 to N
@@ -167,6 +178,18 @@ class VectorizedComplexType {
       -> VectorizedComplexType {
     return VectorizedComplexType(
         TypeInfo::Multiply(lhs.GetRegister(), rhs.GetRegister()));
+  }
+  friend inline auto operator*(const VectorizedComplexType& lhs,
+                               const VectorizedFloatType<T, N>& rhs)
+      -> VectorizedComplexType {
+    return VectorizedComplexType(
+        TypeInfo::Multiply(lhs.GetRegister(), rhs.GetRegister()));
+  }
+  friend inline auto operator*(const VectorizedFloatType<T, N>& lhs,
+                               const VectorizedComplexType& rhs)
+      -> VectorizedComplexType {
+    return VectorizedComplexType(
+        TypeInfo::Multiply(rhs.GetRegister(), lhs.GetRegister()));
   }
 
   // Per-element division:
@@ -212,6 +235,18 @@ class VectorizedComplexType {
                               vectorized_internal::HasLowAndHighParts<N>(),
                           VectorizedComplexType<T, HalfN>> {
     return TypeInfo::ExtractHigh(GetRegister());
+  }
+
+  // Extract all real parts as a vectorized floating point vector:
+  //   RESULT[i] = a[i].real for i = 0 to N
+  inline auto ExtractReal() const -> VectorizedFloatType<T, N> {
+    return TypeInfo::ExtractReal(GetRegister());
+  }
+
+  // Extract all imaginary parts as a vectorized floating point vector:
+  //   RESULT[i] = a[i].imag for i = 0 to N
+  inline auto ExtractImag() const -> VectorizedFloatType<T, N> {
+    return TypeInfo::ExtractImag(GetRegister());
   }
 
   //////////////////////////////////////////////////////////////////////////////
@@ -372,6 +407,26 @@ inline auto Conj(const VectorizedComplexType<T, N>& a)
     -> VectorizedComplexType<T, N> {
   return VectorizedComplexType<T, N>(
       VectorizedComplexType<T, N>::TypeInfo::Conj(a.GetRegister()));
+}
+
+// Compute per-element complex exponential: base-e exponential to the power of
+// i*x where i is the imaginary unit.
+//   RESULT[i] = ComplexExp(x[i])
+template <class T, int N>
+inline auto ComplexExp(const VectorizedFloatType<T, N>& x)
+    -> VectorizedComplexType<T, N> {
+  return VectorizedComplexType<T, N>(
+      VectorizedComplexType<T, N>::TypeInfo::ComplexExp(x.GetRegister()));
+}
+
+// Compute per-element base-e exponential of the complex number z: the Euler's
+// number raised to the power of z.
+//   RESULT[i] = Exp(x[i])
+template <class T, int N>
+inline auto Exp(const VectorizedComplexType<T, N>& x)
+    -> VectorizedComplexType<T, N> {
+  return VectorizedComplexType<T, N>(
+      VectorizedComplexType<T, N>::TypeInfo::Exp(x.GetRegister()));
 }
 
 // Reverse the order of elements in the vectorized value:

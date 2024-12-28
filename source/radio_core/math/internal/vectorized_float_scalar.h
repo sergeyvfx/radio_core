@@ -285,6 +285,33 @@ struct VectorizedFloatTypeInfo {
     Unroll<N>([&](const auto i) { r[i] = value[N - i - 1]; });
     return r;
   }
+
+  static inline auto Sin(const RegisterType& value) -> RegisterType {
+    RegisterType r;
+    Unroll<N>([&](const auto i) { r[i] = radio_core::Sin(value[i]); });
+    return r;
+  }
+
+  static inline auto Cos(const RegisterType& value) -> RegisterType {
+    RegisterType r;
+    Unroll<N>([&](const auto i) { r[i] = radio_core::Cos(value[i]); });
+    return r;
+  }
+
+  static inline void SinCos(const RegisterType& value,
+                            RegisterType& sin,
+                            RegisterType& cos) {
+    Unroll<N>([&](const auto i) {
+      sin[i] = radio_core::Sin(value[i]);
+      cos[i] = radio_core::Cos(value[i]);
+    });
+  }
+
+  static inline auto Exp(const RegisterType& value) -> RegisterType {
+    RegisterType r;
+    Unroll<N>([&](const auto i) { r[i] = radio_core::Exp(value[i]); });
+    return r;
+  }
 };
 
 }  // namespace radio_core

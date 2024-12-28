@@ -242,6 +242,29 @@ struct VectorizedFloatTypeInfo<float, 8, SpecializationMarker> {
   static inline auto Reverse(const RegisterType& value) -> RegisterType {
     return {radio_core::Reverse(value[1]), radio_core::Reverse(value[0])};
   }
+
+  static inline auto Sin(const RegisterType& arg) -> RegisterType {
+    return {radio_core::Sin(arg[0]), radio_core::Sin(arg[1])};
+  }
+
+  static inline auto Cos(const RegisterType& arg) -> RegisterType {
+    return {radio_core::Cos(arg[0]), radio_core::Cos(arg[1])};
+  }
+
+  static inline void SinCos(const RegisterType& arg,
+                            RegisterType& sin,
+                            RegisterType& cos) {
+    Float4 sin_low, cos_low;
+    Float4 sin_high, cos_high;
+    radio_core::SinCos(arg[0], sin_low, cos_low);
+    radio_core::SinCos(arg[1], sin_high, cos_high);
+    sin = RegisterType(sin_low, sin_high);
+    cos = RegisterType(cos_low, cos_high);
+  }
+
+  static inline auto Exp(const RegisterType& arg) -> RegisterType {
+    return {radio_core::Exp(arg[0]), radio_core::Exp(arg[1])};
+  }
 };
 
 }  // namespace radio_core
