@@ -1,5 +1,5 @@
 Project: argparse
 URL: https://github.com/p-ranav/argparse
 License: MIT
-Upstream version: d1d006f8f1a
+Upstream version: 3.1 (68fd0277eea)
 Local modifications: None

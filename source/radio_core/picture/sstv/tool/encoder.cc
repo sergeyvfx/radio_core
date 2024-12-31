@@ -142,9 +142,9 @@ auto GetModeFromName(const std::string_view name) -> Mode {
   return Mode::kUnknown;
 }
 
-// Configure command line argument parser.
-// No actual parsing is done in this function.
-auto ConstructCLIParser() -> argparse::ArgumentParser {
+// Parse command line arguments and return parsed result.
+// MOTE: No sanity check on the options is done here.
+auto ParseCLIAndGetOptions(const int argc, char** argv) -> CLIOptions {
   argparse::ArgumentParser program(
       "sstv_encoder", "0.1", argparse::default_arguments::help);
 
@@ -172,14 +172,6 @@ auto ConstructCLIParser() -> argparse::ArgumentParser {
       .default_value(std::string{CLIOptions::kDefaultModeStr})
       .required()
       .help("Encoding scheme (" + GetCommaSeparatedAllModes() + ")");
-
-  return program;
-}
-
-// Parse command line arguments and return parsed result.
-// MOTE: No sanity check on the options is done here.
-auto ParseCLIAndGetOptions(int argc, char** argv) -> CLIOptions {
-  argparse::ArgumentParser program = ConstructCLIParser();
 
   try {
     program.parse_args(argc, argv);

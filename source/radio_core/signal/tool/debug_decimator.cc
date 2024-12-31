@@ -37,9 +37,9 @@ struct CLIOptions {
   std::string output_filepath;
 };
 
-// Configure command line argument parser.
-// No actual parsing is done in this function.
-auto ConstructCLIParser() -> argparse::ArgumentParser {
+// Parse command line arguments and return parsed result.
+// MOTE: No sanity check on the options is done here.
+auto ParseCLIAndGetOptions(const int argc, char** argv) -> CLIOptions {
   argparse::ArgumentParser program(
       "debug_decimator", "0.1", argparse::default_arguments::help);
 
@@ -47,14 +47,6 @@ auto ConstructCLIParser() -> argparse::ArgumentParser {
       .default_value(std::string(""))
       .required()
       .help("Path to the output file (empty to output to STDOUT)");
-
-  return program;
-}
-
-// Parse command line arguments and return parsed result.
-// MOTE: No sanity check on the options is done here.
-auto ParseCLIAndGetOptions(int argc, char** argv) -> CLIOptions {
-  argparse::ArgumentParser program = ConstructCLIParser();
 
   try {
     program.parse_args(argc, argv);

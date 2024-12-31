@@ -69,9 +69,9 @@ struct CLIOptions {
   float audio_volume{1.0f};
 };
 
-// Configure command line argument parser.
-// No actual parsing is done in this function.
-auto ConstructCLIParser() -> argparse::ArgumentParser {
+// Parse command line arguments and return parsed result.
+// MOTE: No sanity check on the options is done here.
+auto ParseCLIAndGetOptions(int argc, char** argv) -> CLIOptions {
   argparse::ArgumentParser program(
       "signal_path", "0.1", argparse::default_arguments::help);
 
@@ -110,14 +110,6 @@ auto ConstructCLIParser() -> argparse::ArgumentParser {
       .required()
       .help("Audio volume, in percentage")
       .scan<'i', int>();
-
-  return program;
-}
-
-// Parse command line arguments and return parsed result.
-// MOTE: No sanity check on the options is done here.
-auto ParseCLIAndGetOptions(int argc, char** argv) -> CLIOptions {
-  argparse::ArgumentParser program = ConstructCLIParser();
 
   try {
     program.parse_args(argc, argv);
