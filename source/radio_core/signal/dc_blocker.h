@@ -5,8 +5,8 @@
 // Filter which removes DC component from a signal.
 //
 // The parameter R affects on the averaging window (which can be approximated
-// with `1 / (1 - R)`). Smaller R values allows faster tracking but in the cost
-// of higher low frequency attenuation.
+// with `num_samples = 1 / (1 - R)`). Smaller R values allows faster tracking
+// but in the cost of higher low frequency attenuation.
 //
 // The implementation follows:
 //
@@ -17,23 +17,24 @@
 
 namespace radio_core::signal {
 
-template <class T>
+template <class SampleType, class RealType = SampleType>
 class DCBlocker {
  public:
-  explicit DCBlocker(const T r) : r_(r) {}
+  explicit DCBlocker(const RealType r) : r_(r) {}
 
-  inline auto operator()(const T x) -> T {
-    const T y = x - xml_ + r_ * yml_;
+  inline auto operator()(const SampleType& x) -> SampleType {
+    const SampleType y = x - xml_ + r_ * yml_;
     xml_ = x;
     yml_ = y;
     return y;
   }
 
  private:
-  T r_;
+  RealType r_;
 
   // One-delayed input and output samples.
-  T xml_ = T(0), yml_ = T(0);
+  SampleType xml_{0};
+  SampleType yml_{0};
 };
 
 }  // namespace radio_core::signal
