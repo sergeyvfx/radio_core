@@ -148,11 +148,14 @@ TEST(math, FastArcTan2) {
 }
 
 TEST(math, FastIntPow) {
-  EXPECT_EQ(FastIntPow(0, 0), 1);
-  EXPECT_EQ(FastIntPow(2, 0), 1);
+  // Integer argument.
+  {
+    EXPECT_EQ(FastIntPow(0, 0), 1);
+    EXPECT_EQ(FastIntPow(2, 0), 1);
 
-  EXPECT_EQ(FastIntPow(2, 4), 16);
-  EXPECT_EQ(FastIntPow(8, 10), 1073741824);
+    EXPECT_EQ(FastIntPow(2, 4), 16);
+    EXPECT_EQ(FastIntPow(8, 10), 1073741824);
+  }
 }
 
 TEST(math, RoundUpToMultiple) {

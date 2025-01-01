@@ -189,6 +189,21 @@ TEST(HalfComplex, Conj) {
   EXPECT_EQ(Conj(HalfComplex(-1.2f, 3.4f)), HalfComplex(-1.2f, -3.4f));
   EXPECT_EQ(Conj(HalfComplex(-1.2f, -3.4f)), HalfComplex(-1.2f, 3.4f));
 }
+
+TEST(HalfComplex, FastIntPow) {
+  EXPECT_THAT(FastIntPow(HalfComplex(0, 0), 0),
+              ComplexNear(HalfComplex(1, 0), 1e-6f));
+  EXPECT_THAT(FastIntPow(HalfComplex(2, 0), 0),
+              ComplexNear(HalfComplex(1, 0), 1e-6f));
+  EXPECT_THAT(FastIntPow(HalfComplex(2, 0), 4),
+              ComplexNear(HalfComplex(16, 0), 1e-6f));
+
+  // >>> (0.2-1j) ** 3
+  // (-0.592+0.88j)
+  EXPECT_THAT(FastIntPow(HalfComplex(0.2f, -1.0f), 3),
+              ComplexNear(HalfComplex(-0.592f, 0.88f), 1e-6f));
+}
+
 }  // namespace radio_core
 
 #endif  // RADIO_CORE_HAVE_HALF

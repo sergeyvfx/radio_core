@@ -260,11 +260,11 @@ inline auto FastArcTan2(const T& y, const T& x) -> T {
 }
 
 // Fast version of Pow(base, exp) which works for integer values.
-// Only works for positive values of exp.
+// Only works for positive values of exp. If the exp is zero then 1 is returned.
 //
 // https://stackoverflow.com/a/101613
 template <class T>
-inline auto FastIntPow(T base, T exp) {
+inline auto FastIntPow(T base, int exp) {
   assert(exp >= 0);
 
   T result(1);

@@ -211,4 +211,15 @@ TEST(Complex, Exp) {
       ComplexNear(Complex(0.6599267266276456f, -1.0277749817561193f), 1e-6f));
 }
 
+TEST(Complex, FastIntPow) {
+  EXPECT_THAT(FastIntPow(Complex(0, 0), 0), ComplexNear(Complex(1, 0), 1e-6f));
+  EXPECT_THAT(FastIntPow(Complex(2, 0), 0), ComplexNear(Complex(1, 0), 1e-6f));
+  EXPECT_THAT(FastIntPow(Complex(2, 0), 4), ComplexNear(Complex(16, 0), 1e-6f));
+
+  // >>> (0.2-1j) ** 3
+  // (-0.592+0.88j)
+  EXPECT_THAT(FastIntPow(Complex(0.2f, -1.0f), 3),
+              ComplexNear(Complex(-0.592f, 0.88f), 1e-6f));
+}
+
 }  // namespace radio_core

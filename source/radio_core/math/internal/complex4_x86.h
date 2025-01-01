@@ -73,6 +73,13 @@ struct VectorizedComplexTypeInfo<float, 4, true> {
     return r;
   }
 
+  static inline auto Load(const float real) -> RegisterType {
+    RegisterType r;
+    r.val[0] = _mm_set1_ps(real);
+    r.val[1] = _mm_set1_ps(0.0f);
+    return r;
+  }
+
   //////////////////////////////////////////////////////////////////////////////
   // Unary operations.
 

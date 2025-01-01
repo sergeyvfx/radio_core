@@ -52,6 +52,15 @@ struct VectorizedComplexTypeInfo {
     return result;
   }
 
+  static inline auto Load(const T real) -> RegisterType {
+    RegisterType result;
+    Unroll<N>([&](const auto i) {
+      result[i].real = real;
+      result[i].imag = 0;
+    });
+    return result;
+  }
+
   //////////////////////////////////////////////////////////////////////////////
   // Unary operations.
 

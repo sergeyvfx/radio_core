@@ -44,6 +44,13 @@ TEST(Complex2, Load) {
     EXPECT_THAT(complex2.Extract<0>(), ComplexNear(Complex(2, 3), 1e-6f));
     EXPECT_THAT(complex2.Extract<1>(), ComplexNear(Complex(4, 5), 1e-6f));
   }
+
+  {
+    const Complex2 complex2(123);
+
+    EXPECT_THAT(complex2.Extract<0>(), ComplexNear(Complex(123, 0), 1e-6f));
+    EXPECT_THAT(complex2.Extract<1>(), ComplexNear(Complex(123, 0), 1e-6f));
+  }
 }
 
 TEST(Complex2, Store) {
@@ -346,6 +353,18 @@ TEST(Complex2, Reverse) {
 
   EXPECT_THAT(result.Extract<0>(), ComplexNear(Complex(3.0f, 4.0f), 1e-6f));
   EXPECT_THAT(result.Extract<1>(), ComplexNear(Complex(1.0f, 2.0f), 1e-6f));
+}
+
+TEST(Complex2, FastIntPow) {
+  const Complex2 base(Complex(0.0f, 0.0f), Complex(0.1f, 0.2f));
+  const Complex2 result = FastIntPow(base, 4);
+
+  // >>> import numpy as np
+  // >>> np.array([ 0.0+0.0j, 0.1+0.2j]) ** 4
+  // array([ 0.    +0.j    , -0.0007-0.0024j ])
+  EXPECT_THAT(result.Extract<0>(), ComplexNear(Complex(0.0f, 0.0f), 1e-6f));
+  EXPECT_THAT(result.Extract<1>(),
+              ComplexNear(Complex(-0.0007f, -0.0024f), 1e-6f));
 }
 
 }  // namespace radio_core

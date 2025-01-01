@@ -57,6 +57,10 @@ struct VectorizedComplexTypeInfo<float, 8, SpecializationMarker> {
     return result;
   }
 
+  static inline auto Load(const float real) -> RegisterType {
+    return {Complex4(real), Complex4(real)};
+  }
+
   //////////////////////////////////////////////////////////////////////////////
   // Unary operations.
 

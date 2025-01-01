@@ -110,7 +110,6 @@ void VectorizedGoertzel(const std::span<const BaseComplex<RealType>> samples,
                         const VectorizedFloatType<RealType, N> k[K],
                         BaseComplex<RealType>* dft_ptr) {
   using FloatN = VectorizedFloatType<RealType, N>;
-  using ComplexType = BaseComplex<RealType>;
   using ComplexN = VectorizedComplexType<RealType, N>;
 
   // 2 * pi, loaded into vectorized type FloatN.
@@ -132,8 +131,8 @@ void VectorizedGoertzel(const std::span<const BaseComplex<RealType>> samples,
 
   ComplexN s_prev[K], s_prev2[K];
   Unroll<K>([&](const auto i) {
-    s_prev[i] = ComplexType(0);
-    s_prev2[i] = ComplexType(0);
+    s_prev[i] = ComplexN(RealType(0));
+    s_prev2[i] = ComplexN(RealType(0));
   });
   for (size_t n = 0; n < num_samples; ++n) {
     const ComplexN x(samples[n]);

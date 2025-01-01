@@ -75,7 +75,7 @@ class VectorizedComplexType {
   // elements.
   //
   // The first argument in the pack is the 0-th element of the vectorized type.
-  template <class... Args>
+  template <class... Args, typename = std::enable_if_t<sizeof...(Args) == N>>
   inline VectorizedComplexType(const Args&... args)
       : VectorizedComplexType(TypeInfo::Load(args...)) {}
 
@@ -89,6 +89,12 @@ class VectorizedComplexType {
                                const VectorizedFloatType<T, N>& imag)
       : VectorizedComplexType(
             TypeInfo::Load(real.GetRegister(), imag.GetRegister())) {}
+
+  // Construct from the given real part.
+  // It is broadcast to all elements of the vectorized type. Effectively equal
+  // to VectorizedComplexType(Complex(real)).
+  inline explicit VectorizedComplexType(const T& real)
+      : VectorizedComplexType(TypeInfo::Load(real)) {}
 
   // Store all values from this vector into the given memory.
   inline void Store(BaseComplex<T> dst[N]) const {

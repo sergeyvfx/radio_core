@@ -86,6 +86,19 @@ TEST(HalfComplex8, Load) {
     EXPECT_THAT(complex8.Extract<6>(), ComplexNear(HalfComplex(14, 15), 1e-6f));
     EXPECT_THAT(complex8.Extract<7>(), ComplexNear(HalfComplex(16, 17), 1e-6f));
   }
+
+  {
+    const HalfComplex8 complex8(123);
+
+    EXPECT_THAT(complex8.Extract<0>(), ComplexNear(HalfComplex(123, 0), 1e-6f));
+    EXPECT_THAT(complex8.Extract<1>(), ComplexNear(HalfComplex(123, 0), 1e-6f));
+    EXPECT_THAT(complex8.Extract<2>(), ComplexNear(HalfComplex(123, 0), 1e-6f));
+    EXPECT_THAT(complex8.Extract<3>(), ComplexNear(HalfComplex(123, 0), 1e-6f));
+    EXPECT_THAT(complex8.Extract<4>(), ComplexNear(HalfComplex(123, 0), 1e-6f));
+    EXPECT_THAT(complex8.Extract<5>(), ComplexNear(HalfComplex(123, 0), 1e-6f));
+    EXPECT_THAT(complex8.Extract<6>(), ComplexNear(HalfComplex(123, 0), 1e-6f));
+    EXPECT_THAT(complex8.Extract<7>(), ComplexNear(HalfComplex(123, 0), 1e-6f));
+  }
 }
 
 TEST(HalfComplex8, Store) {
@@ -989,6 +1002,39 @@ TEST(HalfComplex8, Reverse) {
   EXPECT_THAT(result.Extract<5>(), ComplexNear(HalfComplex(5.0f, 6.0f), 1e-6f));
   EXPECT_THAT(result.Extract<6>(), ComplexNear(HalfComplex(3.0f, 4.0f), 1e-6f));
   EXPECT_THAT(result.Extract<7>(), ComplexNear(HalfComplex(1.0f, 2.0f), 1e-6f));
+}
+
+TEST(HalfComplex8, FastIntPow) {
+  const HalfComplex8 base(HalfComplex(0.0f, 0.0f),
+                          HalfComplex(0.1f, 0.2f),
+                          HalfComplex(-0.3f, 0.4f),
+                          HalfComplex(-0.4f, 0.5f),
+                          HalfComplex(0.1f, -0.2f),
+                          HalfComplex(-0.3f, -0.4f),
+                          HalfComplex(-0.4f, -0.5f),
+                          HalfComplex(0.5f, -0.6f));
+  const HalfComplex8 result = FastIntPow(base, 4);
+
+  // >>> import numpy as np
+  // >>> np.array([ 0.0+0.0j, 0.1+0.2j, -0.3+0.4j, -0.4+0.5j, 0.1-0.2j,
+  // ...           -0.3-0.4j, -0.4-0.5j, 0.5-0.6j]) ** 4
+  // array([ 0.    +0.j    , -0.0007-0.0024j, -0.0527+0.0336j, -0.1519+0.072j ,
+  //        -0.0007+0.0024j, -0.0527-0.0336j, -0.1519-0.072j , -0.3479+0.132j ])
+  EXPECT_THAT(result.Extract<0>(), ComplexNear(HalfComplex(0.0f, 0.0f), 1e-3f));
+  EXPECT_THAT(result.Extract<1>(),
+              ComplexNear(HalfComplex(-0.0007f, -0.0024f), 1e-3f));
+  EXPECT_THAT(result.Extract<2>(),
+              ComplexNear(HalfComplex(-0.0527f, 0.0336f), 1e-3f));
+  EXPECT_THAT(result.Extract<3>(),
+              ComplexNear(HalfComplex(-0.1519f, 0.072f), 1e-3f));
+  EXPECT_THAT(result.Extract<4>(),
+              ComplexNear(HalfComplex(-0.0007f, 0.0024f), 1e-3f));
+  EXPECT_THAT(result.Extract<5>(),
+              ComplexNear(HalfComplex(-0.0527f, -0.0336f), 1e-3f));
+  EXPECT_THAT(result.Extract<6>(),
+              ComplexNear(HalfComplex(-0.1519f, -0.072f), 1e-3f));
+  EXPECT_THAT(result.Extract<7>(),
+              ComplexNear(HalfComplex(-0.3479, 0.132f), 1e-3f));
 }
 
 }  // namespace radio_core

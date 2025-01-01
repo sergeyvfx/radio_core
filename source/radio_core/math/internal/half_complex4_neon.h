@@ -78,6 +78,13 @@ struct VectorizedComplexTypeInfo<Half, 4, true> {
     return r;
   }
 
+  static inline auto Load(const Half real) -> float16x4x2_t {
+    float16x4x2_t r;
+    r.val[0] = vdup_n_f16(_Float16(real));
+    r.val[1] = vdup_n_f16(_Float16(0));
+    return r;
+  }
+
   //////////////////////////////////////////////////////////////////////////////
   // Unary operations.
 

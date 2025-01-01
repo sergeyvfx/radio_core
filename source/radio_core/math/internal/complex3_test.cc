@@ -48,6 +48,14 @@ TEST(Complex3, Load) {
     EXPECT_THAT(complex3.Extract<1>(), ComplexNear(Complex(4, 5), 1e-6f));
     EXPECT_THAT(complex3.Extract<2>(), ComplexNear(Complex(6, 7), 1e-6f));
   }
+
+  {
+    const Complex3 complex3(123);
+
+    EXPECT_THAT(complex3.Extract<0>(), ComplexNear(Complex(123, 0), 1e-6f));
+    EXPECT_THAT(complex3.Extract<1>(), ComplexNear(Complex(123, 0), 1e-6f));
+    EXPECT_THAT(complex3.Extract<2>(), ComplexNear(Complex(123, 0), 1e-6f));
+  }
 }
 
 TEST(Complex3, Store) {
@@ -407,6 +415,21 @@ TEST(Complex3, Reverse) {
   EXPECT_THAT(result.Extract<0>(), ComplexNear(Complex(5.0f, 6.0f), 1e-6f));
   EXPECT_THAT(result.Extract<1>(), ComplexNear(Complex(3.0f, 4.0f), 1e-6f));
   EXPECT_THAT(result.Extract<2>(), ComplexNear(Complex(1.0f, 2.0f), 1e-6f));
+}
+
+TEST(Complex3, FastIntPow) {
+  const Complex3 base(
+      Complex(0.0f, 0.0f), Complex(0.1f, 0.2f), Complex(-0.3f, 0.4f));
+  const Complex3 result = FastIntPow(base, 4);
+
+  // >>> import numpy as np
+  // >>> np.array([ 0.0+0.0j, 0.1+0.2j, -0.3+0.4j]) ** 4
+  // array([ 0.    +0.j    , -0.0007-0.0024j, -0.0527+0.0336j ])
+  EXPECT_THAT(result.Extract<0>(), ComplexNear(Complex(0.0f, 0.0f), 1e-6f));
+  EXPECT_THAT(result.Extract<1>(),
+              ComplexNear(Complex(-0.0007f, -0.0024f), 1e-6f));
+  EXPECT_THAT(result.Extract<2>(),
+              ComplexNear(Complex(-0.0527f, 0.0336f), 1e-6f));
 }
 
 }  // namespace radio_core

@@ -60,6 +60,15 @@ TEST(HalfComplex4, Load) {
     EXPECT_THAT(complex4.Extract<2>(), ComplexNear(HalfComplex(6, 7), 1e-6f));
     EXPECT_THAT(complex4.Extract<3>(), ComplexNear(HalfComplex(8, 9), 1e-6f));
   }
+
+  {
+    const HalfComplex4 complex4(123);
+
+    EXPECT_THAT(complex4.Extract<0>(), ComplexNear(HalfComplex(123, 0), 1e-6f));
+    EXPECT_THAT(complex4.Extract<1>(), ComplexNear(HalfComplex(123, 0), 1e-6f));
+    EXPECT_THAT(complex4.Extract<2>(), ComplexNear(HalfComplex(123, 0), 1e-6f));
+    EXPECT_THAT(complex4.Extract<3>(), ComplexNear(HalfComplex(123, 0), 1e-6f));
+  }
 }
 
 TEST(HalfComplex4, Store) {
@@ -622,6 +631,25 @@ TEST(HalfComplex4, Reverse) {
   EXPECT_THAT(result.Extract<1>(), ComplexNear(HalfComplex(5.0f, 6.0f), 1e-6f));
   EXPECT_THAT(result.Extract<2>(), ComplexNear(HalfComplex(3.0f, 4.0f), 1e-6f));
   EXPECT_THAT(result.Extract<3>(), ComplexNear(HalfComplex(1.0f, 2.0f), 1e-6f));
+}
+
+TEST(HalfComplex4, FastIntPow) {
+  const HalfComplex4 base(HalfComplex(0.0f, 0.0f),
+                          HalfComplex(0.1f, 0.2f),
+                          HalfComplex(-0.3f, 0.4f),
+                          HalfComplex(-0.4f, 0.5f));
+  const HalfComplex4 result = FastIntPow(base, 4);
+
+  // >>> import numpy as np
+  // >>> np.array([ 0.0+0.0j, 0.1+0.2j, -0.3+0.4j, -0.4+0.5j]) ** 4
+  // array([ 0.    +0.j    , -0.0007-0.0024j, -0.0527+0.0336j, -0.1519+0.072j ])
+  EXPECT_THAT(result.Extract<0>(), ComplexNear(HalfComplex(0.0f, 0.0f), 1e-3f));
+  EXPECT_THAT(result.Extract<1>(),
+              ComplexNear(HalfComplex(-0.0007f, -0.0024f), 1e-3f));
+  EXPECT_THAT(result.Extract<2>(),
+              ComplexNear(HalfComplex(-0.0527f, 0.0336f), 1e-3f));
+  EXPECT_THAT(result.Extract<3>(),
+              ComplexNear(HalfComplex(-0.1519f, 0.072f), 1e-3f));
 }
 
 }  // namespace radio_core

@@ -64,6 +64,13 @@ struct VectorizedComplexTypeInfo<float, 4, true> {
     return r;
   }
 
+  static inline auto Load(const float real) -> float32x4x2_t {
+    float32x4x2_t r;
+    r.val[0] = vdupq_n_f32(real);
+    r.val[1] = vdupq_n_f32(0);
+    return r;
+  }
+
   //////////////////////////////////////////////////////////////////////////////
   // Unary operations.
 
