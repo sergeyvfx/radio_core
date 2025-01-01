@@ -95,6 +95,7 @@ set(PUBLIC_HEADERS
   kernel/dot_flip.h
   kernel/fast_abs.h
   kernel/fast_arg.h
+  kernel/fast_int_pow.h
   kernel/norm.h
   kernel/horizontal_max.h
   kernel/horizontal_sum.h
