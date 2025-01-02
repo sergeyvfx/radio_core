@@ -4,6 +4,7 @@
 
 #include "radio_core/math/float8.h"
 
+#include "radio_core/base/build_config.h"
 #include "radio_core/unittest/test.h"
 
 namespace radio_core {
@@ -369,10 +370,24 @@ TEST(Float8, Divide) {
     EXPECT_NEAR(result.Extract<1>(), 20.0f, 1e-6f);
     EXPECT_NEAR(result.Extract<2>(), 30.0f, 1e-6f);
     EXPECT_NEAR(result.Extract<3>(), 40.0f, 1e-6f);
+
+#if ARCH_CPU_32_BITS && ARCH_CPU_ARM_FAMILY
+    // 32bit ARM uses an approximation for vdivq_f32 which has lower accuracy
+    // with larger difference between numerator and denominator. The
+    // implementation is verified against _mm_div_ps() from sse2nwon which uses
+    // the same number of Netwon-Raphson steps.
+    //
+    // Tested on 32bit Raspbian Lite 12 running on Raspberry Pi 5.
+    EXPECT_NEAR(result.Extract<4>(), 50.0f, 4e-6f);
+    EXPECT_NEAR(result.Extract<5>(), 60.0f, 4e-6f);
+    EXPECT_NEAR(result.Extract<6>(), 70.0f, 4e-6f);
+    EXPECT_NEAR(result.Extract<7>(), 80.0f, 4e-6f);
+#else
     EXPECT_NEAR(result.Extract<4>(), 50.0f, 1e-6f);
     EXPECT_NEAR(result.Extract<5>(), 60.0f, 1e-6f);
     EXPECT_NEAR(result.Extract<6>(), 70.0f, 1e-6f);
     EXPECT_NEAR(result.Extract<7>(), 80.0f, 1e-6f);
+#endif
   }
 }
 

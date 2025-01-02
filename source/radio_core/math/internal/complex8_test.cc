@@ -4,6 +4,7 @@
 
 #include "radio_core/math/complex8.h"
 
+#include "radio_core/base/build_config.h"
 #include "radio_core/math/math.h"
 #include "radio_core/math/unittest/complex_matchers.h"
 #include "radio_core/math/unittest/vectorized_matchers.h"
@@ -691,10 +692,22 @@ TEST(Complex8, Abs) {
     EXPECT_NEAR(abs4.Extract<1>(), Sqrt(41.0f), 1e-6f);
     EXPECT_NEAR(abs4.Extract<2>(), Sqrt(85.0f), 1e-6f);
     EXPECT_NEAR(abs4.Extract<3>(), Sqrt(145.0f), 1e-6f);
+
+#if ARCH_CPU_32_BITS && ARCH_CPU_ARM_FAMILY
+    // 32bit ARM uses an approximation for vsqrt_f32 which has lower accuracy
+    // for larger input values.
+    //
+    // Tested on 32bit Raspbian Lite 12 running on Raspberry Pi 5.
+    EXPECT_NEAR(abs4.Extract<4>(), Sqrt(221.0f), 2e-6f);
+    EXPECT_NEAR(abs4.Extract<5>(), Sqrt(313.0f), 2e-6f);
+    EXPECT_NEAR(abs4.Extract<6>(), Sqrt(421.0f), 2e-6f);
+    EXPECT_NEAR(abs4.Extract<7>(), Sqrt(545.0f), 2e-6f);
+#else
     EXPECT_NEAR(abs4.Extract<4>(), Sqrt(221.0f), 1e-6f);
     EXPECT_NEAR(abs4.Extract<5>(), Sqrt(313.0f), 1e-6f);
     EXPECT_NEAR(abs4.Extract<6>(), Sqrt(421.0f), 1e-6f);
     EXPECT_NEAR(abs4.Extract<7>(), Sqrt(545.0f), 1e-6f);
+#endif
   }
 }
 
