@@ -206,7 +206,9 @@ class AbsBenchmark : public Benchmark {
   Data<Half> half_complex_data_;
 #endif
 
+#if defined(WITH_BENCHMARKS_VOLK)
   bool use_volk_{false};
+#endif
 };
 
 }  // namespace radio_core::benchmark

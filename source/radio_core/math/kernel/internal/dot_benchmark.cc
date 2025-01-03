@@ -262,7 +262,9 @@ class DotBenchmark : public Benchmark {
   Data<HalfComplex, Half> half_complex_half_data_;
 #endif
 
+#if defined(WITH_BENCHMARKS_VOLK)
   bool use_volk_{false};
+#endif
 };
 
 }  // namespace radio_core::benchmark
