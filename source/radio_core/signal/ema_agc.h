@@ -74,9 +74,6 @@ class EMAAGC {
   //
   // The caller must ensure the output samples buffer is big enough should have
   // at least the size of the input samples).
-  //
-  // NOTE: If the kernel was not provided and initialized this function will
-  // have an undefined behavior.
   inline auto operator()(const std::span<const SampleType> input_samples,
                          const std::span<SampleType> output_samples)
       -> std::span<SampleType> {
