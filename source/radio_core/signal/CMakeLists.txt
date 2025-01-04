@@ -102,6 +102,4 @@ radio_core_signal_benchmark(decimator)
 ################################################################################
 # Tools.
 
-if(WITH_TOOLS OR WITH_DEBUG_TOOLS)
-  add_subdirectory(tool)
-endif()
+add_subdirectory(tool)
