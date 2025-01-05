@@ -31,7 +31,7 @@ inline void FFTShift(std::span<T> x) {
       std::swap(x[i], x[i + half]);
     }
   } else {
-    const float x0 = x[0];
+    const T x0 = x[0];
     for (size_t i = 0; i < half; ++i) {
       x[i] = x[i + half + 1];
       x[i + half + 1] = x[i + 1];

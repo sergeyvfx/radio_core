@@ -84,6 +84,22 @@ TEST(math, FFTShift) {
         fft,
         Pointwise(FloatNear(1e-6f), std::to_array<float>({4, 5, 6, 1, 2, 3})));
   }
+
+  // Complex samples.
+  {
+    std::vector<Complex> fft{
+        Complex(1), Complex(2), Complex(3), Complex(4), Complex(5), Complex(6)};
+    FFTShift(std::span<Complex>(fft));
+
+    EXPECT_THAT(fft,
+                Pointwise(ComplexNear(1e-6f),
+                          std::to_array<Complex>({Complex(4.0f),
+                                                  Complex(5.0f),
+                                                  Complex(6.0f),
+                                                  Complex(1.0f),
+                                                  Complex(2.0f),
+                                                  Complex(3.0f)})));
+  }
 }
 
 TEST(math, FFTNormalizeAndShift) {
