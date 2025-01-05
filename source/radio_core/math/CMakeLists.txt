@@ -18,6 +18,8 @@ set(PUBLIC_HEADERS
   dft.h
   distribution.h
   fft.h
+  fft_api.h
+  fft_api_pffft.h
   float2.h
   float3.h
   float4.h
@@ -137,16 +139,20 @@ radio_core_install_with_directory(
 ################################################################################
 # Regression tests.
 
+add_library(radio_core_math_test_data INTERFACE
+  internal/fft_test_data.h
+)
+
 function(radio_core_math_test PRIMITIVE_NAME)
   radio_core_test(
       math_${PRIMITIVE_NAME} internal/${PRIMITIVE_NAME}_test.cc
-      LIBRARIES radio_core_math)
+      LIBRARIES radio_core_math radio_core_math_test_data external_pffft)
 endfunction()
 
 function(radio_core_math_unittest_test PRIMITIVE_NAME)
   radio_core_test(
       math_${PRIMITIVE_NAME} unittest/internal/${PRIMITIVE_NAME}_test.cc
-      LIBRARIES radio_core_math)
+      LIBRARIES radio_core_math radio_core_math_test_data external_pffft)
 endfunction()
 
 radio_core_test(math internal/math_test.cc LIBRARIES radio_core_math)
@@ -165,6 +171,7 @@ radio_core_math_test(complex8)
 radio_core_math_test(dft)
 radio_core_math_test(distribution)
 radio_core_math_test(fft)
+radio_core_math_test(fft_api_pffft)
 radio_core_math_test(float2)
 radio_core_math_test(float3)
 radio_core_math_test(float4)

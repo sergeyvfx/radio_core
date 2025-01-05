@@ -1,0 +1,5 @@
+Project: PFFFT: a pretty fast FFT
+URL: https://bitbucket.org/jpommier/pffft
+License: BSD-like
+Upstream version: 38946c766c1
+Local modifications: None

@@ -7,6 +7,7 @@
 remove_active_strict_compiler_flags()
 
 add_subdirectory(argparse)
+add_subdirectory(pffft)
 add_subdirectory(stb)
 add_subdirectory(tiny_lib)
 
