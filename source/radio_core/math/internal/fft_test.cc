@@ -7,11 +7,14 @@
 #include <array>
 #include <vector>
 
+#include "radio_core/math/complex.h"
+#include "radio_core/math/unittest/complex_matchers.h"
 #include "radio_core/unittest/mock.h"
 #include "radio_core/unittest/test.h"
 
 namespace radio_core {
 
+using testing::ComplexNear;
 using testing::FloatNear;
 using testing::Pointwise;
 
@@ -141,6 +144,22 @@ TEST(math, FFTNormalizeAndShift) {
             FloatNear(1e-6f),
             std::to_array<float>(
                 {4.0f / 6, 5.0f / 6, 6.0f / 6, 1.0f / 6, 2.0f / 6, 3.0f / 6})));
+  }
+
+  // Complex samples.
+  {
+    std::vector<Complex> fft{
+        Complex(1), Complex(2), Complex(3), Complex(4), Complex(5), Complex(6)};
+    FFTNormalizeAndShift(std::span<Complex>(fft));
+
+    EXPECT_THAT(fft,
+                Pointwise(ComplexNear(1e-6f),
+                          std::to_array<Complex>({Complex(4.0f / 6),
+                                                  Complex(5.0f / 6),
+                                                  Complex(6.0f / 6),
+                                                  Complex(1.0f / 6),
+                                                  Complex(2.0f / 6),
+                                                  Complex(3.0f / 6)})));
   }
 }
 
