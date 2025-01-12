@@ -66,6 +66,7 @@ function(radio_core_base_test PRIMITIVE_NAME)
       LIBRARIES radio_core_base)
 endfunction()
 
+radio_core_base_test(algorithm)
 radio_core_base_test(aligned_allocator)
 radio_core_base_test(aligned_malloc)
 radio_core_base_test(aligned_register)
