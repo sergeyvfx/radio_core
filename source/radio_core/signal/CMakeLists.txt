@@ -17,6 +17,7 @@ set(PUBLIC_HEADERS
   ema_agc.h
   filter.h
   filter_design.h
+  filter_energy.h
   filter_gain.h
   filter_window_heuristic.h
   fir_filter.h
@@ -69,6 +70,7 @@ radio_core_signal_test(edge_detector)
 radio_core_signal_test(ema_agc)
 radio_core_signal_test(filter)
 radio_core_signal_test(filter_design)
+radio_core_signal_test(filter_energy)
 radio_core_signal_test(filter_window_heuristic)
 radio_core_signal_test(fir_filter)
 radio_core_signal_test(frequency)
