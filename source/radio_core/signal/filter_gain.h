@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-// FIlter gain calculation and normalization.
+// Filter gain calculation and normalization.
 
 #pragma once
 
@@ -54,7 +54,7 @@ inline auto CalculateFilterGain(const std::span<const T> h, const T frequency)
   return gain;
 }
 
-// Scale filter to have an unity gain at the given frequency.
+// Scale filter to have unity gain at the given frequency.
 template <class T>
 inline void ScaleFilterToUnityGainAtFrequency(const std::span<T> h,
                                               const T frequency) {

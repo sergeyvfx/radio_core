@@ -22,9 +22,8 @@ namespace radio_core::signal {
 
 // Calculate impulse response h(t) of the RRC filter.
 template <class T>
-inline auto RRCWeight(const T t,
-                      const T samples_per_symbol,
-                      const T beta) -> T {
+inline auto RRCWeight(const T t, const T samples_per_symbol, const T beta)
+    -> T {
   const T pi = T(constants::pi);
 
   const T sps = samples_per_symbol;
@@ -57,7 +56,32 @@ inline auto RRCWeight(const T t,
   return sps_inv * num / den;
 }
 
-// Design RRC filter which acts as a low-pass filter.
+// Design root-raised-cosine (RRC) filter which acts as a low-pass filter.
+// The designed filter has unity gain at the DC.
+//
+// It matches the root_raised_cosine() filter design from the GNU Radio:
+//   >>> firdes.root_raised_cosine(
+//   ...    gain=1,
+//   ...    sampling_freq=samples_per_symbol,
+//   ...    symbol_rate=1,
+//   ...    alpha=beta,
+//   ...    ntaps=h.size())
+//
+// It is similar to Matlab's rcosdesign():
+//
+//   rcosdesign(beta, h.size() / samples_per_symbol, samples_per_symbol)
+//   rcosdesign(beta, h.size() / samples_per_symbol, samples_per_symbol, "sqrt")
+//
+// The difference is that Matlab's function provides filter which has unity
+// energy, while this designed provides filter with unity gain.
+//
+// Conversion of filter designed by Matlab to match this function:
+//   h = rcosdesign(...)
+//   ScaleFilterToUnityGainAtFrequency(h, 0)
+//
+// Conversion of filter designed by this function to match the Matlab:
+//   DesignLowpassRRCFilter(h, ...)
+//   ScaleFilterToUnityEnergy(h)
 template <class T>
 inline void DesignLowpassRRCFilter(std::span<T> h,
                                    const T samples_per_symbol,

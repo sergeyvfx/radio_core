@@ -19,8 +19,14 @@ TEST(root_raised_cosine, DesignLowpassRRCFilter) {
   DesignLowpassRRCFilter<float>(actual_kernel, 2, 0.2f);
 
   // The values are obtained by carefully verifying formula and running it prior
-  // to any optimization.
-
+  // to any optimization. They were verified against GNU Radio:
+  //
+  //   >>> from gnuradio.filter import firdes
+  //   >>> firdes.root_raised_cosine(gain=1, sampling_freq=2, symbol_rate=1,
+  //   ...                           alpha=0.2, ntaps=51)
+  //
+  // The result of the firdes.root_raised_cosine() is within the same tolerance
+  // from the values used by this test.
   EXPECT_THAT(
       actual_kernel,
       Pointwise(
