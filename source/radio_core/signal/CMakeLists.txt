@@ -33,6 +33,7 @@ set(PUBLIC_HEADERS
   local_oscillator.h
   peak_detector.h
   polyphase_filter.h
+  raised_cosine.h
   root_raised_cosine.h
   simple_fir_filter.h
   window.h
@@ -85,6 +86,7 @@ radio_core_signal_test(interpolator)
 radio_core_signal_test(local_oscillator)
 radio_core_signal_test(peak_detector)
 radio_core_signal_test(polyphase_filter)
+radio_core_signal_test(raised_cosine)
 radio_core_signal_test(root_raised_cosine)
 radio_core_signal_test(simple_fir_filter)
 radio_core_signal_test(window)
