@@ -25,12 +25,17 @@ target_link_libraries(radio_core INTERFACE
   radio_core_protocol_packet_aprs
   radio_core_signal
   radio_core_signal_path
-  radio_core_tool
 )
 
 if(WITH_BENCHMARKS)
   target_link_libraries(radio_core INTERFACE
     radio_core_benchmark
+  )
+endif()
+
+if(WITH_TOOLS)
+  target_link_libraries(radio_core INTERFACE
+    radio_core_tool
   )
 endif()
 
