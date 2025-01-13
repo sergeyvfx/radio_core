@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: MIT-0
 
 add_subdirectory(base)
+add_subdirectory(comm)
 add_subdirectory(crypto)
 add_subdirectory(info)
 add_subdirectory(math)

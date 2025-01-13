@@ -2,11 +2,11 @@
 //
 // SPDX-License-Identifier: MIT
 
-#include "radio_core/signal/digital_pll.h"
+#include "radio_core/comm/digital_pll.h"
 
 #include "radio_core/unittest/test.h"
 
-namespace radio_core::signal {
+namespace radio_core::comm {
 
 TEST(signal, DigitalPLL) {
   DigitalPLL<float>::Options options;
@@ -52,4 +52,4 @@ TEST(signal, DigitalPLL) {
   }
 }
 
-}  // namespace radio_core::signal
+}  // namespace radio_core::comm

@@ -12,7 +12,6 @@ set(PUBLIC_HEADERS
   debug_writer.h
   decimator.h
   digital_hysteresis.h
-  digital_pll.h
   edge_detector.h
   ema_agc.h
   filter.h
@@ -66,7 +65,6 @@ radio_core_signal_test(awgn_noise_injector)
 radio_core_signal_test(dc_blocker)
 radio_core_signal_test(decimator)
 radio_core_signal_test(digital_hysteresis)
-radio_core_signal_test(digital_pll)
 radio_core_signal_test(edge_detector)
 radio_core_signal_test(ema_agc)
 radio_core_signal_test(filter)

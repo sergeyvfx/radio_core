@@ -29,10 +29,10 @@
 #include "radio_core/base/interval.h"
 #include "radio_core/base/result.h"
 #include "radio_core/base/unreachable.h"
+#include "radio_core/comm/digital_pll.h"
 #include "radio_core/math/average.h"
 #include "radio_core/math/time.h"
 #include "radio_core/picture/sstv/vis.h"
-#include "radio_core/signal/digital_pll.h"
 #include "radio_core/signal/edge_detector.h"
 #include "radio_core/signal/filter.h"
 #include "radio_core/signal/filter_design.h"
@@ -185,7 +185,7 @@ class VISDecoder {
     //
     // Based on VIS specification the baud is 33.3, so we trick integer
     // arithmetic by pretending sample rate and baud are 3x of what they are.
-    const typename signal::DigitalPLL<RealType>::Options pll_options = {
+    const typename comm::DigitalPLL<RealType>::Options pll_options = {
         .data_baud = 100,
         .sample_rate = options.sample_rate * 3,
         .inertia = options.pll_inertia,
@@ -570,7 +570,7 @@ class VISDecoder {
   EdgeDetector edge_detector_;
   typename EdgeDetector::Edge detected_edge_;
 
-  signal::DigitalPLL<RealType> pll_;
+  comm::DigitalPLL<RealType> pll_;
 
   // Delay of this processor in milliseconds.
   //

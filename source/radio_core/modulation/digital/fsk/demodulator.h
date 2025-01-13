@@ -30,11 +30,11 @@
 
 #include "radio_core/base/algorithm.h"
 #include "radio_core/base/result.h"
+#include "radio_core/comm/digital_pll.h"
 #include "radio_core/math/math.h"
 #include "radio_core/modulation/digital/fsk/internal/symbol_demodulator.h"
 #include "radio_core/modulation/digital/fsk/tones.h"
 #include "radio_core/signal/digital_hysteresis.h"
-#include "radio_core/signal/digital_pll.h"
 #include "radio_core/signal/filter_design.h"
 #include "radio_core/signal/filter_window_heuristic.h"
 #include "radio_core/signal/simple_fir_filter.h"
@@ -163,7 +163,7 @@ class Demodulator {
 
     // Configure PLL.
 
-    typename signal::DigitalPLL<RealType>::Options pll_options;
+    typename comm::DigitalPLL<RealType>::Options pll_options;
     pll_options.data_baud = options.data_baud;
     pll_options.sample_rate = options.sample_rate;
     pll_options.inertia = options.pll_inertia;
@@ -216,7 +216,7 @@ class Demodulator {
   internal::SymbolDemodulator<RealType, Allocator> space_demodulator_;
 
   signal::DigitalHysteresis<RealType> hysteresis_;
-  signal::DigitalPLL<RealType> pll_;
+  comm::DigitalPLL<RealType> pll_;
 };
 
 }  // namespace radio_core::modulation::digital::fsk

@@ -17,6 +17,7 @@ set_property(TARGET radio_core_modulation_digital_fsk
 
 target_link_libraries(radio_core_modulation_digital_fsk INTERFACE
   radio_core_base
+  radio_core_comm
   radio_core_math
   radio_core_signal
 )

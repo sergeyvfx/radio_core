@@ -15,6 +15,8 @@ set_property(TARGET radio_core_picture
              PROPERTY PUBLIC_HEADER ${PUBLIC_HEADERS})
 
 target_link_libraries(radio_core_picture INTERFACE
+  radio_core_base
+  radio_core_comm
   radio_core_math
 )
 

@@ -7,6 +7,7 @@ add_library(radio_core INTERFACE)
 target_link_libraries(radio_core INTERFACE
   radio_core_base
   radio_core_crypto
+  radio_core_comm
   radio_core_info
   radio_core_math
   radio_core_modulation_analog

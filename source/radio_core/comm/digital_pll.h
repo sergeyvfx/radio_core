@@ -14,7 +14,7 @@
 
 #include "radio_core/math/math.h"
 
-namespace radio_core::signal {
+namespace radio_core::comm {
 
 template <class RealType>
 class DigitalPLL {
@@ -27,7 +27,7 @@ class DigitalPLL {
     RealType sample_rate{0};
 
     // Inertia defines how quickly the PLL locks to signal on its transitions.
-    // Higher values mean slower but less jittery responce, lower values mean
+    // Higher values mean slower but less jittery response, lower values mean
     // faster response but possibly more jittery clock.
     //
     // The value is expected to be within [0 .. 1] range.
@@ -54,7 +54,7 @@ class DigitalPLL {
     previous_signal_sample_ = 0;
   }
 
-  // Returns true if the input signal is to be samples at the current time to
+  // Returns true if the input signal is to be sampled at the current time to
   // get proper bit value.
   auto operator()(const int signal_sample) -> bool {
     assert(lo_counter_advance_per_input_sample_ != 0);
@@ -107,4 +107,4 @@ class DigitalPLL {
   int previous_signal_sample_{0};
 };
 
-}  // namespace radio_core::signal
+}  // namespace radio_core::comm
