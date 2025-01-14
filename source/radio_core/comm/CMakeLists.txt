@@ -28,7 +28,7 @@ radio_core_install_with_directory(
 
 function(radio_core_comm_test PRIMITIVE_NAME)
   radio_core_test(
-      signal_${PRIMITIVE_NAME} internal/${PRIMITIVE_NAME}_test.cc
+      comm_${PRIMITIVE_NAME} internal/${PRIMITIVE_NAME}_test.cc
       LIBRARIES radio_core_comm)
 endfunction()
 
