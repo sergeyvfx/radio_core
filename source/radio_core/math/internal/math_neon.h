@@ -11,6 +11,7 @@
 #  include <arm_neon.h>
 
 namespace radio_core::internal::neon {
+
 // Reciprocal of v, with higher precision than vrecpeq_f32.
 inline auto vinvertq_f32(const float32x4_t v) -> float32x4_t {
   float32x4_t reciprocal = vrecpeq_f32(v);
@@ -146,18 +147,20 @@ inline auto vreveseq_u16(const uint16x8_t v) -> uint16x8_t {
 }
 
 // Reverse elements of the given vector.
+#  if ARCH_CPU_64_BITS
 inline auto vreveseq_f16(const float16x8_t v) -> float16x8_t {
-#  if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) &&                         \
-      __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
+#    if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) &&                       \
+        __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
   const float16x8_t vec = vrev64q_f16(v);
   return vextq_f16(vec, vec, 4);
-#  else
+#    else
   // On platforms where FP16 vector arithmetic is not available cast to
   // uint16x8_t, reverse, and cast back.
   // The case where its is needed is Raspberry Pi CM4 and Clang 15.
   return vreinterpretq_f16_u16(vreveseq_u16(vreinterpretq_u16_f16(v)));
-#  endif
+#    endif
 }
+#  endif
 
 // clang-format off
 
@@ -250,15 +253,20 @@ inline float32x4_t vexpq_f32(float32x4_t x)
 //
 // TODO(sergey): Investigate whether having float16x4_t implementation allows
 // to utilize more register simultaneously.
+#  if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) &&                         \
+      __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 inline float16x4_t vexp_f16(float16x4_t x) {
   const float32x4_t r = vexpq_f32(vcvt_f32_f16(x));
   return vcvt_f16_f32(r);
 }
+#  endif
 
 // A naive implementation of 8-element exponent for 16bit floating point values.
 // It breaks down the calculation to two calculations of vexpq_f32().
 //
 // TODO(sergey): Investigate proper 16bit exponent.
+#  if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) &&                         \
+      __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 inline float16x8_t vexpq_f16(float16x8_t x)
 {
   const float32x4_t x_lo = vcvt_f32_f16(vget_low_f16(x));
@@ -269,6 +277,7 @@ inline float16x8_t vexpq_f16(float16x8_t x)
 
   return vcombine_f16(vcvt_f16_f32(exp_lo), vcvt_f16_f32(exp_hi));
 }
+#endif
 
 // Calculate logarithm
 //
@@ -437,6 +446,8 @@ inline float32x4_t vcosq_f32(float32x4_t x) {
 //
 // TODO(sergey): Investigate whether having float16x4_t implementation allows
 // to utilize more register simultaneously.
+#  if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) &&                         \
+      __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
 inline void vsincos_f16(float16x4_t x, float16x4_t* ysin, float16x4_t* ycos) {
   float32x4_t ysin32, ycos32;
   vsincosq_f32(vcvt_f32_f16(x), &ysin32, &ycos32);
@@ -455,6 +466,7 @@ inline float16x4_t vcos_f16(float16x4_t x) {
   vsincos_f16(x, &ysin, &ycos);
   return ycos;
 }
+#endif
 
 #  if defined(__ARM_FEATURE_FP16_VECTOR_ARITHMETIC) &&                         \
 __ARM_FEATURE_FP16_VECTOR_ARITHMETIC
