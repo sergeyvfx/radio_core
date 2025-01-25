@@ -114,6 +114,16 @@ inline auto Modulo(const T& x, const T& y) -> T {
   return x - Trunc(x / y) * y;
 }
 
+// Compute the fractional part of the argument.
+//
+// The result has the same sign as the input, matching the result of
+// std::modf() (but different from fract() function from GLSL). It can be used
+// in place of fmodf(x, 1).
+template <class T>
+inline auto Fract(const T& x) -> T {
+  return x - Trunc(x);
+}
+
 // Composes a floating point value with the magnitude of mag and the sign of
 // sgn.
 inline auto CopySign(const float mag, const float sgn) -> float {

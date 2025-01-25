@@ -42,6 +42,52 @@ TEST(math, Modulo) {
   }
 }
 
+TEST(math, Fract) {
+  // Single precision floating point.
+  {
+    EXPECT_NEAR(Fract(0.0f), 0.0f, 1e-5f);
+
+    EXPECT_NEAR(Fract(1.0f), 0.0f, 1e-5f);
+    EXPECT_NEAR(Fract(0.12f), 0.12f, 1e-5f);
+    EXPECT_NEAR(Fract(34.12f), 0.12f, 1e-5f);
+
+    EXPECT_NEAR(Fract(-1.0f), 0.0f, 1e-5f);
+    EXPECT_NEAR(Fract(-0.12f), -0.12f, 1e-5f);
+    EXPECT_NEAR(Fract(-34.12f), -0.12f, 1e-5f);
+  }
+
+  // Double precision floating point.
+  {
+    EXPECT_NEAR(Fract(0.0), 0.0, 1e-5);
+
+    EXPECT_NEAR(Fract(1.0), 0.0, 1e-5);
+    EXPECT_NEAR(Fract(0.12), 0.12, 1e-5);
+    EXPECT_NEAR(Fract(34.12), 0.12, 1e-5);
+
+    EXPECT_NEAR(Fract(-1.0), 0.0, 1e-5);
+    EXPECT_NEAR(Fract(-0.12), -0.12, 1e-5);
+    EXPECT_NEAR(Fract(-34.12), -0.12, 1e-5);
+  }
+}
+
+// A simple snippet to benchmark possible different implementations of the
+// Fract() function.
+TEST(math, FractBenchmark) {
+  GTEST_SKIP() << "Benchmark is disabled";
+
+  float value = 12.345f;
+  for (int j = 0; j < 16 * 1024; ++j) {
+    for (int i = 0; i < 1024; ++i) {
+      const float f = Fract(value);
+      // Modify the variable to prevent constant unrolling.
+      value += f * 0.01f;
+    }
+  }
+  // Perform comparison on the result value to avoid the whole loop from above
+  // from being optimized out.
+  EXPECT_TRUE(IsFinite(value));
+}
+
 TEST(math, IsFinite) {
   // Single precision.
   {
