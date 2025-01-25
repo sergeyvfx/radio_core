@@ -21,7 +21,7 @@ namespace radio_core {
 volatile int kZero = 0;
 
 TEST(math, Modulo) {
-  // Test case os based on https://stackoverflow.com/a/67098028
+  // Test data is based on https://stackoverflow.com/a/67098028
   const auto kArguments = std::to_array<double>({-10.9,
                                                  -10.5,
                                                  -10.4,
@@ -36,14 +36,84 @@ TEST(math, Modulo) {
                                                  10.5,
                                                  10.9});
 
-  for (const double a : kArguments) {
-    EXPECT_NEAR(Modulo<double>(a, 3.2), std::fmod(a, 3.2), 1e-12);
-    EXPECT_NEAR(Modulo<double>(a, -3.2), std::fmod(a, -3.2), 1e-12);
+  // Single precision floating point.
+  // Tests float overload.
+  {
+    for (const double a_double : kArguments) {
+      const float a = a_double;
+      EXPECT_NEAR(Modulo(a, 3.2f), std::fmod(a, 3.2f), 1e-6f);
+      EXPECT_NEAR(Modulo(a, -3.2f), std::fmod(a, -3.2f), 1e-6f);
+    }
   }
+
+  // Double precision floating point.
+  // Tests double overload.
+  {
+    for (const double a : kArguments) {
+      EXPECT_NEAR(Modulo(a, 3.2), std::fmod(a, 3.2), 1e-12);
+      EXPECT_NEAR(Modulo(a, -3.2), std::fmod(a, -3.2), 1e-12);
+    }
+  }
+
+  // Double precision floating point.
+  // Tests generic templated implementation.
+  {
+    for (const double a : kArguments) {
+      EXPECT_NEAR(Modulo<double>(a, 3.2), std::fmod(a, 3.2), 1e-12);
+      EXPECT_NEAR(Modulo<double>(a, -3.2), std::fmod(a, -3.2), 1e-12);
+    }
+  }
+
+  // Manual test to ensure behavior w.r.t argument signs is what it is expected
+  // to be.
+  //
+  // >>> import numpy as np
+  // >>> np.fmod([4.2, -4.2, 4.2, -4.2], [3.1, 3.1, -3.1, -3.1])
+  // array([ 1.1, -1.1,  1.1, -1.1])
+  //
+  // It is also verified against Matlab's rem() function:
+  // >> [rem(4.2, 3.1), rem(-4.2, 3.1), rem(4.2, -3.1), rem(-4.2,-3.1)]
+  // ans =
+  //   1.1000   -1.1000    1.1000   -1.1000
+  {
+    EXPECT_NEAR(Modulo(4.2f, 3.1f), 1.1f, 1e-6f);
+    EXPECT_NEAR(Modulo(-4.2f, 3.1f), -1.1f, 1e-6f);
+    EXPECT_NEAR(Modulo(4.2f, -3.1f), 1.1f, 1e-6f);
+    EXPECT_NEAR(Modulo(-4.2f, -3.1f), -1.1f, 1e-6f);
+
+    EXPECT_NEAR(Modulo<float>(4.2f, 3.1f), 1.1f, 1e-6f);
+    EXPECT_NEAR(Modulo<float>(-4.2f, 3.1f), -1.1f, 1e-6f);
+    EXPECT_NEAR(Modulo<float>(4.2f, -3.1f), 1.1f, 1e-6f);
+    EXPECT_NEAR(Modulo<float>(-4.2f, -3.1f), -1.1f, 1e-6f);
+  }
+}
+
+TEST(math, FloorModulo) {
+  // Similar code implemented in Python for the cross-reference and ease of
+  // getting results for multiple inputs.
+  //
+  // >>> import numpy as np
+  // >>> def floored_mod(a, b):
+  // ...     a = np.array(a)
+  // ...     b = np.array(b)
+  // ...     return a - np.floor(a / b) * b
+  // >>> floored_mod([4.2, -4.2, 4.2, -4.2], [3.1, 3.1, -3.1, -3.1])
+  // array([ 1.1,  2. , -2. , -1.1])
+  //
+  // It is also verified against Matlab's mod() function:
+  // >> [mod(4.2, 3.1), mod(-4.2, 3.1), mod(4.2, -3.1), mod(-4.2,-3.1)]
+  // ans =
+  //   1.1000    2.0000   -2.0000   -1.1000
+  EXPECT_NEAR(FloorModulo(4.2f, 3.1f), 1.1f, 1e-6f);
+  EXPECT_NEAR(FloorModulo(-4.2f, 3.1f), 2.0f, 1e-6f);
+  EXPECT_NEAR(FloorModulo(4.2f, -3.1f), -2.0f, 1e-6f);
+  EXPECT_NEAR(FloorModulo(-4.2f, -3.1f), -1.1f, 1e-6f);
 }
 
 TEST(math, Fract) {
   // Single precision floating point.
+  // Lower epsilon value due ot Fract(34.12f) not giving result within typical
+  // 1e-6f epsilon.
   {
     EXPECT_NEAR(Fract(0.0f), 0.0f, 1e-5f);
 
@@ -58,15 +128,45 @@ TEST(math, Fract) {
 
   // Double precision floating point.
   {
-    EXPECT_NEAR(Fract(0.0), 0.0, 1e-5);
+    EXPECT_NEAR(Fract(0.0), 0.0, 1e-12);
 
-    EXPECT_NEAR(Fract(1.0), 0.0, 1e-5);
-    EXPECT_NEAR(Fract(0.12), 0.12, 1e-5);
-    EXPECT_NEAR(Fract(34.12), 0.12, 1e-5);
+    EXPECT_NEAR(Fract(1.0), 0.0, 1e-12);
+    EXPECT_NEAR(Fract(0.12), 0.12, 1e-12);
+    EXPECT_NEAR(Fract(34.12), 0.12, 1e-12);
 
-    EXPECT_NEAR(Fract(-1.0), 0.0, 1e-5);
-    EXPECT_NEAR(Fract(-0.12), -0.12, 1e-5);
-    EXPECT_NEAR(Fract(-34.12), -0.12, 1e-5);
+    EXPECT_NEAR(Fract(-1.0), 0.0, 1e-12);
+    EXPECT_NEAR(Fract(-0.12), -0.12, 1e-12);
+    EXPECT_NEAR(Fract(-34.12), -0.12, 1e-12);
+  }
+}
+
+TEST(math, FloorFract) {
+  // Single precision floating point.
+  // Lower epsilon value due ot Fract(34.12f) not giving result within typical
+  // 1e-6f epsilon.
+  {
+    EXPECT_NEAR(FloorFract(0.0f), 0.0f, 1e-5f);
+
+    EXPECT_NEAR(FloorFract(1.0f), 0.0f, 1e-5f);
+    EXPECT_NEAR(FloorFract(0.12f), 0.12f, 1e-5f);
+    EXPECT_NEAR(FloorFract(34.12f), 0.12f, 1e-5f);
+
+    EXPECT_NEAR(FloorFract(-1.0f), 0.0f, 1e-5f);
+    EXPECT_NEAR(FloorFract(-0.12f), 0.88f, 1e-5f);
+    EXPECT_NEAR(FloorFract(-34.12f), 0.88f, 1e-5f);
+  }
+
+  // Double precision floating point.
+  {
+    EXPECT_NEAR(FloorFract(0.0), 0.0, 1e-12);
+
+    EXPECT_NEAR(FloorFract(1.0), 0.0, 1e-12);
+    EXPECT_NEAR(FloorFract(0.12), 0.12, 1e-12);
+    EXPECT_NEAR(FloorFract(34.12), 0.12, 1e-12);
+
+    EXPECT_NEAR(FloorFract(-1.0), 0.0, 1e-12);
+    EXPECT_NEAR(FloorFract(-0.12), 0.88, 1e-12);
+    EXPECT_NEAR(FloorFract(-34.12), 0.88, 1e-12);
   }
 }
 

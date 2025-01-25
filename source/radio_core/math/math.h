@@ -103,6 +103,13 @@ inline auto Hypot(const double x, const double y) -> double {
 }
 
 // Computes the floating-point remainder of the division operation.
+// The returned value has the same sign as x and is less than y in magnitude.
+//
+// This function behaves the same as Python's math.fmod() and numpy.fmod(), as
+// well as Matlab's rem() functions.
+//
+// This variant is also known as truncated division, see
+// https://en.wikipedia.org/wiki/Modulo.
 inline auto Modulo(const float x, const float y) -> float {
   return std::fmod(x, y);
 }
@@ -114,14 +121,39 @@ inline auto Modulo(const T& x, const T& y) -> T {
   return x - Trunc(x / y) * y;
 }
 
-// Compute the fractional part of the argument.
+// Computes the floating-point remainder of the division operation.
+// The returned value has the same sign as y and is less than y in magnitude.
 //
-// The result has the same sign as the input, matching the result of
-// std::modf() (but different from fract() function from GLSL). It can be used
-// in place of fmodf(x, 1).
+// This function behaves the same as Python's % operator, as well as Matlab's
+// mod() and Java's Math.floorMod() functions.
+//
+// This variant is also known as floored division, see
+// https://en.wikipedia.org/wiki/Modulo.
+template <class T>
+inline auto FloorModulo(const T& x, const T& y) -> T {
+  return x - Floor(x / y) * y;
+}
+
+// Compute the fractional part of the argument.
+// The result has the same sign as the input.
+//
+// The behavior matches the result of std::modf() and can be used in place of
+// fmodf(x, 1) and Modulo(x, 1).
+//
+// Note that it is not the same as fract() in GLSL.
 template <class T>
 inline auto Fract(const T& x) -> T {
   return x - Trunc(x);
+}
+
+// Compute the fractional part of the argument.
+// The result is always positive.
+//
+// The behavior matches GLSL's fract() function and can be used in place of
+// FloorModulo(x, 1).
+template <class T>
+inline auto FloorFract(const T& x) -> T {
+  return x - Floor(x);
 }
 
 // Composes a floating point value with the magnitude of mag and the sign of
