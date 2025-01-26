@@ -86,6 +86,7 @@ TEST(RingDoubleBuffer, ElementAccess) {
   // Expect samples 0, 1, 2, ... , 9.
   for (int i = 0; i < 10; ++i) {
     EXPECT_EQ(buffer[i], i);
+    EXPECT_EQ(buffer.at(i), i);
   }
 
   // Push samples 10, 11, ... , 14.
@@ -96,7 +97,10 @@ TEST(RingDoubleBuffer, ElementAccess) {
   // Expect samples 5, ..., 12, 13, 14.
   for (int i = 0; i < 10; ++i) {
     EXPECT_EQ(buffer[i], i + 5);
+    EXPECT_EQ(buffer.at(i), i + 5);
   }
+
+  EXPECT_THROW_OR_ABORT(void(buffer.at(10)), std::out_of_range);
 }
 
 TEST(RingDoubleBuffer, fill) {
@@ -107,6 +111,18 @@ TEST(RingDoubleBuffer, fill) {
     EXPECT_THAT(buffer.GetElements(),
                 ElementsAre(-2, -2, -2, -2, -2, -2, -2, -2, -2, -2));
   }
+}
+
+TEST(RingDoubleBuffer, front) {
+  RingDoubleBuffer<int> buffer(10);
+  buffer.push_multiple(std::to_array({0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}));
+  EXPECT_EQ(buffer.front(), 1);
+}
+
+TEST(RingDoubleBuffer, back) {
+  RingDoubleBuffer<int> buffer(10);
+  buffer.push_multiple(std::to_array({0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}));
+  EXPECT_EQ(buffer.back(), 10);
 }
 
 }  // namespace radio_core

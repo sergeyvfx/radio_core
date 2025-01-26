@@ -7,6 +7,8 @@
 // memory block with elements stored in the older-to-newer order.
 //
 // The buffer has a specified length and elements are circularly overwritten.
+// The oldest element is at the `front()` and the newest element is at the
+// `back()`.
 //
 // Internally the samples are stored twice with an offset of the buffer size
 // between them. This allows to have access to a single continuous chunk of
@@ -25,7 +27,10 @@
 #include <cassert>
 #include <memory>
 #include <span>
+#include <stdexcept>
 #include <vector>
+
+#include "radio_core/base/exception.h"
 
 namespace radio_core {
 
@@ -110,6 +115,46 @@ class RingDoubleBuffer {
   inline auto operator[](const size_t index) const -> const T& {
     assert(!empty());
     return data_[head_index_ + index];
+  }
+
+  // Returns a reference to the element at specified location pos, with bounds
+  // checking.
+  //
+  // If index is not within the range of the buffer, an exception of type
+  // std::out_of_range is thrown.
+  inline auto at(const size_t index) -> T& {
+    const RingDoubleBuffer* const_this = this;
+    return const_cast<T&>((const_this->at(index)));
+  }
+  inline auto at(const size_t index) const -> const T& {
+    if (index >= size()) {
+      ThrowOrAbort<std::out_of_range>("RingBuffer[] index out of bounds");
+    }
+    return (*this)[index];
+  }
+
+  // Access the front (the oldest) element of the buffer.
+  //
+  // Calling front on an empty buffer is undefined.
+  inline auto front() -> T& {
+    assert(!empty());
+    return (*this)[0];
+  }
+  inline auto front() const -> const T& {
+    assert(!empty());
+    return (*this)[0];
+  }
+
+  // Access the back (the newest) element of the buffer.
+  //
+  // Calling back on an empty buffer is undefined.
+  inline auto back() -> T& {
+    assert(!empty());
+    return (*this)[size() - 1];
+  }
+  inline auto back() const -> const T& {
+    assert(!empty());
+    return (*this)[size() - 1];
   }
 
   // Get span which contains the size() elements of the buffer.
