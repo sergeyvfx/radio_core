@@ -35,7 +35,7 @@ inline auto HilbertTransformerWeight(const int n) -> RealType {
 // The number of taps equals to the size of the span.
 //
 // NOTE: The number of taps must be odd for valid transformer behavior and it
-// is `VERIFY)`-ed.
+// is Verify()-ed.
 template <class RealType, class WindowPredicateType>
 inline void GenerateWindowedHilbertTransformer(
     std::span<RealType> h, const WindowPredicateType& window_equation) {

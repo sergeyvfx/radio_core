@@ -19,7 +19,7 @@ namespace radio_core::signal {
 // and will reject frequencies above that.
 //
 // NOTE: The cutoff frequency must be in [0 .. sampling_frequency/2] range and
-// it is `VERIFY()`-ed.
+// it is Verify()-ed.
 //
 // The filter is denoted by its kernel coefficients with the number of taps
 // equal to `h.size()`.
@@ -74,7 +74,7 @@ inline void DesignLowPassFilter(std::span<T> h,
 // to `h.size()`.
 //
 // The number of taps must be odd and the cutoff frequencies must be within the
-// [0 .. sampling_frequency/2] range. This is `VERIFY)`-ed.
+// [0 .. sampling_frequency/2] range. This is Verify()-ed.
 //
 // The window is denoted by its equation.
 //
