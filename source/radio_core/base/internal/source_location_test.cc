@@ -30,7 +30,7 @@ static void RunTest(const source_location loc = source_location::current()) {
   //
   //   - With MSVC the function arguments might follow C-style prototype.
   //     For example:
-  //     void __cdecl astro_core::`anonymous-namespace'::MyFunction(void).
+  //     void __cdecl radio_core::`anonymous-namespace'::MyFunction(void).
   EXPECT_TRUE(
       (std::string(loc.function_name()) == "MyFunction") ||
       (std::string_view(loc.function_name()).ends_with("::MyFunction()")) ||
