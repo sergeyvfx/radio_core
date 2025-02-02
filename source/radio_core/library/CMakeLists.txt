@@ -16,6 +16,7 @@ target_link_libraries(radio_core INTERFACE
   radio_core_modulation_analog_nfm
   radio_core_modulation_analog_wfm
   radio_core_modulation_digital_fsk
+  radio_core_numeric
   radio_core_picture
   radio_core_picture_sstv
   radio_core_protocol_binary_nrzs

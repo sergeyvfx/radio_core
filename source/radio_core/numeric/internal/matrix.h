@@ -1,0 +1,461 @@
+// Copyright (c) 2022 radio core authors
+//
+// SPDX-License-Identifier: MIT
+
+// Type definition, and base mathematical operations of a matrix.
+// The storage order is column major.
+//
+// Provides Eigen-style matrix implementation with the major differences being:
+//
+//  - The naming follows CamelCase.
+//  - Initialization of constant matrix can be done by passing values to the
+//    constructor (no stream API to put values to the matrix is implemented).
+//  - No SIMD vectorization.
+//
+// When or if this module needs to have much more sophisticated linear algebra
+// algorithms, then it is probably better to switch to Eigen.
+
+#pragma once
+
+#include <array>
+#include <cstddef>
+#include <ostream>
+#include <type_traits>
+#include <utility>
+
+#include "radio_core/base/algorithm.h"
+#include "radio_core/base/unroll.h"
+#include "radio_core/numeric/internal/vector.h"
+
+namespace radio_core {
+
+namespace numeric_internal {
+template <class T, size_t kNumRows, size_t kNumColumns>
+class Matrix {
+  using ColumnType = std::array<T, kNumRows>;
+  using MatrixType = std::array<ColumnType, kNumColumns>;
+
+  static_assert(sizeof(ColumnType) == sizeof(T) * kNumRows);
+  static_assert(sizeof(MatrixType) == sizeof(T) * kNumRows * kNumColumns);
+
+ public:
+  //////////////////////////////////////////////////////////////////////////////
+  // Member types.
+
+  // Type of elements in this matrix.
+  using ScalarType = T;
+
+  //////////////////////////////////////////////////////////////////////////////
+  // Constants.
+
+  // Dimension of the matrix provided at compile time.
+  static constexpr size_t kStaticNumRows = kNumRows;
+  static constexpr size_t kStaticNumColumns = kNumColumns;
+
+  //////////////////////////////////////////////////////////////////////////////
+  // Constructors.
+
+  // Create matrix created with all elements set to T{0}.
+  static auto Zero() -> Matrix {
+    Matrix result;
+    Unroll<kNumColumns, kNumRows>(
+        [&](const auto column, const auto row) { result(row, column) = T{0}; });
+    return result;
+  }
+
+  // Create an identity matrix with its diagonal set to 1 and the rest of
+  // the elements set to 0.
+  //
+  // Example:
+  //
+  //   std::cout << Matrix<int, 2, 2>::Identity() << std::endl;
+  //
+  // Output:
+  //
+  //   1 0 0
+  //   0 1 0
+  static auto Identity() -> Matrix {
+    Matrix result = Zero();
+    Unroll<Min(kNumRows, kNumColumns)>(
+        [&](const auto i) { result.data_[i][i] = T{1}; });
+    return result;
+  }
+
+  // Construct matrix from provided columns.
+  // The data is in column-major order, meaning to initialize the matrix
+  //
+  //   ( a b c )
+  //   ( d e f )
+  //
+  // is initialized with data = { {a,b}, {c,d}, {e,f} }
+  template <class DataT,
+            int kNumDataRows,
+            int kNumDataColumns,
+            class = std::enable_if_t<std::is_convertible_v<DataT, T>>>
+  static auto FromColumns(const DataT (&data)[kNumDataColumns][kNumDataRows])
+      -> Matrix {
+    static_assert(kNumDataColumns == kNumColumns);
+    static_assert(kNumDataRows == kNumRows);
+
+    Matrix result;
+    Unroll<kNumColumns, kNumRows>([&](const auto column, const auto row) {
+      result(row, column) = data[column][row];
+    });
+    return result;
+  }
+
+  // Construct matrix from provided rows.
+  // The data is in row-major order, which means that to initialize the matrix
+  //
+  //   ( a b c )
+  //   ( d e f )
+  //
+  // is initialized with data = { {a,b,c}, {d,e,f} }
+  template <class DataT,
+            int kNumDataRows,
+            int kNumDataColumns,
+            class = std::enable_if_t<std::is_convertible_v<DataT, T>>>
+  static auto FromRows(const DataT (&data)[kNumDataRows][kNumDataColumns])
+      -> Matrix {
+    static_assert(kNumDataColumns == kNumColumns);
+    static_assert(kNumDataRows == kNumRows);
+
+    Matrix result;
+    Unroll<kNumColumns, kNumRows>([&](const auto column, const auto row) {
+      result(row, column) = data[row][column];
+    });
+    return result;
+  }
+
+  // Construct default initialized matrix.
+  // There is no explicit value provided to the elements, which could result in
+  // an uninitialized state if T is not a class.
+  Matrix() = default;
+
+  //////////////////////////////////////////////////////////////////////////////
+  // Shape.
+
+  // Dimension of the matrix.
+  consteval inline auto GetNumRows() const -> size_t { return kNumRows; }
+  consteval inline auto GetNumColumns() const -> size_t { return kNumColumns; }
+
+  //////////////////////////////////////////////////////////////////////////////
+  // Element access.
+
+  // A view to a continuous memory containing values of elements of this matrix.
+  // The elements in the array are in the colexicographical access order.
+  constexpr inline auto Data() -> std::span<T> {
+    return std::span(&data_[0][0], kNumRows * kNumColumns);
+  }
+  constexpr inline auto Data() const -> std::span<const T> {
+    return std::span(&data_[0][0], kNumRows * kNumColumns);
+  }
+
+  // An unsized pointer to a continuous memory containing values of elements of
+  // this matrix.
+  constexpr inline auto Pointer() -> T* { return Data().data(); }
+  constexpr inline auto Pointer() const -> const T* { return Data().data(); }
+
+  // Return a reference to the element at specified row and column.
+  // No bounds checking is performed.
+  constexpr inline auto operator()(const size_t row, const size_t column)
+      -> T& {
+    return data_[column][row];
+  }
+  constexpr inline auto operator()(const size_t row, const size_t column) const
+      -> const T& {
+    return data_[column][row];
+  }
+
+  //////////////////////////////////////////////////////////////////////////////
+  // Comparison.
+
+  // Compare for an exact per-element match between two matrices.
+  friend constexpr inline auto operator==(const Matrix& lhs, const Matrix& rhs)
+      -> bool {
+    for (size_t column = 0; column < kNumColumns; ++column) {
+      for (size_t row = 0; row < kNumRows; ++row) {
+        if (lhs(row, column) != rhs(row, column)) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  friend constexpr inline auto operator!=(const Matrix& lhs,
+                                          const Matrix& rhs) {
+    return !(lhs == rhs);
+  }
+
+  //////////////////////////////////////////////////////////////////////////////
+  // Mathematical operations.
+
+  // Return the per-element negation of this matrix.
+  constexpr inline auto operator-() const -> Matrix {
+    Matrix result;
+    Unroll<kNumColumns, kNumRows>([&](const auto column, const auto row) {
+      result(row, column) = -(*this)(row, column);
+    });
+    return result;
+  }
+
+  // Add a matrix to this one.
+  // This is a per-element sum.
+  constexpr inline auto operator+=(const Matrix& rhs) -> Matrix& {
+    Unroll<kNumColumns, kNumRows>([&](const auto column, const auto row) {
+      (*this)(row, column) += rhs(row, column);
+    });
+    return *this;
+  }
+
+  // Subtract a matrix from this one.
+  // This is a per-element difference.
+  constexpr inline auto operator-=(const Matrix& rhs) -> Matrix& {
+    Unroll<kNumColumns, kNumRows>([&](const auto column, const auto row) {
+      (*this)(row, column) -= rhs(row, column);
+    });
+    return *this;
+  }
+
+  // Multiply the matrix by a scalar.
+  // Multiplies every element of the matrix by the scala.
+  constexpr inline auto operator*=(const T& rhs) -> Matrix& {
+    Unroll<kNumColumns, kNumRows>([&](const auto column, const auto row) {
+      (*this)(row, column) *= rhs;
+    });
+    return *this;
+  }
+
+  // Divide the matrix by a scalar.
+  constexpr inline auto operator/=(const T& rhs) -> Matrix& {
+    Unroll<kNumColumns, kNumRows>([&](const auto column, const auto row) {
+      (*this)(row, column) /= rhs;
+    });
+    return *this;
+  }
+
+  // Add two matrices.
+  // This is a per-element sum.
+  friend inline constexpr auto operator+(const Matrix& lhs, const Matrix& rhs)
+      -> Matrix {
+    Matrix result{lhs};
+    result += rhs;
+    return result;
+  }
+
+  // Subtract rhs matrix from lhs matrix.
+  // This is a per-element difference.
+  friend inline constexpr auto operator-(const Matrix& lhs, const Matrix& rhs)
+      -> Matrix {
+    Matrix result{lhs};
+    result -= rhs;
+    return result;
+  }
+
+  // Multiply matrix by a scalar.
+  // Multiplies every element of the matrix by the scalar.
+  friend inline constexpr auto operator*(const Matrix& lhs, const T& rhs)
+      -> Matrix {
+    Matrix result{lhs};
+    result *= rhs;
+    return result;
+  }
+
+  // Multiply scalar by matrix.
+  // Multiplies every element of the matrix by the scalar.
+  friend inline constexpr auto operator*(const T& lhs, const Matrix& rhs)
+      -> Matrix {
+    Matrix result{rhs};
+    result *= lhs;
+    return result;
+  }
+
+  // Multiply the matrix by a matrix.
+  template <size_t kOtherNumColumns>
+  friend inline constexpr auto operator*(
+      const Matrix& lhs, const Matrix<T, kNumColumns, kOtherNumColumns>& rhs) {
+    Matrix<T, kNumRows, kOtherNumColumns> result;
+    Unroll<kOtherNumColumns, kNumRows>([&](const auto column, const auto row) {
+      T sum{0};
+      Unroll<kNumColumns>(
+          [&](const auto i) { sum += lhs(row, i) * rhs(i, column); });
+      result(row, column) = sum;
+    });
+    return result;
+  }
+
+  // Divide matrix by a scalar.
+  // Divides every element of the matrix by the scalar.
+  friend inline constexpr auto operator/(const Matrix& lhs, const T& rhs)
+      -> Matrix {
+    Matrix result{lhs};
+    result /= rhs;
+    return result;
+  }
+
+  // Matrix-vector multiplication.
+  // Implemented with an explicit type to ease template deduction and allow
+  // multiplication by types that can be implicitly cast to a vector.
+  friend inline constexpr auto operator*(const Matrix& m,
+                                         const Vector<T, kNumColumns>& v)
+      -> Vector<T, kNumRows> {
+    Vector<T, kNumRows> result;
+    Unroll<kNumRows>([&](const auto i) {
+      result(i) = T{0};
+      Unroll<kNumColumns>([&](const auto j) { result(i) += m(i, j) * v(j); });
+    });
+    return result;
+  }
+
+  // Matrix-vector multiplication with a vector of elements of a different type.
+  // For example, multiply a matrix of floating point values by a vector of
+  // complex values.
+  template <class U>
+  friend inline constexpr auto operator*(const Matrix& m,
+                                         const Vector<U, kNumColumns>& v) {
+    using ResultElementType = decltype(std::declval<T>() * std::declval<U>() +
+                                       std::declval<T>() * std::declval<U>());
+
+    Vector<ResultElementType, kNumRows> result;
+    Unroll<kNumRows>([&](const auto i) {
+      result(i) = ResultElementType{0};
+      Unroll<kNumColumns>([&](const auto j) { result(i) += m(i, j) * v(j); });
+    });
+    return result;
+  }
+
+  //////////////////////////////////////////////////////////////////////////////
+  // Arithmetic.
+
+  // Return matrix which is mirrored around the diagonal by swapping rows and
+  // columns:
+  //
+  //   (1 2 3)^T = (1 4)
+  //   (4 5 6)     (2 5)
+  //               (3 6)
+  [[nodiscard]] constexpr inline auto Transposed() const
+      -> Matrix<T, kNumColumns, kNumRows> {
+    Matrix<T, kNumColumns, kNumRows> result;
+    Unroll<kNumColumns, kNumRows>([&](const auto column, const auto row) {
+      result(column, row) = (*this)(row, column);
+    });
+    return result;
+  }
+
+  // Construct a new matrix from this one by reversing the order of rows.
+  //
+  // The behavior of this function is the same as Numpy's and Matlab's
+  // flipud() for 2D arrays. For Eigen it is mat.rowwise().reverse().
+  [[nodiscard]] constexpr inline auto WithReversedRows() const -> Matrix {
+    Matrix result;
+    Unroll<kNumColumns>([&](const auto column) {
+      Unroll<kNumRows>([&](const auto dst_row) {
+        const size_t src_row = kNumRows - dst_row - 1;
+        result(dst_row, column) = data_[column][src_row];
+      });
+    });
+    return result;
+  }
+
+  // Construct a new matrix from this one by reversing the order of columns.
+  //
+  // The behavior of this function is the same as Numpy's and Matlab's
+  // fliplr() for 2D arrays. For Eigen it is mat.colwise().reverse().
+  [[nodiscard]] constexpr inline auto WithReversedColumns() const -> Matrix {
+    Matrix result;
+    Unroll<kNumColumns>([&](const auto dst_column) {
+      Unroll<kNumRows>([&](const auto row) {
+        const size_t src_column = kNumColumns - dst_column - 1;
+        result(row, dst_column) = data_[src_column][row];
+      });
+    });
+    return result;
+  }
+
+  // Construct a new matrix from this one by reversing the order of rows and
+  // columns.
+  // This is the same as calling WithReversedRows().WithReversedColumns() but
+  // more efficient.
+  // The behavior of this function is the same as Numpy's flip*( Eigen's
+  // reverse().
+  [[nodiscard]] constexpr inline auto Reversed() const -> Matrix {
+    Matrix result;
+    Unroll<kNumColumns>([&](const auto dst_column) {
+      Unroll<kNumRows>([&](const auto dst_row) {
+        const size_t src_row = kNumRows - dst_row - 1;
+        const size_t src_column = kNumColumns - dst_column - 1;
+        result(dst_row, dst_column) = data_[src_column][src_row];
+      });
+    });
+    return result;
+  }
+
+  //////////////////////////////////////////////////////////////////////////////
+  // Output.
+
+  friend auto operator<<(std::ostream& os, const Matrix& m) -> std::ostream& {
+    Unroll<kNumRows>([&](const auto row) {
+      if constexpr (row != 0) {
+        os << "\n";
+      }
+      Unroll<kNumColumns>([&](const auto column) {
+        if constexpr (column != 0) {
+          os << " ";
+        }
+        os << m(row, column);
+      });
+    });
+    return os;
+  }
+
+ private:
+  MatrixType data_{};
+};
+
+namespace detail {
+
+template <class T, size_t kNumRows, size_t kNumColumns>
+struct IsMatrix<Matrix<T, kNumRows, kNumColumns>> : std::true_type {};
+
+}  // namespace detail
+
+}  // namespace numeric_internal
+
+}  // namespace radio_core
+
+////////////////////////////////////////////////////////////////////////////////
+// Integration with the Google testing framework.
+//
+// The specialization of the StlContainerView for the Matrix type allows using
+// Pointwise operations from the testing framework.
+//
+// Example:
+//   EXPECT_THAT(CalculateMatrix(), Pointwise(DoubleNear(1e-12), {1.23, 4.56}));
+namespace testing::internal {
+
+template <class ContainerType>
+class StlContainerView;
+
+template <class T, size_t kNumRows, size_t kNumColumns>
+class StlContainerView<
+    radio_core::numeric_internal::Matrix<T, kNumRows, kNumColumns>> {
+  using Matrix = radio_core::numeric_internal::Matrix<T, kNumRows, kNumColumns>;
+
+ public:
+  using type = std::array<T, kNumRows * kNumColumns>;
+  using const_reference = std::span<const T>;
+
+  static auto ConstReference(const Matrix& m) -> const_reference {
+    return m.Data();
+  }
+
+  static auto Copy(const Matrix& m) -> type {
+    const const_reference data = m.Data();
+    type copy;
+    std::copy(data.begin(), data.end(), copy.begin());
+    return copy;
+  }
+};
+
+}  // namespace testing::internal
