@@ -4,13 +4,28 @@
 
 // Automatic gain control.
 // Adaptively scales the signal to convert to make be within [-1 .. 1] range.
+// Uses an absolute value to estimate the envelope of the signal.
 //
 // The idea behind the implementation is to mimic to how a charging capacitor
 // via a rectifier will behave: fast exponential charge and slower exponential
 // discharge. The charge is used as an inverse of the normalization factor.
 //
+// To estimate the charge and discharge rate the following formula could be
+// used `alpha = 1 - e^(-3 / N)` where N is the number of samples to make AGC
+// reach the steady state. It comes as an extent of [Wikipedia-TimeConstant]:
+// 1*τ  the system reaches 62.3% the final value, after 3*τ it reaches 95%.
+//
 // Reference:
-//   https://en.wikipedia.org/wiki/Moving_average#Exponential_moving_average
+//
+//  [Wikipedia-EMA] "Exponential moving average," Wikipedia, [Online].
+//       Available:
+//       https://wikipedia.org/wiki/Moving_average#Exponential_moving_average.
+//       [Accessed: March. 15, 2025].
+//
+//  [Wikipedia-TimeConstant] "Time constant," Wikipedia, [Online].
+//      Available:
+//      https://en.wikipedia.org/wiki/Exponential_smoothing#Time_constant.
+//      [Accessed: March. 15, 2025].
 
 #pragma once
 
@@ -97,6 +112,10 @@ class EMAAGC {
 
   // Reset the AGC to the initial state.
   inline void Reset() { current_charge_ = 0; }
+
+  // Get current AGC charge.
+  // It is an estimate of the signal envelope.
+  inline auto GetCharge() const -> RealType { return current_charge_; }
 
  private:
   RealType charge_rate_{0};
