@@ -82,13 +82,7 @@ struct VectorizedIntTypeInfo<uint32_t, 4, true> {
                           const uint32_t b,
                           const uint32_t c,
                           const uint32_t d) -> __m128i {
-    // NOTE: Can not trust order of function arguments in memory, so ensure they
-    // are loaded into a continuous memory chunk.
-    //
-    // TODO(sergey): Optimize this somehow, avoiding possible extra memory
-    // transfers.
-    const uint32_t values[4] = {a, b, c, d};
-    return Load(values);
+    return _mm_set_epi32(d, c, b, a);
   }
 
   static inline auto Load(const uint32_t value) -> __m128i {

@@ -44,13 +44,7 @@ struct VectorizedFloatTypeInfo<float, 4, true> {
                           const float b,
                           const float c,
                           const float d) -> __m128 {
-    // NOTE: Can not trust order of function arguments in memory, so ensure they
-    // are loaded into a continuous memory chunk.
-    //
-    // TODO(sergey): Optimize this somehow, avoiding possible extra memory
-    // transfers.
-    const float values[4] = {a, b, c, d};
-    return Load(values);
+    return _mm_set_ps(d, c, b, a);
   }
 
   static inline auto Load(const float value) -> __m128 {
