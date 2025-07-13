@@ -25,7 +25,7 @@ radio_core_math_kernel_test(power_spectral_density)
 radio_core_math_kernel_test(rotator)
 
 ################################################################################
-# Benhcmarks.
+# Benchmarks.
 
 function(radio_core_math_kernel_benchmark PRIMITIVE_NAME)
   radio_core_benchmark(

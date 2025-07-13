@@ -11,7 +11,7 @@ class Test:
     """
     Base class for all test definitions
 
-    The test contains data needed bu a suit to know what it needs to run and the
+    The test contains data needed by a suit to know what it needs to run and the
     actual run logic is implemented on the suit level.
     """
 
@@ -40,7 +40,7 @@ class TestSuit:
 
     def setup(self):
         """
-        Setup the suit for execution of its tests
+        Set up the suit for execution of its tests
 
         Run one per tests run before any tests of this suit are run.
         Allows to prepare a common environment for all tests which belong to

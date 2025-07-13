@@ -37,7 +37,7 @@ class ReferenceImageTestSuit(TestSuit):
     def __init__(self):
         super().__init__()
 
-        # When actual image is too different from reference don't consider it a
+        # When actual image is too different from the reference don't consider it a
         # failure but, instead, update the reference file.
         # Used when test is failed upon expected changes.
         self._update_reference_on_failure = False

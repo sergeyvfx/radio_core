@@ -32,7 +32,7 @@ target_link_libraries(sstv_decoder
 target_set_output_directory(sstv_decoder ${TOOL_EXECUTABLE_OUTPUT_DIR})
 
 ################################################################################
-# VIS geenrator.
+# VIS generator.
 
 add_executable(sstv_vis_generator vis_generator.cc)
 

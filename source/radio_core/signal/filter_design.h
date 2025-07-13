@@ -132,7 +132,7 @@ inline void DesignBandPassFilter(std::span<T> h,
 }
 
 // Design filter which delays signal by a fractional number of samples.
-// For example, allows t odelay input signal by 0.3 samples.
+// For example, allows to delay input signal by 0.3 samples.
 //
 // References:
 //

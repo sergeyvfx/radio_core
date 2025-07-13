@@ -4,7 +4,7 @@
 
 // Detector of a rising and/or falling edge of a pulse.
 //
-// From implementation perspective this is done by subtracking ver aggressively
+// From implementation perspective this is done by subtracting aggressively
 // smoothed signal from a cleaner signal. This gives a spike in absolute value
 // of the difference on pulse lobes.
 //

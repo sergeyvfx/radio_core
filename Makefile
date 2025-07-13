@@ -10,11 +10,11 @@
 #
 # Targets:
 #
-#   release, test, install - Build, test, and install the project in the relase
+#   release, test, install - Build, test, and install the project in the release
 #                            build configuration.
 #
 #   debug, debug-test, debug-install - Build, test, and install the project in
-#                                      the relase build configuration.
+#                                      the release build configuration.
 #
 # Configuration variables:
 #

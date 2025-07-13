@@ -55,7 +55,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 #         with RealType = float generates warning with MSVC but not with GCC or
 #         Clang. For the simple cases it could be worked around by using
 #         `RealType foo{RealType(0.19)}`, but for non-trivial RealType (like,
-#         Complex or Flaot4) this does not work.
+#         Complex or Float4) this does not work.
 string(CONCAT DEFAULT_DISABLE_WARNINGS
     "/wd4018 /wd4389 /wd4127 /wd4244 /wd4245 /wd4267 /wd4310 "
     "/wd4456 /wd4457 /wd4458 /wd4996 /wd4305")

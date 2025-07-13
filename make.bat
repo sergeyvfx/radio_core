@@ -13,10 +13,10 @@ REM
 REM Targets:
 REM
 REM   release, test, install - Build, test, and install the project in the
-REM                            relase build configuration.
+REM                            release build configuration.
 REM
 REM   debug, debug-test, debug-install - Build, test, and install the project in
-REM                                      the relase build configuration.
+REM                                      the release build configuration.
 REM
 REM Configuration variables:
 REM
@@ -124,13 +124,13 @@ IF NOT "%INSTALL_PREFIX%" == "" (
 )
 
 REM ============================================================================
-REM Directories with spoaces support.
+REM Directories with spaces support.
 REM ============================================================================
 
-REM There are some quircks in different aspects of this script, which makes it
+REM There are some quirks in different aspects of this script, which makes it
 REM more tricky to deal with spaces than simply using double quotes.
 REM
-REM - Using quotes on %~dp0 does not always work. This is because the direcotry
+REM - Using quotes on %~dp0 does not always work. This is because the directory
 REM   contains backward slash at the end, which in some usages escapes the
 REM   closing quote.
 REM
@@ -138,11 +138,11 @@ REM - `IF EXISTS %FOO%\nul` to check whether directory exists does not work when
 REM   put in quotes. `IF EXISTS "%FOO%"` does work, but is not guaranteed to be
 REM   a directory.
 REM
-REM - CMake itself is doing verid decisions when paths with spaces and Windows
+REM - CMake itself is doing weird decisions when paths with spaces and Windows
 REM   like directory separators are passed. Replacing Windows separator with
 REM   Unix one works around the issue.
 
-REM If the directory has forward slashes already, the logic bewlow will break.
+REM If the directory has forward slashes already, the logic below will break.
 set PROJECT_DIR_NOSLASHES=%PROJECT_DIR:/=%
 if not "%PROJECT_DIR%"=="%PROJECT_DIR_NOSLASHES%" (
   echo Forward slashes are detected in the project path.
@@ -159,9 +159,9 @@ REM
 REM TODO(sergey): Consider adding foreign configuration support, so we can, for
 REM example, cross-compile for different target CPUs.
 REM
-REM NOTE: Annoyingly, we need to pass diferent values to CMake and to
+REM NOTE: Annoyingly, we need to pass different values to CMake and to
 REM vcvarsall.bat. There seems to be no easy way around it, so we just maintain
-REM two sets of stringss.
+REM two sets of strings.
 
 set CMAKE_GENERATOR_ARCH=
 set VCVARSALL_ARCH=
@@ -196,7 +196,7 @@ REM ============================================================================
 REM
 REM We use latest available Visual Studio, since the project is supposed to be
 REM working on the wide variety of compilers equally good. Might look into
-REM detecting some soert of "default" Visual Studio, similar to the default GCC
+REM detecting some sort of "default" Visual Studio, similar to the default GCC
 REM and Clang on Linux.
 
 REM Detect executable which allows to query various Visual Studio installations.
@@ -226,7 +226,7 @@ for /f "usebackq tokens=1* delims=: " %%i in (`"%VSWHERE%" -latest -requires Mic
   if /i "%%i"=="catalog_productLineVersion" set VS_VERSION_YEAR=%%j
   if /i "%%i"=="catalog_productSemanticVersion" set VS_VERSION_SEMANTIC=%%j
 )
-REM CMake expects both versaion and the year, for example the proper geenrator
+REM CMake expects both version and the year, for example the proper generator
 REM name is "Visual Studio 15 2017 Win64". Here we extract the major version
 REM from semantic version.
 REM
@@ -285,7 +285,7 @@ REM Configure on every run of `make`. While this seems to be an unnecessary step
 REM which only slows overall process down there are some good reasons for it:
 REM
 REM - There is some issue which leads to MSBuild failures when new files are
-REM   addedl even though CMake is re-run linking fails due to missing symbols
+REM   added even though CMake is re-run linking fails due to missing symbols
 REM   from the new files.
 REM
 REM   This could be a bug in CMake or MSBuild, but need to deal with it so that

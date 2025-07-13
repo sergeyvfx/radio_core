@@ -88,7 +88,7 @@ class EMAAGC {
   // Returns subspan of output where samples were actually written.
   //
   // The caller must ensure the output samples buffer is big enough should have
-  // at least the size of the input samples).
+  // at least the size of the input samples.
   inline auto operator()(const std::span<const SampleType> input_samples,
                          const std::span<SampleType> output_samples)
       -> std::span<SampleType> {

@@ -19,7 +19,7 @@
 //   - Compare how the current implementation different from a more classical
 //     polyphase subfilter approach.
 //
-//     The algorithmical complexity seems to be the same, but is the quality the
+//     The algorithmic complexity seems to be the same, but is the quality the
 //     same?
 //
 //   - Verify the calculation of the kernel size for the anti-alias filter.
@@ -49,7 +49,7 @@ class Decimator {
   // Default constructor.
   //
   // Leaves object uninitialized. When this path is used an explicit call to
-  // `setRatio()` is expected before performing downsapling, otherwise the
+  // `setRatio()` is expected before performing downsampling, otherwise the
   // object will have an undefined behavior.
   inline Decimator() = default;
 

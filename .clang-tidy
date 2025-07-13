@@ -27,10 +27,10 @@ Checks: >
 #   verbose, i.e. (Mask & Flag) == true.
 #
 # - readability-identifier-length: for formulas is better to follow notation
-#   from whitepapers and not invent new names.
+#   from white papers and not invent new names.
 #
 # - readability-function-cognitive-complexity: it includes complexity hidden by
-#   macro, making the check to be very proone to be trigerred in regression
+#   macro, making the check to be very prone to be triggered in regression
 #   tests.
 #
 # - readability-convert-member-functions-to-static: the check can not be aware
@@ -54,12 +54,12 @@ Checks: >
 # Modernize
 # =========
 #
-# - modernize-avoid-c-arrays: for the perofmrance, cleaness of headers, and
-#   interfacing with the librraies is easier and more clear to use C array.
-#   Using std::array<> does not intrinsicly solve problem of C arrays due to
+# - modernize-avoid-c-arrays: for the performance, cleanness of headers, and
+#   interfacing with the libraries is easier and clearer to use C array.
+#   Using std::array<> does not intrinsically solve problem of C arrays due to
 #   the non-checked behavior of operator[].
 #
-# - modernize-use-nodiscard: makes code too verbose, border line harder to
+# - modernize-use-nodiscard: makes code too verbose, borderline harder to
 #   follow.
 
 # WarningsAsErrors: "*"
@@ -87,9 +87,9 @@ CheckOptions:
   - { key: readability-identifier-naming.GlobalConstantCase, value: CamelCase }
   - { key: readability-identifier-naming.GlobalConstantPrefix, value: k }
   - {
-      key: readability-identifier-naming.ConstexprVariableCase,
-      value: CamelCase,
-    }
+    key: readability-identifier-naming.ConstexprVariableCase,
+    value: CamelCase,
+  }
   - { key: readability-identifier-naming.ConstexprVariablePrefix, value: k }
   - { key: readability-identifier-naming.StaticConstantCase, value: CamelCase }
   - { key: readability-identifier-naming.StaticConstantPrefix, value: k }

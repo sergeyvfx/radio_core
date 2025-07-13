@@ -58,7 +58,7 @@ class TestSuitRunner:
     # Those are lines with common predefined prefix used for output. Takes care
     # of coloring of the output.
     #
-    # TODO(sergey): COuld move some of shared logic to a more reusable functions
+    # TODO(sergey): Could move some of shared logic to a more reusable functions
     # but not sure it will make code easier.
 
     def _print_info_h1(self, info: str):

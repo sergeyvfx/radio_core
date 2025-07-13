@@ -204,7 +204,7 @@ radio_core_math_unittest_test(complex_matchers)
 radio_core_math_unittest_test(vectorized_matchers)
 
 ################################################################################
-# Benhcmarks.
+# Benchmarks.
 
 function(radio_core_math_benchmark PRIMITIVE_NAME)
   radio_core_benchmark(

@@ -80,7 +80,7 @@ inline void FFTNormalizeAndShift(const std::span<SampleType> x) {
 //
 // The normalization happens by the factor of 1/x.size().
 //
-// This function is designed to be used on the result of FFT which transfotms
+// This function is designed to be used on the result of FFT which transforms
 // complex input.
 template <class T>
 inline void FFTNormalizeAndShift(const std::span<T> x) {

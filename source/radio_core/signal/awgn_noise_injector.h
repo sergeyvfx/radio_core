@@ -34,7 +34,7 @@ namespace radio_core::signal {
 template <class RealType>
 class AWGNNoiseInjector {
  public:
-  // Default input is a sinewave with peak amplitude of 1 volt.
+  // Default input is a sine wave with peak amplitude of 1 volt.
   struct Options {
     // Power of the input signal in dBm. Assumes a constant power of the signal.
     RealType signal_db{0};

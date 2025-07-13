@@ -155,7 +155,7 @@ class Report:
         """
         Global setup of the report
 
-        Called before any suit is setup.
+        Called before any suit is set up.
         """
 
         parser = argparse.ArgumentParser(description="Histogram plotter")
@@ -170,7 +170,7 @@ class Report:
 
         self.report_rootdir = args.report_rootdir
 
-        # When the reporting is enabled ensure the outout root directory exists.
+        # When the reporting is enabled ensure the output root directory exists.
         if self.is_enabled():
             self.report_rootdir.mkdir(exist_ok=True)
 
@@ -178,7 +178,7 @@ class Report:
         """
         Global teardown of the report
 
-        Called after all suits are teareddown.
+        Called after all suits are teared down.
         """
 
         self._generate_report()
