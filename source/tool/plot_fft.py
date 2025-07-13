@@ -59,7 +59,7 @@ def create_argument_parser() -> argparse.ArgumentParser:
         "--transform",
         type=str,
         help="Transformation of the input samples before calculating FFT",
-        choices=["none", "x**2", "x**4"],
+        choices=["none", "x**2", "x**4", "x**8"],
         default="none",
     )
 
@@ -143,6 +143,8 @@ class PlotState:
             self.transform = lambda x: x**2
         elif transform == "x**4":
             self.transform = lambda x: x**4
+        elif transform == "x**8":
+            self.transform = lambda x: x**8
 
     def reset(self):
         """
