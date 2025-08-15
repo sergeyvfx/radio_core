@@ -35,12 +35,12 @@ ifndef CMAKE_ARGS
 	CMAKE_ARGS :=
 endif
 
+# Build directories for release and build configurations.
 ifndef BUILD_DIR_RELEASE
-	BUILD_DIR_RELEASE := $(CURDIR)/build-release
+	BUILD_DIR_RELEASE := $(CURDIR)/Build/Release
 endif
-
 ifndef BUILD_DIR_DEBUG
-	BUILD_DIR_DEBUG := $(CURDIR)/build-debug
+	BUILD_DIR_DEBUG := $(CURDIR)/Build/Debug
 endif
 
 CMAKE_GENERATOR_ARGS :=
@@ -112,7 +112,7 @@ define configure-project
 	$(eval $@_BUILD_DIR := $1)
 	$(eval $@_BUILD_TYPE := $2)
 
- 	@echo
+	@echo
 	@echo "**********************************************************************"
 	@echo "** Configuring the project for $($@_BUILD_TYPE) ..."
 	@echo "**********************************************************************"
@@ -140,16 +140,16 @@ define build-project
 	$(eval $@_BUILD_DIR := $1)
 	$(eval $@_BUILD_TYPE := $2)
 
- 	@echo
- 	@echo "**********************************************************************"
- 	@echo "** Building the project for $($@_BUILD_TYPE) ..."
- 	@echo "**********************************************************************"
- 	@echo
+	@echo
+	@echo "**********************************************************************"
+	@echo "** Building the project for $($@_BUILD_TYPE) ..."
+	@echo "**********************************************************************"
+	@echo
 
- 	+$(call compile-target,$($@_BUILD_DIR))
+	+$(call compile-target,$($@_BUILD_DIR))
 
- 	@echo
- 	@echo Build succeeded.
+	@echo
+	@echo Build succeeded.
 endef
 
 # ==============================================================================
@@ -225,7 +225,7 @@ install: release
 debug-configure:
 	$(call configure-project,$(BUILD_DIR_DEBUG),Debug)
 
-.PHONY: build-debug
+.PHONY: debug-build
 debug-build: | debug-configure
 	$(call build-project,$(BUILD_DIR_DEBUG),Debug)
 

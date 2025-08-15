@@ -29,6 +29,7 @@ Desktop.ini
 
 # Build folders.
 /build*/
+/Build*/
 
 # Python temp paths.
 __pycache__/
