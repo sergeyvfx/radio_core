@@ -47,9 +47,7 @@
 
 #include "radio_core/base/ring_buffer.h"
 #include "radio_core/math/kernel/dot.h"
-#include "radio_core/signal/filter.h"
 #include "radio_core/signal/filter_design.h"
-#include "radio_core/signal/frequency.h"
 #include "radio_core/signal/window.h"
 
 namespace radio_core::signal {

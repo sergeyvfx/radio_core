@@ -22,7 +22,6 @@
 
 #include "radio_core/base/container.h"
 #include "radio_core/modulation/analog/bandwidth.h"
-#include "radio_core/modulation/analog/iq_demodulator.h"
 #include "radio_core/signal/decimator.h"
 #include "radio_core/signal/ema_agc.h"
 #include "radio_core/signal/frequency_shifter.h"
