@@ -20,7 +20,20 @@
 //     polyphase subfilter approach.
 //
 //     The algorithmic complexity seems to be the same, but is the quality the
-//     same?
+//     same? It must be, because it is the same with an exception of the order
+//     of mathematical operations. The memory access pattern also does not seem
+//     to be any of benefit.
+//
+//     Similar question has been raised in https://dsp.stackexchange.com/q/24925
+//
+//   - Investigate whether Cascaded integrator–comb filter (CIC filter) could be
+//     be used to reduce computational complexity.
+//
+//     https://en.wikipedia.org/wiki/Cascaded_integrator%E2%80%93comb_filter
+//     https://wirelesspi.com/cascaded-integrator-comb-cic-filters-a-staircase-of-dsp/
+//
+//   - Multi-stage decimation might help, potentially combined with Half-band
+//     filter(s).
 //
 //   - Verify the calculation of the kernel size for the anti-alias filter.
 
