@@ -368,16 +368,16 @@ class BaseSignalPath : public Sink<BaseComplex<T>> {
   auto GetAFSampleRate() const -> int { return af_sample_rate_; }
 
   // Get receive filter configuration.
-  auto GetReceiveFilterDecimationRatio() -> T {
+  auto GetReceiveFilterDecimationRatio() const -> T {
     return receive_filter_.GetDecimationRatio();
   }
-  auto GetReceiveFilterBandwidth() -> T {
+  auto GetReceiveFilterBandwidth() const -> T {
     return receive_filter_.GetBandwidth();
   }
-  auto GetReceiveFilterTransitionBand() -> T {
+  auto GetReceiveFilterTransitionBand() const -> T {
     return receive_filter_.GetTransitionBand();
   }
-  auto GetReceiveFilterKernelSize() -> size_t {
+  auto GetReceiveFilterKernelSize() const -> size_t {
     return receive_filter_.GetKernelSize();
   }
 

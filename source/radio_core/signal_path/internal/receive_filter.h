@@ -141,10 +141,10 @@ class ReceiveFilter {
   }
 
   // Get actual filter configuration.
-  auto GetDecimationRatio() -> int { return decimation_ratio_; }
-  auto GetBandwidth() -> T { return filter_bandwidth_; }
-  auto GetTransitionBand() -> T { return filter_transition_band_; }
-  auto GetKernelSize() -> size_t { return filter_.GetKernelSize(); }
+  auto GetDecimationRatio() const -> int { return decimation_ratio_; }
+  auto GetBandwidth() const -> T { return filter_bandwidth_; }
+  auto GetTransitionBand() const -> T { return filter_transition_band_; }
+  auto GetKernelSize() const -> size_t { return filter_.GetKernelSize(); }
 
  private:
   // Get the decimation ratio which is applied prior to the filter.
