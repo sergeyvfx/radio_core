@@ -129,7 +129,7 @@ class Decimator {
   }
 
   // Get currently configured decimation ratio.
-  inline auto GetRatio() const -> int { return ratio_; }
+  inline auto GetRatio() const -> int { return int(ratio_); }
 
   // Push and process new sample.
   //
@@ -349,7 +349,9 @@ class Decimator {
   }
 
   // Decimation ratio.
-  int ratio_ = 0;
+  // Store as size_t to simplify comparison with the number of accumulated
+  // samples, avoiding type casts in hot code paths.
+  size_t ratio_ = 0;
 
   // Kernel of the low-pass filter.
   std::vector<KernelElementType, Allocator<KernelElementType>> kernel_;
