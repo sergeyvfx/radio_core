@@ -27,6 +27,8 @@ from pathlib import Path
 from scipy import stats  # type: ignore
 from typing import Iterable
 
+from module.wav_reader import WavReader
+
 
 def create_argument_parser() -> argparse.ArgumentParser:
     """
@@ -68,45 +70,20 @@ def create_argument_parser() -> argparse.ArgumentParser:
     return parser
 
 
-# TODO(sergey): Find a way to make type more specific?
-def decode_frames(wav_file: wave.Wave_read, frames: bytes) -> np.ndarray:
-    """
-    Decode frames read from WAV from binary form to a collection of tuples
-
-    Returns an array with N frame-samples, each frame-sample contains 2 floating
-    point values for I and Q values of that sample.
-    """
-
-    num_channels = wav_file.getnchannels()
-    assert num_channels == 2
-
-    # Calculate the number of frames from the raw bytes.
-    # The sample_width is the size of a single sample, so every sample frame
-    # consists of num_channels*sample_width bytes.
-    sample_width = wav_file.getsampwidth()
-    num_frames = len(frames) // num_channels // sample_width
-
-    if sample_width == 1:
-        # int8
-        data = struct.unpack("<" + str(num_frames * 2) + "c", frames)
-        flat_samples = np.array(data, dtype=np.float32) / 255
-    elif sample_width == 2:
-        # int16
-        data = struct.unpack("<" + str(num_frames * 2) + "h", frames)
-        flat_samples = np.array(data, dtype=np.float32) / 32767
-    else:
-        raise Exception(f"Unknown sample width {sample_width}")
-
-    return np.c_[flat_samples[0::2], flat_samples[1::2]]
-
-
 class PlotState:
     """
     Configuration and the current state of the plot
     """
 
-    # Matplotlib's plot which is used for visualization.
+    # Reader of data from a WAV file.
+    wav_reader: WavReader
+
+    # Matplotlib's axes and plot which is used for visualization.
+    axes: matplotlib.axes.Axes
     plot: matplotlib.collections.PathCollection
+
+    # Matplotlib's Text object which is used to display text in a box.
+    text_plot: matplotlib.text.Text
 
     # The number of new sample-frames read from file on every redraw.
     block_size: int
@@ -120,13 +97,17 @@ class PlotState:
 
     def __init__(
         self,
-        wav_file: wave.Wave_read,
+        wav_reader: WavReader,
+        axes: matplotlib.axes.Axes,
         plot: matplotlib.collections.PathCollection,
+        text_plot: matplotlib.text.Text,
         block_size: int,
         constellation_size: int,
     ) -> None:
-        self.wav_file = wav_file
+        self.wav_reader = wav_reader
+        self.axes = axes
         self.plot = plot
+        self.text_plot = text_plot
         self.block_size = block_size
         self.constellation_size = constellation_size
         self.samples = np.array([], dtype=np.float32)
@@ -138,7 +119,7 @@ class PlotState:
         Clear the current samples and rewind the file.
         """
 
-        self.wav_file.rewind()
+        self.wav_reader.rewind()
         self.samples = np.array([], dtype=np.float32)
 
     def push_samples(self, new_samples: np.ndarray) -> None:
@@ -176,8 +157,7 @@ def update_plot(
 
     # Read frames form the file and decode them into IQ samples.
     # Sample is an array of (I, Q).
-    new_frames = plot_state.wav_file.readframes(plot_state.block_size)
-    new_samples = decode_frames(plot_state.wav_file, new_frames)
+    new_samples = plot_state.wav_reader.read_num_samples(plot_state.block_size)
 
     plot_state.push_samples(new_samples)
 
@@ -187,7 +167,16 @@ def update_plot(
     )
 
     # Calculate density of the IQ samples.
-    kde = stats.gaussian_kde(samples_stack)
+    #
+    # Add dither to the input to work-around cases when the dataset to avoid
+    # it having highly dependent features, and hereby also avoid gaussian_kde
+    # throwing an exception in such cases.
+    num_samples = len(plot_state.samples)
+    dither_x = np.random.normal(size=num_samples) * 1e-5
+    dither_y = np.random.normal(size=num_samples) * 1e-5
+    kde = stats.gaussian_kde(
+        [samples_stack[0] + dither_x, samples_stack[1] + dither_y]
+    )
     density = kde(samples_stack)
 
     # Sort samples by density, so they are displayed more nicely.
@@ -204,6 +193,8 @@ def update_plot(
     plot_state.plot.set_offsets(samples)
     plot_state.plot.set_array(density)
 
+    plot_state.text_plot.set_text(f"Frame: {frame}")
+
     return (plot_state.plot,)
 
 
@@ -211,22 +202,18 @@ def main() -> None:
     parser = create_argument_parser()
 
     args = parser.parse_args()
-    wav_file = wave.open(str(args.wav_file), "rb")
-
-    duration_sec = wav_file.getnframes() / wav_file.getframerate()
+    wav_reader = WavReader(args.wav_file)
 
     # Print basic information.
     print("File information")
     print("================")
     print()
-    print(f"Number of channels              : {wav_file.getnchannels()}")
-    print(f"Sample width                    : {wav_file.getsampwidth()} bytes")
-    print(f"Frame rate (sampling frequency) : {wav_file.getframerate()} Hz")
-    print(f"Number of frames                : {wav_file.getnframes()}")
-    print(f"Compression type                : {wav_file.getcomptype()}")
-    print(f"Duration                        : {duration_sec} sec")
+    print(f"Number of channels  : {wav_reader.get_num_channels()}")
+    print(f"Sample rate         : {wav_reader.get_sample_rate()} Hz")
+    print(f"Sample type         : {wav_reader.get_sample_type()}")
+    print(f"Duration            : {wav_reader.get_duration_sec()} sec")
 
-    if wav_file.getnchannels() != 2:
+    if wav_reader.get_num_channels() != 2:
         raise Exception("Can only visualize files with 2 channels")
 
     constellation_scale = args.scale
@@ -241,9 +228,21 @@ def main() -> None:
     ax_const.set_ylabel("Q")
     scatter_plot = ax_const.scatter([], [], c=[], cmap="viridis", alpha=0.7)
 
+    text_plot = ax_const.axes.text(
+        0.05,
+        0.95,
+        f"",
+        transform=ax_const.axes.transAxes,
+        fontsize=10,
+        verticalalignment="top",
+        bbox=dict(boxstyle="round", facecolor="lavender", alpha=0.7),
+    )
+
     plot_state = PlotState(
-        wav_file=wav_file,
+        wav_reader=wav_reader,
+        axes=ax_const,
         plot=scatter_plot,
+        text_plot=text_plot,
         block_size=args.block_size,
         constellation_size=args.size,
     )
@@ -252,7 +251,7 @@ def main() -> None:
     anim = matplotlib.animation.FuncAnimation(
         fig=fig,
         func=update_plot,
-        frames=wav_file.getnframes() // plot_state.block_size,
+        frames=wav_reader.get_num_samples() // plot_state.block_size,
         interval=1.0 / fps * 1000,
         fargs=(plot_state,),
     )
