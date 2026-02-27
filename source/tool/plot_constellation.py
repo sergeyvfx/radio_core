@@ -177,7 +177,7 @@ def update_plot(
     kde = stats.gaussian_kde(
         [samples_stack[0] + dither_x, samples_stack[1] + dither_y]
     )
-    density = kde(samples_stack)
+    density = kde(samples_stack).astype(np.float64)
 
     # Sort samples by density, so they are displayed more nicely.
     idx = density.argsort()
@@ -228,11 +228,11 @@ def main() -> None:
     ax_const.set_ylabel("Q")
     scatter_plot = ax_const.scatter([], [], c=[], cmap="viridis", alpha=0.7)
 
-    text_plot = ax_const.axes.text(
+    text_plot = ax_const.text(
         0.05,
         0.95,
         f"",
-        transform=ax_const.axes.transAxes,
+        transform=ax_const.transAxes,
         fontsize=10,
         verticalalignment="top",
         bbox=dict(boxstyle="round", facecolor="lavender", alpha=0.7),

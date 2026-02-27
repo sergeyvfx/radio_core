@@ -13,7 +13,7 @@ import argparse
 import re
 import sys
 
-from typing import List, Dict
+from typing import List, Dict, TextIO
 
 from module import signal, windowed_plot
 
@@ -72,9 +72,7 @@ def create_argument_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def read_signals_from_file(
-    context: Context, input: argparse.FileType("r")
-) -> None:
+def read_signals_from_file(context: Context, input: TextIO) -> None:
     """Read signals from the input opened by the argument parser"""
 
     regex = re.compile(
@@ -83,6 +81,8 @@ def read_signals_from_file(
 
     for line in input.readlines():
         match = regex.match(line)
+        if match is None:
+            continue
 
         label = match.group("label")
         x = float(match.group("x"))

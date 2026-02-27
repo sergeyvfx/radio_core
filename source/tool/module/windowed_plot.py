@@ -78,12 +78,12 @@ class Plot:
 
         if options.ymin < options.ymax:
             self._ax.axis(
-                [
+                (
                     0,
                     1,
                     options.ymin,
                     options.ymax,
-                ]
+                )
             )
 
         self._ax.callbacks.connect(
@@ -136,7 +136,7 @@ class Plot:
         pyplot.subplots_adjust(bottom=0.25)
 
         self._window_size_slider = widgets.Slider(
-            ax=pyplot.axes([0.25, 0.1, 0.65, 0.03]),
+            ax=pyplot.axes((0.25, 0.1, 0.65, 0.03)),
             label="Window size [ms]",
             valmin=1,
             valmax=5000,
@@ -145,7 +145,7 @@ class Plot:
         self._window_size_slider.on_changed(lambda val: self._update())
 
         self._position_slider = widgets.Slider(
-            ax=pyplot.axes([0.25, 0.05, 0.65, 0.03]),
+            ax=pyplot.axes((0.25, 0.05, 0.65, 0.03)),
             label="Start time [ms]",
             valmin=0.0,
             valmax=self._max_time_in_ms,

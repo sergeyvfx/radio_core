@@ -16,7 +16,7 @@ import sys
 
 from pathlib import Path
 from typing import Any
-from scipy.io import wavfile
+from scipy.io import wavfile  # type: ignore
 
 
 class WAV:

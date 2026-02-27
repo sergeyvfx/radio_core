@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT-0
 
 import numpy as np
-import soundfile as sf
+import soundfile as sf  # type: ignore
 from pathlib import Path
 
 

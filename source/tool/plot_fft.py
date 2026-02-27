@@ -199,11 +199,11 @@ def main() -> None:
     ax_fft.set_xlabel("Frequency (Hz)")
     (fft_plot,) = ax_fft.plot([], [], "r")
 
-    text_plot = ax_fft.axes.text(
+    text_plot = ax_fft.text(
         0.05,
         0.95,
         f"",
-        transform=ax_fft.axes.transAxes,
+        transform=ax_fft.transAxes,
         fontsize=10,
         verticalalignment="top",
         bbox=dict(boxstyle="round", facecolor="lavender", alpha=0.7),
