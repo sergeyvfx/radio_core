@@ -196,6 +196,9 @@ inline auto IsNaN(const BaseComplex<T>& a) -> bool {
 }
 
 // Calculate the squared magnitude of a complex number.
+//
+// Note: follows the std::norm(std::complex). It is different from NumPy's
+// linalg.norm() which returns Frobenius norm by default.
 template <class T>
 inline auto Norm(const BaseComplex<T>& a) -> T {
   return a.imag * a.imag + a.real * a.real;

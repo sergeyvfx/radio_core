@@ -20,6 +20,8 @@
 
 namespace radio_core::kernel {
 
+// Calculate per-element norm (squared magnitude) of every input sample.
+//
 // The output buffer must have at least same number of elements as the input
 // samples buffer. It is possible to have the output buffer bigger than input
 // in which case the output buffer will only be partially written (only

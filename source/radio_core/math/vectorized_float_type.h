@@ -526,6 +526,7 @@ namespace linalg {
 
 // Calculate a Frobenius norm of the vector norm:
 //   RESULT = Sqrt( Sum from i to N (a[i]) )
+// Matches the default behavior of numpy.linalg.
 template <class T, int N>
 inline auto Norm(const VectorizedFloatType<T, N>& a) -> T {
   return VectorizedFloatType<T, N>::TypeInfo::Norm(a.GetRegister());

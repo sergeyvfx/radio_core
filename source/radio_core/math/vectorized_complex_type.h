@@ -371,6 +371,9 @@ inline auto FastAbs(const VectorizedComplexType<T, N>& a)
 
 // Calculate the per-element squared magnitude of a complex number:
 //   RESULT[i] = Norm(a[i]) for i = 0 to N
+//
+// Note: follows the std::norm(std::complex). It is different from NumPy's
+// linalg.norm() which returns Frobenius norm by default.
 template <class T, int N>
 inline auto Norm(const VectorizedComplexType<T, N>& a)
     -> VectorizedFloatType<T, N> {
