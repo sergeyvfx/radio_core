@@ -84,7 +84,7 @@ template <class T>
 class WindowEquation<T, Window::kTriangular> {
  public:
   inline auto operator()(const int order, const int n) const -> T {
-    return T(1) - T(2) * Abs(n - T(order) / 2) / order;
+    return T(1) - T(2) / order * Abs(n - T(order) / 2);
   }
 };
 
