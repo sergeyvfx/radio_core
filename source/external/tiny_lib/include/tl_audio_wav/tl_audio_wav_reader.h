@@ -118,7 +118,7 @@
 // Semantic version of the tl_audio_wav_reader library.
 #define TL_AUDIO_WAV_READER_VERSION_MAJOR 0
 #define TL_AUDIO_WAV_READER_VERSION_MINOR 0
-#define TL_AUDIO_WAV_READER_VERSION_REVISION 1
+#define TL_AUDIO_WAV_READER_VERSION_REVISION 4
 
 // Namespace of the module.
 // The outer name spaces which surrounds the ABI-version namespace.

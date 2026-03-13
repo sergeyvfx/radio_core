@@ -341,9 +341,10 @@ auto Main(int argc, char** argv) -> int {
 
     // Configure WAV writer.
     const audio_wav_writer::FormatSpec audio_format_spec = {
+        .file_format = audio_wav_writer::FileFormat::kRIFF,
+        .compression = audio_wav_writer::Compression::kPCM16,
         .num_channels = 1,
         .sample_rate = cli_options.audio_sample_rate,
-        .bit_depth = 16,
     };
     if (!audio_wav_writer.Open(audio_file, audio_format_spec)) {
       cerr << "Error opening audio WAV stream." << endl;

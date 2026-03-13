@@ -6,8 +6,8 @@
 //
 // The writer implements streamed and bulk writer of WAVE files.
 //
-// In the bulk mode the file is written using given set of samples, and file is
-// written in one go.
+// In the bulk mode the file is written using given a set of samples, and the
+// file is written in one go.
 //
 // In a streamed mode samples are written incrementally to the file. In this
 // mode the underlying file needs to support rewind to the beginning of the
@@ -27,9 +27,9 @@
 //
 //   const FormatSpec format_spec = {
 //       .file_format = FileFormat::kRIFF,
+//       .compression = Compression::kPCM16,
 //       .num_channels = 2,
 //       .sample_rate = 44100,
-//       .bit_depth = 16,
 //   };
 //
 //   MyFileWriter my_file_writer;
@@ -47,9 +47,9 @@
 //
 //   const FormatSpec format_spec = {
 //       .file_format = FileFormat::kRIFF,
+//       .compression = Compression::kPCM16,
 //       .num_channels = 2,
 //       .sample_rate = 44100,
-//       .bit_depth = 16,
 //   };
 //
 //   MyFileWriter my_file_writer;
@@ -63,9 +63,9 @@
 //
 //   const FormatSpec format_spec = {
 //       .file_format = FileFormat::kRIFF,
+//       .compression = Compression::kPCM16,
 //       .num_channels = 2,
 //       .sample_rate = 44100,
-//       .bit_depth = 16,
 //   };
 //
 //   Writer<MyFileWriter>::Write(MyFileWriter(), format_spec, my_samples);
@@ -92,13 +92,13 @@
 // of the return value in the case of error or reading past the EOF will work
 // for the WAV writer.
 //
-// When using a streamed API then additionally the following method is to be
+// When using a streamed API, then additionally, the following method is to be
 // implemented:
 //
 //   auto Rewind() -> bool;
 //
-// which rewinds current position in the file to its beginning, allowing to
-// override content of file.
+// which rewinds the current position in the file to its beginning, allowing to
+// override the content of a file.
 //
 // The return value is defined as following:
 //
@@ -106,22 +106,23 @@
 //   - Otherwise false is returned.
 //
 // It is possible to have trailing arguments with default values in those
-// methods if they fo not change the expected semantic.
+// methods if they do not change the expected semantic.
 //
 //
 // Limitations
 // ===========
 //
-// - Only writing WAVE as uncompressed PCM 16-bit signed integer data type is
+// - Only writing WAVE as an uncompressed PCM 16-bit signed integer data type is
 //   supported.
 //
-// - Streaming is not optimized: it can take substantial time to write float
-//   samples to int16 file.
+// - Streaming is not optimized: it can take significant time to write float
+//   samples to an int16 file.
 //
 //
 // Version history
 // ===============
 //
+//   0.0.4-alpha    (11 Mar 2026)    Support FLOAT and DOUBLE samples.
 //   0.0.3-alpha    (19 Oct 2025)    Support RF64 output format.
 //   0.0.2-alpha    (13 Dec 2024)    Various improvements with the goal to
 //                                   support buffered writing:
@@ -141,29 +142,39 @@
 #include <array>
 #include <bit>
 #include <cassert>
+#include <cmath>
 #include <concepts>
 #include <cstdint>
 #include <cstdio>
 #include <iterator>
+#include <optional>
 #include <span>
 #include <type_traits>
 
 // Semantic version of the tl_audio_wav_writer library.
 #define TL_AUDIO_WAV_WRITER_VERSION_MAJOR 0
 #define TL_AUDIO_WAV_WRITER_VERSION_MINOR 0
-#define TL_AUDIO_WAV_WRITER_VERSION_REVISION 1
+#define TL_AUDIO_WAV_WRITER_VERSION_REVISION 4
 
 // Namespace of the module.
-// The outer name spaces which surrounds the ABI-version namespace.
+// The outer name spaces that surround the ABI-version namespace.
 #ifndef TL_AUDIO_WAV_WRITER_NAMESPACE
 #  define TL_AUDIO_WAV_WRITER_NAMESPACE tiny_lib::audio_wav_writer
 #endif
 
-// The size of the buffer used for single frame-sample.
+// Number of supported audio channels.
+//
+// Mainly for the PEAK chunk, which is used for RIFF format and non-PCM
+// compression. The rest of the writer support an arbitrary number of channels.
+#ifndef TL_AUDIO_WAV_WRITER_MAX_NUM_CHANNELS
+#  define TL_AUDIO_WAV_WRITER_MAX_NUM_CHANNELS 32
+#endif
+
+// The size of the buffer used for a single frame-sample.
 //
 // It is used, for example, in WriteSingleSample() to optimize disk and memory
 // access pattern. Measured in the number of per-channel samples. The default
-// value covers the case of surround files with center channel.
+// value covers the case of surround files with a center channel.
 //
 // Must be non-negative.
 // Value of 0 or 1 disables buffered writing, which leads to more poor
@@ -185,10 +196,16 @@
     (TL_AUDIO_WAV_WRITER_SAMPLE_FRAME_BUFFER_SIZE * 32)
 #endif
 
+// When the time header is not available, all time fields will be initialized to
+// 0 unless a timestamp is provided via GetTimeStamp().
+#ifndef TL_AUDIO_WAV_WRITER_NO_TIME_H
+#  include <time.h>
+#endif
+
 // Helpers for TL_AUDIO_WAV_WRITER_VERSION_NAMESPACE.
 //
-// Typical extra indirection for such conversion to allow macro to be expanded
-// before it is converted to string.
+// Typical extra indirection for such conversion to allow the macro to be
+// expanded before it is converted to string.
 #define TL_AUDIO_WAV_WRITER_VERSION_NAMESPACE_CONCAT_HELPER(id1, id2, id3)     \
   v_##id1##_##id2##_##id3
 #define TL_AUDIO_WAV_WRITER_VERSION_NAMESPACE_CONCAT(id1, id2, id3)            \
@@ -197,7 +214,7 @@
 // Constructs identifier suitable for namespace denoting the current library
 // version.
 //
-// For example: TL_AUDIO_WAV_WRITER_VERSION_NAMESPACE -> v_0_1_9
+// Example: TL_AUDIO_WAV_WRITER_VERSION_NAMESPACE -> v_0_1_9
 #define TL_AUDIO_WAV_WRITER_VERSION_NAMESPACE                                  \
   TL_AUDIO_WAV_WRITER_VERSION_NAMESPACE_CONCAT(                                \
       TL_AUDIO_WAV_WRITER_VERSION_MAJOR,                                       \
@@ -215,7 +232,7 @@ inline namespace TL_AUDIO_WAV_WRITER_VERSION_NAMESPACE {
 enum class FileFormat {
   // Original RIFF/WAVE format.
   //
-  // The most compatible format, especially with an older software. The file is
+  // The most compatible format, especially with older software. The file is
   // limited to 4 gigabyte in size with this format.
   kRIFF,
 
@@ -226,9 +243,27 @@ enum class FileFormat {
   kRF64,
 };
 
-// Information about format in which the audio data is stored in a WAV file.
+enum class Compression {
+  // Values are written as 16-bit signed integers.
+  // Floating point input is quantized to 16-bit integers, mapping range [-1, 1]
+  // to [-32767, 32767], Values outside the [-1, 1] range are clipped.
+  kPCM16,
+
+  // The values are written as single or double precision floating point values.
+  kFloat,
+  kDouble,
+};
+
+// Get bit depth of a single sample value for the given compression.
+inline auto GetBitDepth(Compression compression) -> int;
+
+// Returns true for any PCM type of compression.
+inline auto IsPCM(Compression compression) -> bool;
+
+// Information about the format in which the audio data is stored in a WAV file.
 struct FormatSpec {
   FileFormat file_format{FileFormat::kRIFF};
+  Compression compression{Compression::kPCM16};
 
   // Number of channels.
   // Rather self-explanatory: 1 is mono, 2 is stereo, 5 is surround.
@@ -236,11 +271,48 @@ struct FormatSpec {
 
   // Sample rate in samples per second.
   int sample_rate{-1};
-
-  // Bit depth for per-channel sample values.
-  // For example: 16 means values are stored as 16-bit signed integers.
-  int bit_depth{-1};
 };
+
+// Options for the Writer::Write() function.
+struct WriteOptions {
+  // Override of the time() call when saving a file in format that requires a
+  // file time stamp. If it is not provided, the implementation will use time()
+  // call unless TL_AUDIO_WAV_WRITER_NO_TIME_H is defined. If it is defined,
+  // then the time stamp fields will be written as 0 unless this value is
+  // provided.
+  std::optional<uint32_t> time_stamp{std::nullopt};
+};
+
+namespace internal {
+
+struct PeakPosition {
+  float value;        // Signed value of peak.
+  uint32_t position;  // The sample frame for the peak.
+};
+static_assert(sizeof(PeakPosition) == 8);
+
+// Helper class that calculates per-channel peak to use it for the PEAK WAV
+// chunk.
+class PeakDetector {
+ public:
+  // Reset the peak calculation for the given number of channels.
+  // Returns false if the requested number of channels is beyond of the number
+  // of channels supported by the peak calculator.
+  [[nodiscard]] inline auto Reset(int num_channels) -> bool;
+
+  // Update peak for the given sample.
+  template <class ValueType>
+  inline void Update(uint64_t sample_index, std::span<const ValueType> sample);
+
+  // Get peak information for the given channel.
+  inline auto GetPeakPosition(int channel) const -> PeakPosition;
+
+ private:
+  std::array<PeakPosition, TL_AUDIO_WAV_WRITER_MAX_NUM_CHANNELS>
+      peak_positions_;
+};
+
+}  // namespace internal
 
 template <class FileWriter>
 class Writer {
@@ -254,45 +326,56 @@ class Writer {
 
   // Delete copy constructor and assignment operator.
   //
-  // Simplifies the FileWriter API by avoiding requirement to implement the
+  // Simplifies the FileWriter API by avoiding the requirement to implement the
   // copy file descriptor API call.
   Writer(const Writer& other) noexcept = delete;
   auto operator=(const Writer& other) -> Writer& = delete;
 
   ~Writer() = default;
 
-  // Calculate maximum number of samples which can be stored in a WAV file with
-  // the given format specification.
-  // The sample include values of all channels.
+  // Calculate the maximum number of samples which can be stored in a WAV file
+  // with the given format specification. The sample includes values of all
+  // channels.
   static inline auto MaxNumSamples(const FormatSpec& format_spec) -> uint64_t;
 
-  // Open file for writing samples with the given specification into the file
+  // Set the time stamp in seconds since 1/1/1970.
+  //
+  // The time stamp is used for chunks that need the time information, such as
+  // the PEAK chunk that contains information about the peak in the stream.
+  //
+  // If the time stamp is not provided, a system call of time() will be used on
+  // platforms where it is supported. If the system does not support the time()
+  // call and no time stamp is not provided, then a time stamp of 0 will be
+  // used.
+  void SetTimeStamp(uint32_t time_stamp) { time_stamp_ = time_stamp; }
+
+  // Open a file for writing samples with the given specification into the file
   // writer.
   //
-  // The file writer is referenced by the WAV writer and caller is to guarantee
-  // it is valid throughout the WAV file writing.
+  // The file writer is referenced by the WAV writer, and the caller is to
+  // guarantee it is valid throughout the WAV file writing.
   //
-  // Writes a temporary head to the file, so that if the application execution
-  // is aborted it is still possible to read samples which were written prior to
-  // the failure.
+  // Writes a temporary head to the file so that if the application execution
+  // is aborted, it is still possible to read samples that were written prior
+  // to the failure.
   //
   // Multiple calls of Open() on the same file is undefined.
   //
   // Returns true upon success.
   auto Open(FileWriter& file_writer, const FormatSpec& format_spec) -> bool;
 
-  // Get format specification of the file.
+  // Get the format specification of the file.
   //
   // Requires WAV file to be successfully open for write first and will have an
   // undefined behavior if the Open() returned false.
   inline auto GetFormatSpec() const -> const FormatSpec&;
 
-  // Write single sample which consists of values for all channels.
+  // Write a single sample which consists of values for all channels.
   //
   // The number of values must match the number of channels in the format
-  // specification otherwise an error is returned.
+  // specification, otherwise an error is returned.
   //
-  // Returns true upon successful write.
+  // Returns true upon success.
   template <class ValueType>
   auto WriteSingleSample(std::span<const ValueType> sample) -> bool;
 
@@ -314,13 +397,13 @@ class Writer {
   auto WriteMultipleSamples(std::span<const ValueType> samples) -> bool;
 
   // Write multiple samples organized in an array-of-arrays memory layout.
-  // The data is provided as span of arrays.
+  // The data is provided as a span of arrays.
   template <class ValueType, std::size_t Extent, std::size_t N>
   auto WriteMultipleSamples(
       const std::span<const std::array<ValueType, N>, Extent>& samples) -> bool;
 
   // Write multiple samples organized in an array-of-arrays memory layout.
-  // The data is provided as container from which std::span could be
+  // The data is provided as a container from which std::span could be
   // constructed.
   template <class ContainerType,
             class ValueType = std::remove_reference_t<
@@ -336,9 +419,9 @@ class Writer {
   // occur.
   auto Close() -> bool;
 
-  // Create WAV file from the given format specification and samples.
+  // Create a WAV file from the given format specification and samples.
   //
-  // This call writes the complete file, without ability to append samples to
+  // This call writes the complete file, without an ability to append samples to
   // the file.
   //
   // The samples storage is expected to be a container of sample, and every
@@ -351,11 +434,12 @@ class Writer {
     requires std::is_scalar_v<ValueType>
   static auto Write(FileWriterType&& file_writer,
                     const FormatSpec& format_spec,
-                    std::span<const ValueType> samples) -> bool;
+                    std::span<const ValueType> samples,
+                    const WriteOptions& options = {}) -> bool;
 
-  // Create WAV file from the given format specification and samples organized
+  // Create a WAV file from the given format specification and samples organized
   // in an array-of-arrays memory layout.
-  // The data is provided as span of arrays.
+  // The data is provided as a span of arrays.
   template <class FileWriterType,
             class ValueType,
             std::size_t Extent,
@@ -363,11 +447,12 @@ class Writer {
   static auto Write(
       FileWriterType&& file_writer,
       const FormatSpec& format_spec,
-      const std::span<const std::array<ValueType, N>, Extent>& samples) -> bool;
+      const std::span<const std::array<ValueType, N>, Extent>& samples,
+      const WriteOptions& options = {}) -> bool;
 
-  // Create WAV file from the given format specification and samples organized
+  // Create a WAV file from the given format specification and samples organized
   // in an array-of-arrays memory layout.
-  // The data is provided as container from which std::span could be
+  // The data is provided as a container from which std::span could be
   // constructed.
   template <class FileWriterType,
             class ContainerType,
@@ -376,13 +461,14 @@ class Writer {
     requires std::constructible_from<std::span<ValueType>, const ContainerType&>
   static auto Write(FileWriterType&& file_writer,
                     const FormatSpec& format_spec,
-                    const ContainerType& container) -> bool;
+                    const ContainerType& container,
+                    const WriteOptions& options = {}) -> bool;
 
  private:
-  // Write placeholder header upon the file Open().
+  // Write a placeholder header upon the file Open().
   //
   // Will write all the known information from the current format specification,
-  // but will keep the chunk sizes at a high value allowing to read partially
+  // but will keep the chunk sizes at a high value allowing to read a partially
   // saved file.
   [[nodiscard]] auto WritePlaceholderHeader() -> bool;
 
@@ -414,8 +500,8 @@ class Writer {
             class ValueTypeInBuffer>
   [[nodiscard]] static auto Write(FileWriterType&& file_writer,
                                   const FormatSpec& format_spec,
-                                  std::span<const ValueTypeInBuffer> samples)
-      -> bool;
+                                  std::span<const ValueTypeInBuffer> samples,
+                                  const WriteOptions& options = {}) -> bool;
 
   FileWriter* file_writer_{nullptr};
 
@@ -424,15 +510,21 @@ class Writer {
 
   FormatSpec format_spec_;
 
-  uint64_t num_samples_written_ = 0;
+  // Time stamp in seconds since 1/1/1970.
+  std::optional<uint32_t> time_stamp_{0};
+
+  uint64_t num_samples_written_{0};
+
+  bool need_peak_{false};
+  internal::PeakDetector peak_detector_;
 };
 
 #if defined(_MSC_VER)
 #  pragma warning(push)
 // 4702 - Unreachable code.
-//        MSVC might consider some fall-back code paths consider unreachable.
+//        MSVC might consider some fall-back code paths unreachable.
 //        For example, assert() and default return value as a recovery.
-//        Another example, is having unbuffered code after `if constexpr ()`
+//        Another example is having unbuffered code after `if constexpr ()`
 //        which evaluates to true for the buffered reading.
 #  pragma warning(disable : 4702)
 #endif
@@ -471,7 +563,7 @@ namespace internal {
 
 // Convert 4 character string representation of an ID to an unsigned 32-bit
 // integer value in a way that it can be compared to a value directly read from
-// file without runtime endian conversion.
+// a file without runtime endian conversion.
 constexpr auto IDStringToUInt32(const char a,
                                 const char b,
                                 const char c,
@@ -489,15 +581,15 @@ constexpr auto IDStringToUInt32(const char a,
 
 // Mnemonics for known and supported chunk identifiers.
 //
-// Derived from the ASCII string representation stored as 32-bit integer.
+// Derived from the ASCII string representation stored as a 32-bit integer.
 //
 // The value of ID matches the value when it is read from a binary file as
 // uint32 without endian conversion.
 enum class ChunkID : uint32_t {
-  // RIFF corresponds to a WAVE files stored in little endian.
+  // RIFF corresponds to a WAVE file stored in little endian.
   kRIFF = IDStringToUInt32('R', 'I', 'F', 'F'),
 
-  // RIFX is RIFF header but for a file using big endian.
+  // RIFX is a RIFF header but for a file using big endian.
   kRIFX = IDStringToUInt32('R', 'I', 'F', 'X'),
 
   // RF64 sisa header for 64-bit files.
@@ -505,6 +597,9 @@ enum class ChunkID : uint32_t {
 
   // Data size 64.
   kDS64 = IDStringToUInt32('d', 's', '6', '4'),
+
+  kFACT = IDStringToUInt32('f', 'a', 'c', 't'),
+  kPEAK = IDStringToUInt32('P', 'E', 'A', 'K'),
 
   kFMT = IDStringToUInt32('f', 'm', 't', ' '),
   kDATA = IDStringToUInt32('d', 'a', 't', 'a'),
@@ -520,6 +615,8 @@ enum class Format : uint32_t {
 // Audio format stored in the FMT chunk.
 enum class AudioFormat : uint16_t {
   kPCM = 1,
+  kFloat = 3,
+  kEXTENSIBLE = 0xfffe,  // Format is determined by SubFormat.
 };
 
 // Header of a chunk.
@@ -530,6 +627,25 @@ struct ChunkHeader {
 };
 static_assert(sizeof(ChunkHeader) == 8);
 
+// Data of a FACT chunk.
+struct Fact {
+  uint32_t num_samples_per_channel;
+};
+static_assert(sizeof(Fact) == 4);
+
+// Data of a PEAK chunk.
+// NOTE: Does not include the array for the per-channel peak information.
+struct Peak {
+  // The version of the PEAK chunk.
+  // Currently, version 1 is used.
+  uint32_t version;
+
+  uint32_t time_stamp;  // Time stamp in seconds since 1/1/1970.
+
+  // PositionPeak peak[CommonChunk.numchannels]; /* the peak info */
+};
+static_assert(sizeof(Peak) == 8);
+
 // Data of a RIFF chunk (`ChunkID::RIFF` for files stored in little endian and
 // `ChunkID::RIFX` for files stored in big endian).
 struct RIFFData {
@@ -538,7 +654,7 @@ struct RIFFData {
 static_assert(sizeof(RIFFData) == 4);
 
 // ds64 chunk.
-// It  has to be the first chunk after the `RF64 chunk`.
+// It has to be the first chunk after the `RF64 chunk`.
 struct DS64 {
   uint32_t riff_size_low;      // Low 4 byte size of RF64 block.
   uint32_t riff_size_high;     // High 4 byte size of RF64 block.
@@ -561,7 +677,7 @@ static_assert(sizeof(DS64) == 28);
 
 struct FormatData {
   // Format in which audio data is stored.
-  // Mnemonic representation is in `AudioFormat` enumerator.
+  // Mnemonic representation is in the `AudioFormat` enumerator.
   AudioFormat audio_format;
 
   // Number of channels.
@@ -582,20 +698,46 @@ struct FormatData {
 };
 static_assert(sizeof(FormatData) == 16);
 
-// Calculate size which is to be specified in the RIFF/RIFX/RF64 chunk header.
-// This size is the size of the entire WAV file minus the header of the
+[[nodiscard]] inline auto NeedFactChunk(const FormatSpec& format_spec) -> bool {
+  // All (compressed) non-PCM formats must have a Fact chunk (Rev. 3
+  // documentation).
+  return format_spec.file_format == FileFormat::kRIFF &&
+         !IsPCM(format_spec.compression);
+}
+
+[[nodiscard]] inline auto NeedPeakChunk(const FormatSpec& format_spec) -> bool {
+  // . The PEAK seems optional, but it is written by most of the audio software
+  // writes it, so write it for non-PCM files as well for the compatibility
+  // reasons.
+  return NeedFactChunk(format_spec);
+}
+
+// Calculate the size which is to be specified in the RIFF/RIFX/RF64 chunk
+// header. This size is the size of the entire WAV file minus the header of the
 // RIFF/RIFX/RF64 chunk header.
 [[nodiscard]] inline auto CalculateRIFFContainerSize(
-    const FileFormat file_format, const uint64_t num_data_bytes) -> uint64_t {
-  switch (file_format) {
-    case FileFormat::kRIFF:
-      return
+    const FormatSpec format_spec, const uint64_t num_data_bytes) -> uint64_t {
+  switch (format_spec.file_format) {
+    case FileFormat::kRIFF: {
+      uint64_t size =
           // Data of the RIFF/RIFX chunk.
           sizeof(RIFFData) +
           // Header and data of the FMT chunk.
           sizeof(ChunkHeader) + sizeof(FormatData) +
           // Header and data of the DATA chunk (samples).
           sizeof(ChunkHeader) + num_data_bytes;
+
+      if (NeedFactChunk(format_spec)) {
+        size += sizeof(ChunkHeader) + sizeof(Fact);
+      }
+
+      if (NeedPeakChunk(format_spec)) {
+        size += sizeof(ChunkHeader) + sizeof(Peak) +
+                sizeof(PeakPosition) * format_spec.num_channels;
+      }
+
+      return size;
+    }
 
     case FileFormat::kRF64:
       return
@@ -617,12 +759,26 @@ static_assert(sizeof(FormatData) == 16);
 ////////////////////////////////////////////////////////////////////////////////
 // Public API implementation.
 
+inline auto GetBitDepth(const Compression compression) -> int {
+  switch (compression) {
+    case Compression::kPCM16: return 16;
+    case Compression::kFloat: return 32;
+    case Compression::kDouble: return 64;
+  }
+  assert(!"Unreachable code executed");
+  return 0;
+}
+
+inline auto IsPCM(const Compression compression) -> bool {
+  return compression == Compression::kPCM16;
+}
+
 template <class FileWriter>
 inline auto Writer<FileWriter>::MaxNumSamples(const FormatSpec& format_spec)
     -> uint64_t {
   const uint64_t headers_size =
-      internal::CalculateRIFFContainerSize(format_spec.file_format, 0);
-  const uint32_t byte_depth = format_spec.bit_depth / 8;
+      internal::CalculateRIFFContainerSize(format_spec, 0);
+  const uint32_t byte_depth = GetBitDepth(format_spec.compression) / 8;
   const uint64_t max_data_bytes =
       (format_spec.file_format == FileFormat::kRF64 ? 0xffffffffffffffff
                                                     : 0xffffffff) -
@@ -640,6 +796,13 @@ auto Writer<FileWriter>::Open(FileWriter& file_writer,
   format_spec_ = format_spec;
 
   is_open_ = true;
+
+  need_peak_ = internal::NeedPeakChunk(format_spec);
+  if (need_peak_) {
+    if (!peak_detector_.Reset(format_spec.num_channels)) {
+      return false;
+    }
+  }
 
   if (!WritePlaceholderHeader()) {
     is_open_ = false;
@@ -660,8 +823,13 @@ template <class FileWriter>
 template <class ValueType>
 auto Writer<FileWriter>::WriteSingleSample(
     const std::span<const ValueType> sample) -> bool {
-  switch (format_spec_.bit_depth) {
-    case 16: return WriteSingleSample<int16_t, ValueType>(sample);
+  switch (format_spec_.compression) {
+    case Compression::kPCM16:
+      return WriteSingleSample<int16_t, ValueType>(sample);
+    case Compression::kFloat:
+      return WriteSingleSample<float, ValueType>(sample);
+    case Compression::kDouble:
+      return WriteSingleSample<double, ValueType>(sample);
   }
   return false;
 }
@@ -671,8 +839,13 @@ template <class ValueType>
   requires std::is_scalar_v<ValueType>
 auto Writer<FileWriter>::WriteMultipleSamples(
     const std::span<const ValueType> samples) -> bool {
-  switch (format_spec_.bit_depth) {
-    case 16: return WriteMultipleSamples<int16_t, ValueType>(samples);
+  switch (format_spec_.compression) {
+    case Compression::kPCM16:
+      return WriteMultipleSamples<int16_t, ValueType>(samples);
+    case Compression::kFloat:
+      return WriteMultipleSamples<float, ValueType>(samples);
+    case Compression::kDouble:
+      return WriteMultipleSamples<double, ValueType>(samples);
   }
   return false;
 }
@@ -719,10 +892,15 @@ template <class FileWriterType, class ValueType>
   requires std::is_scalar_v<ValueType>
 auto Writer<FileWriter>::Write(FileWriterType&& file_writer,
                                const FormatSpec& format_spec,
-                               const std::span<const ValueType> samples)
-    -> bool {
-  switch (format_spec.bit_depth) {
-    case 16: return Write<int16_t>(file_writer, format_spec, samples);
+                               const std::span<const ValueType> samples,
+                               const WriteOptions& options) -> bool {
+  switch (format_spec.compression) {
+    case Compression::kPCM16:
+      return Write<int16_t>(file_writer, format_spec, samples, options);
+    case Compression::kFloat:
+      return Write<float>(file_writer, format_spec, samples, options);
+    case Compression::kDouble:
+      return Write<double>(file_writer, format_spec, samples, options);
   }
   return false;
 }
@@ -735,9 +913,10 @@ template <class FileWriterType,
 auto Writer<FileWriter>::Write(
     FileWriterType&& file_writer,
     const FormatSpec& format_spec,
-    const std::span<const std::array<ValueType, N>, Extent>& samples) -> bool {
+    const std::span<const std::array<ValueType, N>, Extent>& samples,
+    const WriteOptions& options) -> bool {
   const std::span<const ValueType> data(samples[0].data(), N * samples.size());
-  return Write(file_writer, format_spec, data);
+  return Write(file_writer, format_spec, data, options);
 }
 
 template <class FileWriter>
@@ -745,25 +924,36 @@ template <class FileWriterType, class ContainerType, class ValueType>
   requires std::constructible_from<std::span<ValueType>, const ContainerType&>
 auto Writer<FileWriter>::Write(FileWriterType&& file_writer,
                                const FormatSpec& format_spec,
-                               const ContainerType& container) -> bool {
-  return Write(file_writer, format_spec, std::span(container));
+                               const ContainerType& container,
+                               const WriteOptions& options) -> bool {
+  return Write(file_writer, format_spec, std::span(container), options);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Private implementation.
 
 namespace internal {
+inline auto CompressionToAudioFormat(const Compression compression) {
+  switch (compression) {
+    case Compression::kPCM16: return AudioFormat::kPCM;
+    case Compression::kFloat:
+    case Compression::kDouble: return AudioFormat::kFloat;
+  }
+  assert(!"Unreachable code executed");
+  return AudioFormat::kPCM;
+}
 
 [[nodiscard]] inline auto FormatSpecToFormatData(const FormatSpec& format_spec)
     -> FormatData {
   FormatData format_data;
 
-  const uint32_t byte_depth = format_spec.bit_depth / 8;
+  const uint32_t bit_depth = uint32_t(GetBitDepth(format_spec.compression));
+  const uint32_t byte_depth = bit_depth / 8;
 
-  format_data.audio_format = AudioFormat::kPCM;
+  format_data.audio_format = CompressionToAudioFormat(format_spec.compression);
   format_data.num_channels = format_spec.num_channels;
   format_data.sample_rate = format_spec.sample_rate;
-  format_data.bit_depth = format_spec.bit_depth;
+  format_data.bit_depth = bit_depth;
 
   format_data.byte_rate =
       format_data.sample_rate * format_data.num_channels * byte_depth;
@@ -792,23 +982,101 @@ inline auto GetRIFFChunkID(const FormatSpec& format_spec) -> ChunkID {
   return ChunkID::kRIFF;
 }
 
+inline auto GetTimeStamp(const std::optional<uint32_t> time_stamp) -> uint32_t {
+  if (time_stamp.has_value()) {
+    return time_stamp.value();
+  }
+
+#ifndef TL_AUDIO_WAV_WRITER_NO_TIME_H
+  return time(nullptr);
+#else
+  return 0;
+#endif
+}
+
+template <class FileWriter>
+[[nodiscard]] inline auto WriteFactChunkIfNeeded(FileWriter& file_writer,
+                                                 const FormatSpec& format_spec,
+                                                 const uint64_t num_samples)
+    -> bool {
+  if (!NeedFactChunk(format_spec)) {
+    return true;
+  }
+
+  if (!WriteObjectToFile(
+          file_writer,
+          ChunkHeader{.id = ChunkID::kFACT, .size = sizeof(Fact)})) {
+    return false;
+  }
+
+  Fact fact;
+
+  // The Fact chunk is written for RIFF files where the number of samples is
+  // limited by 32bit signed integer size field of the DATA chunk. So, it is
+  // fine to cast the number of samples to a narrow type here.
+  fact.num_samples_per_channel = uint32_t(num_samples);
+
+  if (!WriteObjectToFile(file_writer, fact)) {
+    return false;
+  }
+
+  return true;
+}
+
+template <class FileWriter>
+[[nodiscard]] inline auto WritePeakChunkIfNeeded(
+    FileWriter& file_writer,
+    const FormatSpec& format_spec,
+    const std::optional<uint32_t> time_stamp,
+    const PeakDetector& peak_detector) -> bool {
+  if (!NeedPeakChunk(format_spec)) {
+    return true;
+  }
+
+  const uint32_t peak_chunk_size =
+      sizeof(Peak) + sizeof(PeakPosition) * format_spec.num_channels;
+  if (!WriteObjectToFile(
+          file_writer,
+          ChunkHeader{.id = ChunkID::kPEAK, .size = peak_chunk_size})) {
+    return false;
+  }
+
+  Peak peak;
+  peak.version = 1;
+  peak.time_stamp = GetTimeStamp(time_stamp);
+  if (!WriteObjectToFile(file_writer, peak)) {
+    return false;
+  }
+
+  for (int i = 0; i < format_spec.num_channels; ++i) {
+    if (!WriteObjectToFile(file_writer, peak_detector.GetPeakPosition(i))) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 // Write WAVE header to the file, starting at the current position in the file.
 //
-// Writes all sections of header up to and including the DATA chunk header.
+// Writes all sections of the header up to and including the DATA chunk header.
 template <class FileWriter>
 [[nodiscard]] inline auto WriteHeader(FileWriter& file_writer,
                                       const FormatSpec& format_spec,
-                                      const uint64_t num_samples) -> bool {
-  const uint64_t byte_depth = format_spec.bit_depth / 8;
+                                      const uint64_t num_samples,
+                                      const std::optional<uint32_t> time_stamp,
+                                      const PeakDetector& peak_detector)
+    -> bool {
+  const uint64_t byte_depth = GetBitDepth(format_spec.compression) / 8;
   const uint64_t num_data_bytes =
       num_samples * byte_depth * format_spec.num_channels;
 
   // RIFF header and data.
-  // Note that for the RF64 file format it is the DS64 block which holds the
-  // size. In this format the RIFF header specifies size of 0xffffffff.
+  // Note that for the RF64 file format it is the DS64 block that holds the
+  // size. In this format the RIFF header specifies the size of 0xffffffff.
   const ChunkID riff_id = GetRIFFChunkID(format_spec);
   const uint64_t riff_container_size =
-      CalculateRIFFContainerSize(format_spec.file_format, num_data_bytes);
+      CalculateRIFFContainerSize(format_spec, num_data_bytes);
   const uint32_t riff_container_size_in_header =
       format_spec.file_format == FileFormat::kRF64
           ? 0xffffffff
@@ -856,6 +1124,17 @@ template <class FileWriter>
     return false;
   }
 
+  // Fact chunk.
+  if (!WriteFactChunkIfNeeded(file_writer, format_spec, num_samples)) {
+    return false;
+  }
+
+  // PEAK chunk.
+  if (!WritePeakChunkIfNeeded(
+          file_writer, format_spec, time_stamp, peak_detector)) {
+    return false;
+  }
+
   // Data header.
   const uint32_t data_size = format_spec.file_format == FileFormat::kRF64
                                  ? 0xffffffff
@@ -873,7 +1152,7 @@ auto ConvertValue(FromType sample) -> ToType;
 
 template <>
 [[nodiscard]] inline auto ConvertValue(const float sample) -> int16_t {
-  // There does not seem to be the standard and different implementations are
+  // There does not seem to be a standard, and different implementations are
   // using different quantization rules.
   //
   // Follow the following
@@ -895,11 +1174,55 @@ template <>
 }
 
 template <>
+[[nodiscard]] inline auto ConvertValue(const double sample) -> int16_t {
+  // Same as ConvertValue<float, int16_t> but for floating point values.
+  if (sample <= -1.0) {
+    return -32767;
+  }
+  if (sample >= 1.0) {
+    return 32767;
+  }
+  return int16_t(sample * 32767.0);
+}
+
+template <>
+[[nodiscard]] inline auto ConvertValue(const int16_t sample) -> float {
+  // The reverse of ConvertValue<float, int16_t>.
+  return float(sample) / 32767.0f;
+}
+
+template <>
+[[nodiscard]] inline auto ConvertValue(const int16_t sample) -> double {
+  // The reverse of ConvertValue<float, int16_t>.
+  return double(sample) / 32767.0;
+}
+
+template <>
 [[nodiscard]] inline auto ConvertValue(const int16_t sample) -> int16_t {
   return sample;
 }
 
-// Write single sample without using any buffering.
+template <>
+[[nodiscard]] inline auto ConvertValue(const float sample) -> float {
+  return sample;
+}
+
+template <>
+[[nodiscard]] inline auto ConvertValue(const double sample) -> double {
+  return sample;
+}
+
+template <>
+[[nodiscard]] inline auto ConvertValue(const float sample) -> double {
+  return double(sample);
+}
+
+template <>
+[[nodiscard]] inline auto ConvertValue(const double sample) -> float {
+  return float(sample);
+}
+
+// Write a single sample without using any buffering.
 //
 // Writes the entire sample, without performing any checks about validity.
 //
@@ -921,7 +1244,7 @@ template <class ValueTypeInFile, class FileWriter, class ValueTypeInBuffer>
   return true;
 }
 
-// Write single sample using buffer to optimize disk and memory access.
+// Write a single sample using buffer to optimize disk and memory access.
 //
 // Writes the entire sample, without performing any checks about validity.
 //
@@ -932,8 +1255,8 @@ template <class ValueTypeInFile, class FileWriter, class ValueTypeInBuffer>
     -> bool {
   static_assert(TL_AUDIO_WAV_WRITER_SAMPLE_FRAME_BUFFER_SIZE >= 0);
 
-  // This is more of provisionary check, to avoid possible warnings about zero
-  // sized buffer.
+  // This is more of a provisionary check to avoid possible warnings about
+  // zero-sized buffer.
   if constexpr (TL_AUDIO_WAV_WRITER_SAMPLE_FRAME_BUFFER_SIZE > 1) {
     const size_t num_channels_to_write = sample.size();
     size_t num_channels_written = 0;
@@ -948,7 +1271,7 @@ template <class ValueTypeInFile, class FileWriter, class ValueTypeInBuffer>
       const size_t num_bytes_to_write =
           num_channels_to_write * sizeof(ValueTypeInFile);
 
-      // Convert type from how it's stored in the file to the return sample
+      // Convert the type from how it's stored in the file to the return sample
       // type.
       for (size_t i = 0; i < num_channels_to_write; ++i) {
         buffer[i] = ConvertValue<ValueTypeInBuffer, ValueTypeInFile>(
@@ -972,7 +1295,7 @@ template <class ValueTypeInFile, class FileWriter, class ValueTypeInBuffer>
                    num_channels_to_write - num_channels_written);
       const size_t num_bytes_to_write = n * sizeof(ValueTypeInFile);
 
-      // Convert type from how it's stored in the file to the return sample
+      // Convert the type from how it's stored in the file to the return sample
       // type.
       for (size_t i = 0; i < n; ++i) {
         buffer[i] = ConvertValue<ValueTypeInBuffer, ValueTypeInFile>(
@@ -991,7 +1314,7 @@ template <class ValueTypeInFile, class FileWriter, class ValueTypeInBuffer>
   return false;
 }
 
-// Write single sample. Will choose the best strategy to use based on the
+// Write a single sample. Will choose the best strategy to use based on the
 // current configuration.
 //
 // Writes the entire sample, without performing any checks about validity.
@@ -1047,8 +1370,8 @@ template <class ValueTypeInFile, class FileWriter, class ValueTypeInBuffer>
     const std::span<const ValueTypeInBuffer> samples) -> bool {
   static_assert(TL_AUDIO_WAV_WRITER_BUFFER_SIZE >= 0);
 
-  // This is more of provisionary check, to avoid possible warnings about zero
-  // sized buffer.
+  // This is more of a provisionary check to avoid possible warnings about
+  // zero-sized buffer.
   if constexpr (TL_AUDIO_WAV_WRITER_BUFFER_SIZE > 1) {
     // Buffer for reading from the file.
     std::array<ValueTypeInFile, TL_AUDIO_WAV_WRITER_BUFFER_SIZE> buffer;
@@ -1062,7 +1385,7 @@ template <class ValueTypeInFile, class FileWriter, class ValueTypeInBuffer>
       const size_t num_bytes_to_write =
           num_samples_to_write * sizeof(ValueTypeInFile);
 
-      // Convert type from how it's stored in the file to the return sample
+      // Convert the type from how it's stored in the file to the return sample
       // type.
       for (size_t i = 0; i < num_samples_to_write; ++i) {
         buffer[i] = ConvertValue<ValueTypeInBuffer, ValueTypeInFile>(
@@ -1117,15 +1440,22 @@ template <class FileWriter>
   // Specify the chunk size to the max possible value, allowing reader of a
   // partially saved file to read the file until the EOF.
   const uint32_t max_num_samples = MaxNumSamples(format_spec_);
-  return internal::WriteHeader(*file_writer_, format_spec_, max_num_samples);
+  return internal::WriteHeader(*file_writer_,
+                               format_spec_,
+                               max_num_samples,
+                               time_stamp_,
+                               peak_detector_);
 }
 
 template <class FileWriter>
 [[nodiscard]] auto Writer<FileWriter>::WriteFinalHeader() -> bool {
   assert(is_open_);
 
-  return internal::WriteHeader(
-      *file_writer_, format_spec_, num_samples_written_);
+  return internal::WriteHeader(*file_writer_,
+                               format_spec_,
+                               num_samples_written_,
+                               time_stamp_,
+                               peak_detector_);
 }
 
 template <class FileWriter>
@@ -1135,7 +1465,7 @@ template <class ValueTypeInFile, class ValueTypeInBuffer>
   assert(is_open_);
 
   // Check for every sample as depending on data structure in the user code it
-  // might be not guaranteed that all samples contains the same number of
+  // might be not guaranteed that all samples contain the same number of
   // channels.
   const size_t num_values = std::size(sample);
   if (num_values != format_spec_.num_channels) {
@@ -1146,6 +1476,10 @@ template <class ValueTypeInFile, class ValueTypeInBuffer>
 
   if (!internal::WriteSingleSample<ValueTypeInFile>(*file_writer_, sample)) {
     return false;
+  }
+
+  if (need_peak_) {
+    peak_detector_.Update(num_samples_written_, sample);
   }
 
   ++num_samples_written_;
@@ -1162,7 +1496,7 @@ template <class ValueTypeInFile, class ValueTypeInBuffer>
   const size_t num_channels = format_spec_.num_channels;
   const size_t num_frames = samples.size() / num_channels;
 
-  // Check that the buffer has expected size.
+  // Check that the buffer has the expected size.
   if (num_frames * num_channels != samples.size()) {
     return false;
   }
@@ -1172,6 +1506,16 @@ template <class ValueTypeInFile, class ValueTypeInBuffer>
   if (!internal::WriteMultipleSamples<ValueTypeInFile>(
           *file_writer_, num_frames, num_channels, samples)) {
     return false;
+  }
+
+  if (need_peak_) {
+    std::span<const ValueTypeInBuffer> remaining_sample = samples;
+    for (size_t frame = 0; frame < num_frames; ++frame) {
+      const std::span<const ValueTypeInBuffer> current_frame =
+          remaining_sample.first(num_channels);
+      peak_detector_.Update(num_samples_written_ + frame, current_frame);
+      remaining_sample = remaining_sample.subspan(num_channels);
+    }
   }
 
   num_samples_written_ += num_frames;
@@ -1184,7 +1528,8 @@ template <class ValueTypeInFile, class FileWriterType, class ValueTypeInBuffer>
 [[nodiscard]] auto Writer<FileWriter>::Write(
     FileWriterType&& file_writer,
     const FormatSpec& format_spec,
-    const std::span<const ValueTypeInBuffer> samples) -> bool {
+    const std::span<const ValueTypeInBuffer> samples,
+    const WriteOptions& options) -> bool {
   Writer<FileWriter> writer;
 
   if (!writer.Open(file_writer, format_spec)) {
@@ -1196,8 +1541,50 @@ template <class ValueTypeInFile, class FileWriterType, class ValueTypeInBuffer>
     return false;
   }
 
+  if (options.time_stamp.has_value()) {
+    writer.SetTimeStamp(options.time_stamp.value());
+  }
+
   return writer.Close();
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// Peak detector implementation.
+
+namespace internal {
+
+inline auto PeakDetector::Reset(const int num_channels) -> bool {
+  if (num_channels > peak_positions_.size()) {
+    return false;
+  }
+
+  for (int i = 0; i < num_channels; ++i) {
+    peak_positions_[i] = PeakPosition{.value = 0, .position = 0};
+  }
+
+  return true;
+}
+
+template <class ValueType>
+inline void PeakDetector::Update(const uint64_t sample_index,
+                                 const std::span<const ValueType> sample) {
+  for (int channel = 0; channel < sample.size(); ++channel) {
+    const float abs_float_sample =
+        std::abs(ConvertValue<ValueType, float>(sample[channel]));
+    if (abs_float_sample > peak_positions_[channel].value) {
+      peak_positions_[channel].value = abs_float_sample;
+      peak_positions_[channel].position = sample_index;
+    }
+  }
+}
+
+inline auto PeakDetector::GetPeakPosition(const int channel) const
+    -> PeakPosition {
+  assert(channel < peak_positions_.size());
+  return peak_positions_[channel];
+}
+
+}  // namespace internal
 
 #if defined(_MSC_VER)
 #  pragma warning(pop)

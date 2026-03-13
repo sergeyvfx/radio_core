@@ -21,6 +21,8 @@ using testing::Pointwise;
 
 template <class FileWriter>
 using WAVWriter = tiny_lib::audio_wav_writer::Writer<FileWriter>;
+using WAVFileFormat = tiny_lib::audio_wav_writer::FileFormat;
+using WAVCompression = tiny_lib::audio_wav_writer::Compression;
 using WAVFormatSpec = tiny_lib::audio_wav_writer::FormatSpec;
 
 TEST(BufferedWAVWriter, SingleSample) {
@@ -38,9 +40,10 @@ TEST(BufferedWAVWriter, SingleSample) {
     FileWriterToMemory file_writer(expected_buffer);
     WAVWriter<FileWriterToMemory> wav_writer;
     const WAVFormatSpec audio_format_spec = {
+        .file_format = WAVFileFormat::kRIFF,
+        .compression = WAVCompression::kPCM16,
         .num_channels = 2,
         .sample_rate = 44100,
-        .bit_depth = 16,
     };
     EXPECT_TRUE(wav_writer.Open(file_writer, audio_format_spec));
     for (const auto& sample : kSamples) {
@@ -55,9 +58,10 @@ TEST(BufferedWAVWriter, SingleSample) {
     FileWriterToMemory file_writer(actual_buffer);
     WAVWriter<FileWriterToMemory> wav_writer;
     const WAVFormatSpec audio_format_spec = {
+        .file_format = WAVFileFormat::kRIFF,
+        .compression = WAVCompression::kPCM16,
         .num_channels = 2,
         .sample_rate = 44100,
-        .bit_depth = 16,
     };
     EXPECT_TRUE(wav_writer.Open(file_writer, audio_format_spec));
 
@@ -90,9 +94,10 @@ TEST(BufferedWAVWriter, WriteMultipleSamples) {
     FileWriterToMemory file_writer(expected_buffer);
     WAVWriter<FileWriterToMemory> wav_writer;
     const WAVFormatSpec audio_format_spec = {
+        .file_format = WAVFileFormat::kRIFF,
+        .compression = WAVCompression::kPCM16,
         .num_channels = 2,
         .sample_rate = 44100,
-        .bit_depth = 16,
     };
     EXPECT_TRUE(wav_writer.Open(file_writer, audio_format_spec));
     for (int i = 0; i < 2; ++i) {
@@ -111,9 +116,10 @@ TEST(BufferedWAVWriter, WriteMultipleSamples) {
       FileWriterToMemory file_writer(actual_buffer);
       WAVWriter<FileWriterToMemory> wav_writer;
       const WAVFormatSpec audio_format_spec = {
+          .file_format = WAVFileFormat::kRIFF,
+          .compression = WAVCompression::kPCM16,
           .num_channels = 2,
           .sample_rate = 44100,
-          .bit_depth = 16,
       };
       EXPECT_TRUE(wav_writer.Open(file_writer, audio_format_spec));
 
@@ -142,9 +148,10 @@ TEST(BufferedWAVWriter, WriteMultipleSamples) {
       FileWriterToMemory file_writer(actual_buffer);
       WAVWriter<FileWriterToMemory> wav_writer;
       const WAVFormatSpec audio_format_spec = {
+          .file_format = WAVFileFormat::kRIFF,
+          .compression = WAVCompression::kPCM16,
           .num_channels = 2,
           .sample_rate = 44100,
-          .bit_depth = 16,
       };
       EXPECT_TRUE(wav_writer.Open(file_writer, audio_format_spec));
 
