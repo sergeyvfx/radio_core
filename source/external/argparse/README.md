@@ -6,7 +6,7 @@
   <a href="https://github.com/p-ranav/argparse/blob/master/LICENSE">
     <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="license"/>
   </a>
-  <img src="https://img.shields.io/badge/version-3.1-blue.svg?cacheSeconds=2592000" alt="version"/>
+  <img src="https://img.shields.io/badge/version-3.2-blue.svg?cacheSeconds=2592000" alt="version"/>
 </p>
 
 ## Highlights
@@ -38,6 +38,7 @@
      *    [Gathering Remaining Arguments](#gathering-remaining-arguments)
      *    [Parent Parsers](#parent-parsers)
      *    [Subcommands](#subcommands)
+     *    [Getting Argument and Subparser Instances](#getting-argument-and-subparser-instances)
      *    [Parse Known Args](#parse-known-args)
      *    [Hidden argument and alias](#hidden-argument-alias)
      *    [ArgumentParser in bool Context](#argumentparser-in-bool-context)
