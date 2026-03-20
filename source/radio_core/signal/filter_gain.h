@@ -65,4 +65,13 @@ inline void ScaleFilterToUnityGainAtFrequency(const std::span<T> h,
   }
 }
 
+// Scale filter to have desired gain at the DC.
+template <class T>
+inline void ScaleFilterToGainAtDC(const std::span<T> h, const T gain) {
+  const T multiplier = gain / CalculateFilterGainAtDC<T>(h);
+  for (T& h_k : h) {
+    h_k *= multiplier;
+  }
+}
+
 }  // namespace radio_core::signal

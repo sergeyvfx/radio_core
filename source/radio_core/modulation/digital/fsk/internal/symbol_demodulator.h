@@ -169,8 +169,10 @@ class SymbolDemodulator {
     const RealType samples_per_symbol = options.sample_rate / options.data_baud;
 
     low_pass_filter_.SetKernelSize(num_taps);
-    signal::DesignLowpassRRCFilter(
-        low_pass_filter_.GetKernel(), samples_per_symbol, options.rrc_beta);
+    signal::DesignRRCFilter(low_pass_filter_.GetKernel(),
+                            RealType(1),
+                            samples_per_symbol,
+                            options.rrc_beta);
 
     // Configure the AGC.
     //
