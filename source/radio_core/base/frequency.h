@@ -211,31 +211,29 @@ class Frequency {
 // Example:
 //  Frequency my_freq = 145.8_MHz;
 
-constexpr auto operator"" _Hz(const unsigned long long int hz) -> Frequency {
+constexpr auto operator""_Hz(const unsigned long long int hz) -> Frequency {
   return {hz};
 }
-constexpr auto operator"" _Hz(const long double hz) -> Frequency {
-  return {hz};
-}
+constexpr auto operator""_Hz(const long double hz) -> Frequency { return {hz}; }
 
-constexpr auto operator"" _kHz(const unsigned long long int khz) -> Frequency {
+constexpr auto operator""_kHz(const unsigned long long int khz) -> Frequency {
   return {khz * 1000};
 }
-constexpr auto operator"" _kHz(const long double khz) -> Frequency {
+constexpr auto operator""_kHz(const long double khz) -> Frequency {
   return {khz * 1000};
 }
 
-constexpr auto operator"" _MHz(const unsigned long long int mhz) -> Frequency {
+constexpr auto operator""_MHz(const unsigned long long int mhz) -> Frequency {
   return {mhz * 1000000};
 }
-constexpr auto operator"" _MHz(const long double mhz) -> Frequency {
+constexpr auto operator""_MHz(const long double mhz) -> Frequency {
   return {mhz * 1000000};
 }
 
-constexpr auto operator"" _GHz(const unsigned long long int ghz) -> Frequency {
+constexpr auto operator""_GHz(const unsigned long long int ghz) -> Frequency {
   return {ghz * 1000000000};
 }
-constexpr auto operator"" _GHz(const long double ghz) -> Frequency {
+constexpr auto operator""_GHz(const long double ghz) -> Frequency {
   return {ghz * 1000000000};
 }
 
